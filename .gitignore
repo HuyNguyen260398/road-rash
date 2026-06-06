@@ -12,12 +12,22 @@ next-env.d.ts
 /build
 /dist
 
-# amplify gen 2
-.amplify/
-amplify_outputs*
-amplifyconfiguration*
-amplify-build-config.json
-aws-exports.js
+# terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+!example.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+# keep the provider lock file committed: .terraform.lock.hcl
 
 # testing
 /coverage
