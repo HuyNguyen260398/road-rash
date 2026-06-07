@@ -2,15 +2,15 @@
 goal: Implement the road-rash trip-planning web app MVP (M0–M8)
 version: 2.0
 date_created: 2026-06-06
-last_updated: 2026-06-06
+last_updated: 2026-06-07
 owner: Huy Nguyen
-status: 'Planned'
+status: 'In progress'
 tags: [feature, architecture, terraform, nextjs, serverless, mvp]
 ---
 
 # Introduction
 
-![Status: Planned](https://img.shields.io/badge/status-Planned-blue)
+![Status: In progress](https://img.shields.io/badge/status-In%20progress-yellow)
 
 This plan turns `docs/road-rash-plan.md` into an executable, phase-by-phase build for the road-rash MVP: a mobile-first Next.js app (on Amplify Hosting) backed by a serverless REST API (API Gateway → Lambda → DynamoDB), Cognito auth, S3 media, and Gemini AI suggestions. **All AWS resources are provisioned with Terraform** (remote state in an S3 backend). There is no Amplify Gen 2 backend and no AppSync/GraphQL. Phases map 1:1 to milestones M0–M8; every task names concrete files, symbols, and verifiable completion criteria.
 
@@ -52,13 +52,13 @@ This plan turns `docs/road-rash-plan.md` into an executable, phase-by-phase buil
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
-| TASK-001 | Scaffold the app: `pnpm create next-app` (App Router, TypeScript) at repo root. Add `"packageManager": "pnpm@<version>"` and `engines.node: ">=20"` to `package.json`. Verify `pnpm dev` serves `http://localhost:3000`. | | |
-| TASK-002 | Create `infra/bootstrap/` Terraform that provisions the **state S3 bucket** (versioned + SSE-encrypted, public-access-blocked). Apply with local state. | | |
-| TASK-003 | Add `infra/` root with `backend "s3" { bucket=..., key="env/<env>/terraform.tfstate", region=..., use_lockfile=true }`; run `terraform init -migrate-state`. Document the bootstrap ordering in `infra/README.md`. | | |
-| TASK-004 | Establish module layout: `infra/modules/{cognito,dynamodb,s3,lambda,apigateway,hosting,iam}` and per-env roots `infra/envs/{staging,prod}` with `*.tfvars`. | | |
-| TASK-005 | `hosting` module: `aws_amplify_app` + `aws_amplify_branch` for `main` (prod) and `staging`, connected to GitHub `HuyNguyen260398/road-rash`, with a pnpm build spec (`corepack enable && pnpm install --frozen-lockfile && pnpm build`). | | |
-| TASK-006 | Define Terraform outputs (Cognito IDs, API base URL, region, bucket) and wire them into Amplify Hosting environment variables consumed by the Next.js app. | | |
-| TASK-007 | Add `amplify.yml` build spec (pnpm) committed at repo root for Amplify Hosting. | | |
+| TASK-001 | Scaffold the app: `pnpm create next-app` (App Router, TypeScript) at repo root. Add `"packageManager": "pnpm@<version>"` and `engines.node: ">=20"` to `package.json`. Verify `pnpm dev` serves `http://localhost:3000`. | ✅ | 2026-06-07 |
+| TASK-002 | Create `infra/bootstrap/` Terraform that provisions the **state S3 bucket** (versioned + SSE-encrypted, public-access-blocked). Apply with local state. | ✅ (code+validate; apply deferred) | 2026-06-07 |
+| TASK-003 | Add `infra/` root with `backend "s3" { bucket=..., key="env/<env>/terraform.tfstate", region=..., use_lockfile=true }`; run `terraform init -migrate-state`. Document the bootstrap ordering in `infra/README.md`. | ✅ (per-env roots; partial backend) | 2026-06-07 |
+| TASK-004 | Establish module layout: `infra/modules/{cognito,dynamodb,s3,lambda,apigateway,hosting,iam}` and per-env roots `infra/envs/{staging,prod}` with `*.tfvars`. | ✅ | 2026-06-07 |
+| TASK-005 | `hosting` module: `aws_amplify_app` + `aws_amplify_branch` for `main` (prod) and `staging`, connected to GitHub `HuyNguyen260398/road-rash`, with a pnpm build spec (`corepack enable && pnpm install --frozen-lockfile && pnpm build`). | ✅ (one app per env) | 2026-06-07 |
+| TASK-006 | Define Terraform outputs (Cognito IDs, API base URL, region, bucket) and wire them into Amplify Hosting environment variables consumed by the Next.js app. | ✅ (placeholders until M1/M2) | 2026-06-07 |
+| TASK-007 | Add `amplify.yml` build spec (pnpm) committed at repo root for Amplify Hosting. | ✅ | 2026-06-07 |
 
 ### Implementation Phase 2
 
