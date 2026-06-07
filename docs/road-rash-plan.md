@@ -2,7 +2,8 @@
 
 A mobile-oriented web app for creating, sharing, and discovering travel trip plans, built around Google My Maps and Google Maps.
 
-**Stack:** Next.js · AWS Amplify Gen 2 (Cognito, AppSync/GraphQL, DynamoDB, S3, Lambda) · Google OAuth · Google Gemini (AI trip suggestions)
+**Stack:** Next.js · AWS (Amplify Hosting, Cognito, API Gateway, Lambda, DynamoDB, S3) · Google OAuth · Google Gemini (AI trip suggestions)
+**Infrastructure:** Terraform (all AWS resources), with an S3 backend for remote state
 **Package manager:** pnpm
 **Last updated:** 2026-06-06
 
@@ -12,10 +13,13 @@ A mobile-oriented web app for creating, sharing, and discovering travel trip pla
 
 | Question | Decision |
 |---|---|
-| Thumbnails | Upload images to S3 (Amplify Storage) |
+| Thumbnails | Upload images to S3 (via presigned URL from a Lambda) |
 | Mobile-oriented | Responsive web only (not a PWA, for now) |
 | Trip browsing | Public — anyone can browse shared trips |
 | My Maps link in detail popup | Embedded iframe preview |
+| Infrastructure as code | Terraform provisions all AWS resources; remote state in an S3 backend |
+| API style | REST via API Gateway (HTTP API) → Lambda → DynamoDB (no AppSync/GraphQL) |
+| Hosting | AWS Amplify Hosting for the Next.js SSR app (provisioned via Terraform) |
 
 ### The key architectural constraint
 Google My Maps has **no public API**. The app cannot create, edit, or read a My Maps map programmatically. The "My Maps link" on a trip is therefore **user-supplied data**: the user creates their map manually in the My Maps UI and pastes the share/embed URL into the trip form. The app stores the string, validates it, and renders it as an embedded iframe. The "open in Google Maps" action is a separate, reliable mobile deep-link handoff.
@@ -23,6 +27,8 @@ Google My Maps has **no public API**. The app cannot create, edit, or read a My 
 ---
 
 ## 2. System architecture
+
+> All AWS resources below are provisioned by **Terraform** (remote state in an S3 backend). Amplify is used only as a **hosting/CI target** for the Next.js app — there is no Amplify Gen 2 backend.
 
 ```
                         ┌─────────────────────────────┐
@@ -33,15 +39,21 @@ Google My Maps has **no public API**. The app cannot create, edit, or read a My 
                   ┌────────────────────┼────────────────────┐
                   │                    │                    │
           ┌───────▼────────┐  ┌────────▼────────┐  ┌────────▼────────┐
-          │ Amplify Hosting│  │   AppSync       │  │   S3 (Storage)  │
-          │ (Next.js SSR)  │  │  GraphQL API    │  │  trip thumbnails│
-          └────────────────┘  └────┬───────┬────┘  └─────────────────┘
-                                    │       │
+          │ Amplify Hosting│  │  API Gateway    │  │   S3 (bucket)   │
+          │ (Next.js SSR)  │  │  (HTTP API)     │  │  trip thumbnails│
+          └────────────────┘  └────┬───────┬────┘  └────────▲────────┘
+                                    │       │ JWT authorizer  │ presigned
+                              ┌─────▼─────┐ │ (Cognito)       │ PUT/GET
+                              │  Lambda   │ │                 │
+                              │ functions │─┼─────────────────┘
+                              │ (CRUD,    │ │
+                              │  favorites)│ │
+                              └─────┬─────┘ │
                          ┌──────────▼──┐ ┌──▼──────────┐
                          │  DynamoDB   │ │  Cognito    │
-                         │ Trip /      │ │ User Pool   │
-                         │ Favorite    │ │ + Google    │
-                         │ tables      │ │ federation  │
+                         │ Trip /      │ │ User Pool + │
+                         │ Favorite    │ │ Identity Pool│
+                         │ tables      │ │ + Google fed.│
                          └─────────────┘ └─────────────┘
                                               │
                                     ┌─────────▼─────────┐
@@ -50,16 +62,14 @@ Google My Maps has **no public API**. The app cannot create, edit, or read a My 
                                     └───────────────────┘
 
    AI suggestion flow (separate path):
-   Browser ──prompt──▶ AppSync custom query / API route
-                          │
-                   ┌──────▼───────┐      ┌──────────────┐
-                   │ Lambda       │─────▶│ Google Gemini│
-                   │ "suggestTrips"│◀────│ API          │
-                   └──────┬───────┘      └──────────────┘
-                          │ queries DynamoDB for candidate trips,
-                          │ sends compact trip list + user prompt to Gemini,
-                          ▼ returns ranked/suggested trip IDs
-                       Browser renders suggested trip cards
+   Browser ──prompt──▶ API Gateway route ──▶ Lambda "suggestTrips"
+                                                │      ┌──────────────┐
+                                                │─────▶│ Google Gemini│
+                                                │◀─────│ API          │
+                                                │ queries DynamoDB for candidates,
+                                                │ sends compact trip list + prompt,
+                                                ▼ returns ranked/suggested trip IDs
+                                          Browser renders suggested trip cards
 ```
 
 ### External integrations (no SDK lock-in)
@@ -69,9 +79,40 @@ Google My Maps has **no public API**. The app cannot create, edit, or read a My 
 
 ---
 
-## 3. Data model (DynamoDB, via Amplify Data schema)
+## 2a. Infrastructure & provisioning (Terraform)
 
-Stored as JSON documents. Two models.
+All AWS resources are defined as code in **Terraform** and provisioned with `terraform apply`. Amplify is used purely as a hosting/CI target for the Next.js app — there is **no** Amplify Gen 2 backend (`ampx`, `defineData`/`defineAuth`) and no AppSync.
+
+### AWS services (provisioned by Terraform)
+| Service | Purpose | Key Terraform resources |
+|---|---|---|
+| **Amplify Hosting** | Build & host the Next.js SSR app; branch deploys | `aws_amplify_app`, `aws_amplify_branch` |
+| **Cognito** | Auth: User Pool + Google federation; Identity Pool for guest creds | `aws_cognito_user_pool`, `_user_pool_client`, `_user_pool_domain`, `_identity_provider`, `_identity_pool`, `_identity_pool_roles_attachment` |
+| **API Gateway (HTTP API)** | REST entry point with Cognito JWT authorizer | `aws_apigatewayv2_api`, `_route`, `_integration`, `_authorizer`, `_stage` |
+| **Lambda** | Trip CRUD, favorites, presigned-URL issuer, `suggestTrips` | `aws_lambda_function`, `aws_lambda_permission` |
+| **DynamoDB** | `Trip` and `Favorite` tables + GSIs | `aws_dynamodb_table` |
+| **S3 (thumbnails)** | Trip thumbnail storage via presigned URLs | `aws_s3_bucket` (+ CORS, policy, public-access-block) |
+| **S3 (TF state)** | Remote Terraform state backend | `aws_s3_bucket` (versioned, encrypted) + `backend "s3"` |
+| **SSM Parameter Store** | Secrets (`GEMINI_API_KEY`, Google OAuth secret) | `aws_ssm_parameter` (SecureString) |
+| **IAM** | Least-privilege roles for Lambda + identity-pool roles | `aws_iam_role`, `aws_iam_policy`, attachments |
+| **CloudWatch Logs** | Lambda / API Gateway logs | `aws_cloudwatch_log_group` |
+
+> CloudFront sits in front of Amplify Hosting but is managed by Amplify, not authored directly.
+
+### Remote state
+- Backend is an **S3 bucket** (versioned + SSE-encrypted) holding `terraform.tfstate`.
+- **State locking** uses S3 native locking (`use_lockfile = true`, Terraform ≥ 1.10); a DynamoDB lock table is an optional alternative for older versions.
+- **Bootstrap ordering:** the state bucket must exist before the `backend "s3"` block can use it — create it via a one-time bootstrap (local state, then `terraform init -migrate-state`) or a separate bootstrap module.
+
+### Environments
+- Separate state/config per environment (`staging`, `prod`) via distinct backend keys (or workspaces) and `*.tfvars`.
+- Secrets are set per environment in SSM; `amplify_outputs.json` does **not** exist in this architecture — the frontend reads Cognito/API config from Amplify Hosting environment variables (or a generated runtime config), populated from Terraform outputs.
+
+---
+
+## 3. Data model (DynamoDB, tables provisioned via Terraform)
+
+Two DynamoDB tables (`aws_dynamodb_table`), accessed by Lambda functions through the AWS SDK. Stored as JSON documents.
 
 ### Trip
 | Field | Type | Notes |
@@ -105,9 +146,12 @@ Stored as JSON documents. Two models.
 
 Composite uniqueness on (`tripId`, `userId`) prevents double-favoriting; secondary index on `userId` powers "my favorites".
 
-### Authorization rules
-- **Trip**: public read (guest access via Cognito identity pool); create/update/delete restricted to `authorId` owner.
-- **Favorite**: read/create/delete restricted to the owning `userId`.
+### Authorization model
+There is no AppSync/Amplify field-level auth. Authorization is enforced in two layers:
+- **API Gateway JWT authorizer** (Cognito User Pool) gates all mutating routes (`POST /trips`, `PUT/DELETE /trips/{id}`, `POST/DELETE /favorites`, `POST /uploads/presign`); read routes (`GET /trips`, `GET /trips/{id}`) are public/unauthenticated.
+- **`POST /suggest` (AI) is public but throttled.** The AI suggestion box lives on the public Home page, so guests must be able to use it; abuse/cost is controlled with API Gateway throttling/rate limits rather than auth.
+- **Application-level checks in Lambda**: `Trip` create/update/delete require the caller's Cognito `sub` to equal `authorId`; `Favorite` read/create/delete require the caller's `sub` to equal `userId`. Lambda IAM roles scope DynamoDB/S3 access to least privilege.
+- **Guests** (unauthenticated) read public trips through the public GET routes; the Cognito **Identity Pool** unauthenticated role is used only where temporary AWS credentials are needed (e.g. direct S3 reads, if any).
 
 ---
 
@@ -143,23 +187,26 @@ The search bar and the group/filter controls need to query across `name`, `locat
 
 ## 5. Development plan (milestones)
 
-### M0 — Project setup (½–1 day)
-- Use **pnpm** as the package manager (commit `pnpm-lock.yaml`); ensure Amplify Hosting build settings use pnpm.
-- `pnpm create amplify@latest` scaffold; Next.js App Router.
-- Git repo + Amplify Hosting connected; staging + prod branches.
-- Per-developer cloud sandbox for fast iteration (`pnpm ampx sandbox`).
+### M0 — Project & Terraform setup (1–2 days)
+- Use **pnpm** as the package manager (commit `pnpm-lock.yaml`).
+- Scaffold a Next.js App Router app (`pnpm create next-app`).
+- **Terraform bootstrap:** create the S3 state-backend bucket (versioned + encrypted) and configure the `backend "s3"` block (native S3 state locking via `use_lockfile`; a DynamoDB lock table is an optional alternative). Resolve the bootstrap ordering (state bucket created with local state first, then migrated, or via a separate bootstrap module).
+- Lay out the `infra/` Terraform: modules per concern (`network`-free serverless, `cognito`, `dynamodb`, `s3`, `lambda`, `apigateway`, `hosting`), and per-environment configs for `staging` and `prod`.
+- Provision **Amplify Hosting** (`aws_amplify_app` + `aws_amplify_branch` for `main`/`staging`) connected to the GitHub repo, with a pnpm-based build spec.
 
 ### M1 — Auth (1–2 days)
-- Cognito user pool with Google as social provider.
-- Set up Google OAuth client in Google Cloud Console (consent screen, redirect URIs).
-- Sign-in / sign-out flow; guest (unauthenticated) access for public browsing.
+- Terraform-provision **Cognito**: User Pool, User Pool Client, Hosted UI domain, Google identity provider (`aws_cognito_identity_provider`), and an Identity Pool with authenticated/unauthenticated IAM roles for guest access.
+- Set up Google OAuth client in Google Cloud Console (consent screen, redirect URIs pointing at the Cognito Hosted UI domain per environment).
+- Configure Amplify JS Auth on the client to point at the Terraform-created Cognito pool; sign-in / sign-out flow; guest (unauthenticated) browsing.
 
 ### M2 — Data + storage (1–2 days)
-- Define Trip and Favorite models in `amplify/data/resource.ts` with auth rules.
-- S3 storage resource for thumbnails; upload + signed-URL retrieval.
+- Terraform-provision the `Trip` and `Favorite` **DynamoDB tables** with GSIs (pay-per-request).
+- Terraform-provision the **S3 thumbnails bucket** (private; CORS for browser PUT/GET). Uploads use **presigned URLs** issued by a Lambda; reads use presigned GET (or public-read CDN later).
+- Define the base **API Gateway (HTTP API)** + a Cognito **JWT authorizer**, and Lambda IAM roles scoped to the tables/bucket.
 
 ### M3 — Core trip CRUD (2–3 days)
-- Create/edit trip form, including thumbnail upload, structured location fields (city/province/country), trip type + vehicle pickers, and My Maps URL validation.
+- Trip CRUD **Lambda(s)** behind API Gateway routes (`GET/POST /trips`, `GET/PUT/DELETE /trips/{id}`) reading/writing the DynamoDB table via the AWS SDK.
+- Create/edit trip form, including thumbnail upload (presigned-URL flow), structured location fields (city/province/country), trip type + vehicle pickers, and My Maps URL validation.
 - List + card grid (mobile-first responsive layout).
 - "My trips" view.
 
@@ -174,8 +221,8 @@ The search bar and the group/filter controls need to query across `name`, `locat
 - Empty-state and "no results" handling.
 
 ### M6 — AI trip suggestions with Gemini (2–3 days)
-- Lambda (`suggestTrips`) that takes the user's prompt + a candidate trip set, calls the Gemini API server-side, and returns ranked/suggested trip IDs (with optional "why it fits" notes).
-- Gemini API key stored as a secret (Amplify secret / SSM), never exposed to the browser.
+- Lambda (`suggestTrips`) behind an API Gateway route (`POST /suggest`) that takes the user's prompt + a candidate trip set, calls the Gemini API server-side, and returns ranked/suggested trip IDs (with optional "why it fits" notes).
+- Gemini API key stored in **SSM Parameter Store (SecureString)** or Secrets Manager, read by the Lambda at runtime; never exposed to the browser.
 - Prompt UI on Home; render suggested cards; graceful fallback to plain search if the AI call fails.
 
 ### M7 — Maps integration (1–2 days)
@@ -185,7 +232,7 @@ The search bar and the group/filter controls need to query across `name`, `locat
 ### M8 — Polish + deploy (2–3 days)
 - Responsive QA across device sizes; empty/loading/error states.
 - Form validation, image size limits, basic rate sanity.
-- Production deploy; smoke test the full flow.
+- `terraform apply` the `prod` environment; deploy `main` via Amplify Hosting; smoke test the full flow.
 
 **Rough total: ~3–4 weeks of focused solo work.**
 
@@ -200,8 +247,11 @@ The search bar and the group/filter controls need to query across `name`, `locat
 | Deep link opens browser instead of native app | Documented platform behavior; treat native handoff as best-effort, not guaranteed |
 | Public write abuse (spam trips) | Auth required to create; consider lightweight moderation/report later |
 | S3 thumbnail cost/size creep | Enforce max upload size + image type; resize on upload if needed |
-| Cognito + Next.js SSR session handling | Use the official `@aws-amplify/adapter-nextjs` patterns for server-side auth |
-| Gemini API key leakage | Call Gemini only from Lambda/server; store key as a secret; never ship it to the browser |
+| Cognito + Next.js SSR session handling | Use the official `@aws-amplify/adapter-nextjs` patterns (Amplify JS Auth pointed at the Terraform-created Cognito pool) for server-side auth |
+| Gemini API key leakage | Call Gemini only from Lambda/server; store key in SSM/Secrets Manager; never ship it to the browser |
+| Terraform state corruption / loss | Versioned, encrypted S3 backend; native state locking (`use_lockfile`); never edit state by hand |
+| Bootstrap ordering (state bucket vs backend) | Create the state bucket in a separate bootstrap step before configuring the `backend "s3"` block |
+| Drift between Terraform and console changes | Treat Terraform as the single source of truth; avoid manual console edits; run `terraform plan` in CI |
 | Gemini suggests trips that don't exist | Constrain Gemini to rank/select only from the candidate trip IDs you pass it; validate returned IDs against DynamoDB before rendering |
 | Gemini latency or cost on every keystroke | Trigger AI suggestion on explicit submit (not per-keystroke); keep plain search instant and separate |
 | Inconsistent location data hurts filtering | Use dropdowns/autocomplete for country/province where possible, or normalize on save |
