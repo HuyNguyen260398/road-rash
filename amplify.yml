@@ -1,0 +1,24 @@
+# AWS Amplify Hosting build spec for the Next.js (SSR) app.
+# Committed at repo root so it is the source of truth for builds; the hosting
+# Terraform module also sets an equivalent build_spec on the app.
+#
+# RISK-008: Amplify defaults to npm — this forces pnpm. `corepack enable`
+# activates the pnpm version pinned in package.json#packageManager.
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - corepack enable
+        - pnpm install --frozen-lockfile
+    build:
+      commands:
+        - pnpm build
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+      - .next/cache/**/*

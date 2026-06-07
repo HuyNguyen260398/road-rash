@@ -1,6 +1,22 @@
 # Staging environment root — composes the per-concern modules. Modules are
 # stubs today; each milestone fills in its module and this composition grows.
 
+locals {
+  # Browser-safe runtime config surfaced to the Next.js app as Amplify env vars.
+  # Right-hand sides are placeholder ("") until Cognito (M1) and API Gateway (M2)
+  # produce real outputs — the plumbing is wired now so later milestones only
+  # swap the values (TASK-006). NEVER put secrets here.
+  amplify_environment_variables = {
+    NEXT_PUBLIC_AWS_REGION                  = var.region
+    NEXT_PUBLIC_COGNITO_USER_POOL_ID        = module.cognito.user_pool_id
+    NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID = module.cognito.user_pool_client_id
+    NEXT_PUBLIC_COGNITO_IDENTITY_POOL_ID    = module.cognito.identity_pool_id
+    NEXT_PUBLIC_COGNITO_DOMAIN              = module.cognito.domain
+    NEXT_PUBLIC_API_BASE_URL                = module.apigateway.api_base_url
+    NEXT_PUBLIC_THUMBNAILS_BUCKET           = module.s3.thumbnails_bucket_name
+  }
+}
+
 module "iam" {
   source      = "../../modules/iam"
   project     = var.project
@@ -38,7 +54,11 @@ module "apigateway" {
 }
 
 module "hosting" {
-  source      = "../../modules/hosting"
-  project     = var.project
-  environment = var.environment
+  source                = "../../modules/hosting"
+  project               = var.project
+  environment           = var.environment
+  repository_url        = var.repository_url
+  github_access_token   = var.github_access_token
+  branch_name           = var.branch_name
+  environment_variables = local.amplify_environment_variables
 }

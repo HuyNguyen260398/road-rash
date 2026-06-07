@@ -1,5 +1,6 @@
-# Outputs feed Amplify Hosting env vars and app config. Expanded as modules gain
-# real resources (Cognito IDs, API base URL, thumbnails bucket — see TASK-006).
+# Outputs feed Amplify Hosting env vars and app config. Values sourced from the
+# stub modules are placeholder ("") until the real resources land in M1/M2
+# (TASK-006 wires the plumbing).
 
 output "region" {
   description = "AWS region for this environment."
@@ -9,4 +10,49 @@ output "region" {
 output "environment" {
   description = "Environment name."
   value       = var.environment
+}
+
+output "cognito_user_pool_id" {
+  description = "Cognito User Pool ID."
+  value       = module.cognito.user_pool_id
+}
+
+output "cognito_user_pool_client_id" {
+  description = "Cognito User Pool app client ID."
+  value       = module.cognito.user_pool_client_id
+}
+
+output "cognito_identity_pool_id" {
+  description = "Cognito Identity Pool ID."
+  value       = module.cognito.identity_pool_id
+}
+
+output "cognito_domain" {
+  description = "Cognito Hosted UI domain."
+  value       = module.cognito.domain
+}
+
+output "api_base_url" {
+  description = "HTTP API base URL."
+  value       = module.apigateway.api_base_url
+}
+
+output "thumbnails_bucket_name" {
+  description = "S3 thumbnails bucket name."
+  value       = module.s3.thumbnails_bucket_name
+}
+
+output "amplify_app_id" {
+  description = "Amplify app ID for this environment."
+  value       = module.hosting.app_id
+}
+
+output "amplify_default_domain" {
+  description = "Amplify default domain for this environment."
+  value       = module.hosting.default_domain
+}
+
+output "amplify_branch_url" {
+  description = "Public URL of the deployed branch."
+  value       = module.hosting.branch_url
 }
