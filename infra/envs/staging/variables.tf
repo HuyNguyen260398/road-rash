@@ -40,6 +40,16 @@ variable "branch_name" {
   default     = "staging"
 }
 
+# --- App origins (s3 CORS + API Gateway CORS) -----------------------------
+# Browser origins allowed to call the API and PUT/GET thumbnails. No trailing
+# slash (CORS origins are scheme+host only). Add the Amplify URL after apply.
+
+variable "app_origins" {
+  description = "App origins (no trailing slash) allowed by API and S3 CORS."
+  type        = list(string)
+  default     = ["http://localhost:3000"]
+}
+
 # --- Cognito (cognito module) ---------------------------------------------
 # OAuth redirect targets for the app. Defaults cover local dev; add the Amplify
 # branch/custom-domain URL once the first apply surfaces it. Not derived from

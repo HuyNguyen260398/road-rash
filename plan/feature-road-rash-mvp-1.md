@@ -80,13 +80,13 @@ This plan turns `docs/road-rash-plan.md` into an executable, phase-by-phase buil
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
-| TASK-015 | `dynamodb` module: `aws_dynamodb_table` `Trip` (PK `id`) with GSIs on `country`, `province`, `city`, `tripType`, `vehicle`; pay-per-request billing. | | |
-| TASK-016 | `dynamodb` module: `aws_dynamodb_table` `Favorite` (PK enforcing (`tripId`,`userId`) uniqueness) with a `userId` GSI. | | |
-| TASK-017 | `s3` module: `aws_s3_bucket` thumbnails (private, public-access-block, SSE), CORS rules for browser PUT/GET. | | |
-| TASK-018 | `iam` module: least-privilege roles/policies per Lambda (scoped DynamoDB actions, S3 object actions on the bucket prefix, SSM `GetParameter` on specific names). | | |
-| TASK-019 | `apigateway` module: `aws_apigatewayv2_api` (HTTP), `aws_apigatewayv2_authorizer` (JWT, Cognito issuer/audience), default `aws_apigatewayv2_stage` with throttling/rate limits (notably on the public `POST /suggest` route), CORS config. | | |
-| TASK-020 | `lambda` module: reusable `aws_lambda_function` + `aws_lambda_permission` + `aws_cloudwatch_log_group`; standardize TS bundling (esbuild) and zip packaging. | | |
-| TASK-021 | Create `lib/api-client.ts` (frontend) with a typed `fetch` wrapper that injects the Cognito JWT into `Authorization` for protected calls and reads the API base URL from env. | | |
+| TASK-015 | `dynamodb` module: `aws_dynamodb_table` `Trip` (PK `id`) with GSIs on `country`, `province`, `city`, `tripType`, `vehicle`; pay-per-request billing. | ✅ (code+validate; apply deferred) | 2026-06-08 |
+| TASK-016 | `dynamodb` module: `aws_dynamodb_table` `Favorite` (PK enforcing (`tripId`,`userId`) uniqueness) with a `userId` GSI. | ✅ (code+validate; apply deferred) | 2026-06-08 |
+| TASK-017 | `s3` module: `aws_s3_bucket` thumbnails (private, public-access-block, SSE), CORS rules for browser PUT/GET. | ✅ (code+validate; apply deferred) | 2026-06-08 |
+| TASK-018 | `iam` module: least-privilege roles/policies per Lambda (scoped DynamoDB actions, S3 object actions on the bucket prefix, SSM `GetParameter` on specific names). | ✅ (code+validate; apply deferred) | 2026-06-08 |
+| TASK-019 | `apigateway` module: `aws_apigatewayv2_api` (HTTP), `aws_apigatewayv2_authorizer` (JWT, Cognito issuer/audience), default `aws_apigatewayv2_stage` with throttling/rate limits (notably on the public `POST /suggest` route), CORS config. | ✅ (code+validate; per-route /suggest throttle in M6; apply deferred) | 2026-06-08 |
+| TASK-020 | `lambda` module: reusable `aws_lambda_function` + `aws_lambda_permission` + `aws_cloudwatch_log_group`; standardize TS bundling (esbuild) and zip packaging. | ✅ (reusable module + validate; esbuild bundling lands with handlers in M3) | 2026-06-08 |
+| TASK-021 | Create `lib/api-client.ts` (frontend) with a typed `fetch` wrapper that injects the Cognito JWT into `Authorization` for protected calls and reads the API base URL from env. | ✅ (build verified) | 2026-06-08 |
 
 ### Implementation Phase 4
 
