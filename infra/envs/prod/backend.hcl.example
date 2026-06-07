@@ -1,7 +1,7 @@
 # Copy to backend.hcl (gitignored) and fill in the values from the bootstrap step:
 #   terraform -chdir=infra/bootstrap output state_bucket_name
 # Then:
-#   terraform -chdir=infra/envs/staging init -backend-config=backend.hcl
+#   terraform -chdir=infra/envs/prod init -backend-config=backend.hcl
 
 bucket = "road-rash-tfstate-000000000000" # ← replace with your state bucket name
 region = "ap-southeast-1"
