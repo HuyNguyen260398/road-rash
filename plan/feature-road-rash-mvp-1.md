@@ -52,7 +52,7 @@ This plan turns `docs/road-rash-plan.md` into an executable, phase-by-phase buil
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
-| TASK-001 | Scaffold the app: `pnpm create next-app` (App Router, TypeScript) at repo root. Add `"packageManager": "pnpm@<version>"` and `engines.node: ">=20"` to `package.json`. Verify `pnpm dev` serves `http://localhost:3000`. | ✅ | 2026-06-07 |
+| TASK-001 | Scaffold the app: `pnpm create next-app` (App Router, TypeScript) at repo root. Add `"packageManager": "pnpm@<version>"` and `engines.node: ">=24"` to `package.json`. Verify `pnpm dev` serves `http://localhost:3000`. | ✅ | 2026-06-07 |
 | TASK-002 | Create `infra/bootstrap/` Terraform that provisions the **state S3 bucket** (versioned + SSE-encrypted, public-access-blocked). Apply with local state. | ✅ (code+validate; apply deferred) | 2026-06-07 |
 | TASK-003 | Add `infra/` root with `backend "s3" { bucket=..., key="env/<env>/terraform.tfstate", region=..., use_lockfile=true }`; run `terraform init -migrate-state`. Document the bootstrap ordering in `infra/README.md`. | ✅ (per-env roots; partial backend) | 2026-06-07 |
 | TASK-004 | Establish module layout: `infra/modules/{cognito,dynamodb,s3,lambda,apigateway,hosting,iam}` and per-env roots `infra/envs/{staging,prod}` with `*.tfvars`. | ✅ | 2026-06-07 |
@@ -224,7 +224,7 @@ This plan turns `docs/road-rash-plan.md` into an executable, phase-by-phase buil
 - **RISK-009**: SSR + Cognito session edge cases → official adapter patterns (GUD-001).
 - **ASSUMPTION-001**: Launch-scale dataset small enough for DynamoDB Option A search.
 - **ASSUMPTION-002**: Single developer; milestone estimates from `docs/road-rash-plan.md` §5 hold.
-- **ASSUMPTION-003**: Node 20 runtime locally, in Lambda, and in Amplify Hosting.
+- **ASSUMPTION-003**: Node 24 runtime locally, in Lambda (nodejs24.x), and in Amplify Hosting. (Bumped from Node 20: pnpm 11 requires Node ≥ 22.13, and Node 20 reaches EOL April 2026.)
 - **ASSUMPTION-004**: Terraform ≥ 1.10 (for S3 native state locking).
 
 ## 8. Related Specifications / Further Reading

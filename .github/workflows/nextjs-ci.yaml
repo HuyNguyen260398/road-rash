@@ -32,8 +32,8 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      # node-version-file reads .nvmrc (Node 20) for the build; the action itself
-      # runs on the runner's Node 24 runtime.
+      # node-version-file reads .nvmrc (Node 24) for the build. Node 24 is also
+      # required by pnpm 11 (needs >= 22.13).
       - name: Setup Node
         uses: actions/setup-node@v5
         with:

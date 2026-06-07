@@ -11,7 +11,7 @@ backend, and provision Amplify Hosting.
 
 ## Prerequisites
 
-- Node 20+ and `corepack` available (`corepack enable`).
+- Node 24+ and `corepack` available (`corepack enable`). (pnpm 11 requires Node ≥ 22.13.)
 - Terraform ≥ 1.10 (needed for S3 native state locking via `use_lockfile`).
 - AWS credentials configured locally with permissions for S3, Amplify, IAM
   (and later: Cognito, API Gateway, Lambda, DynamoDB, SSM, CloudWatch).
@@ -28,7 +28,7 @@ backend, and provision Amplify Hosting.
    mobile-first UI later.)
 2. Add to `package.json`:
    - `"packageManager": "pnpm@<version>"` (pin the exact version you used).
-   - `"engines": { "node": ">=20" }`.
+   - `"engines": { "node": ">=24" }`.
 3. Commit `pnpm-lock.yaml`.
 4. Add a `.gitignore` entry for `.next/`, `node_modules/`, and Terraform state/dirs
    (`.terraform/`, `*.tfstate*`, `*.tfvars` if they hold secrets).
