@@ -73,7 +73,9 @@ declaring launch.
 
 ## Post-launch — explicitly deferred (do NOT build now)
 
-Per `docs/road-rash-plan.md` §7 and the plan's Alternatives:
+The deferred open questions (personalization, ratings, PWA, OpenSearch) are
+listed in `docs/road-rash-plan.md` §7. The matching `ALT-*`/`RISK-*` identifiers
+below are defined in `plan/feature-road-rash-mvp-1.md`:
 - Personalization / ratings, PWA (ALT-006), OpenSearch full-text (ALT-005),
   stream-driven `favoriteCount` reconciler (RISK-005).
 

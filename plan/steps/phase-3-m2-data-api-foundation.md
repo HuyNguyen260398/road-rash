@@ -67,7 +67,7 @@ permits presigned PUT/GET from the app origin only.
 
 ## TASK-018 — `iam` module: least-privilege Lambda roles
 
-**Do:** one role/policy per Lambda (PAT, SEC-005), each scoped tightly:
+**Do:** one role/policy per Lambda (SEC-005), each scoped tightly:
 - **trips:** `dynamodb:{GetItem,PutItem,UpdateItem,DeleteItem,Query}` on `Trip`
   (+ relevant GSIs).
 - **favorites:** CRUD on `Favorite` + `UpdateItem` on `Trip` (for `favoriteCount`).
