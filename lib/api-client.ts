@@ -33,7 +33,9 @@ type ApiFetchOptions = {
   query?: Record<string, string | undefined>;
 };
 
-async function resolveToken(options: ApiFetchOptions): Promise<string | undefined> {
+async function resolveToken(
+  options: ApiFetchOptions,
+): Promise<string | undefined> {
   if (options.token) return options.token;
   // Auto-fetch only in the browser; server callers must pass `token`.
   if (!options.auth || typeof window === "undefined") return undefined;
@@ -64,7 +66,10 @@ export async function apiFetch<T>(
 
   const token = await resolveToken(options);
   if (options.auth && !token) {
-    throw new ApiError(401, "Authentication required but no session token found");
+    throw new ApiError(
+      401,
+      "Authentication required but no session token found",
+    );
   }
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
