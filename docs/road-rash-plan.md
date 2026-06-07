@@ -148,7 +148,8 @@ Composite uniqueness on (`tripId`, `userId`) prevents double-favoriting; seconda
 
 ### Authorization model
 There is no AppSync/Amplify field-level auth. Authorization is enforced in two layers:
-- **API Gateway JWT authorizer** (Cognito User Pool) gates all mutating routes (`POST/PUT/DELETE /trips`, `/favorites`); read routes (`GET /trips`, `GET /trips/{id}`) are public/unauthenticated.
+- **API Gateway JWT authorizer** (Cognito User Pool) gates all mutating routes (`POST /trips`, `PUT/DELETE /trips/{id}`, `POST/DELETE /favorites`, `POST /uploads/presign`); read routes (`GET /trips`, `GET /trips/{id}`) are public/unauthenticated.
+- **`POST /suggest` (AI) is public but throttled.** The AI suggestion box lives on the public Home page, so guests must be able to use it; abuse/cost is controlled with API Gateway throttling/rate limits rather than auth.
 - **Application-level checks in Lambda**: `Trip` create/update/delete require the caller's Cognito `sub` to equal `authorId`; `Favorite` read/create/delete require the caller's `sub` to equal `userId`. Lambda IAM roles scope DynamoDB/S3 access to least privilege.
 - **Guests** (unauthenticated) read public trips through the public GET routes; the Cognito **Identity Pool** unauthenticated role is used only where temporary AWS credentials are needed (e.g. direct S3 reads, if any).
 

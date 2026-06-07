@@ -162,9 +162,9 @@ REST over API Gateway (HTTP API). Mutating routes require a valid Cognito JWT (a
 | `POST /favorites` | JWT | favorites | Favorite a trip (+ inc `favoriteCount`) |
 | `DELETE /favorites/{tripId}` | JWT | favorites | Unfavorite (+ dec `favoriteCount`) |
 | `POST /uploads/presign` | JWT | presign | Presigned S3 PUT URL for a thumbnail |
-| `POST /suggest` | public/JWT | suggestTrips | AI suggestions |
+| `POST /suggest` | public (throttled) | suggestTrips | AI suggestions |
 
-Ownership is enforced **in the Lambda** by comparing the JWT `sub` claim to `authorId`/`userId` — there is no field-level auth engine.
+Ownership is enforced **in the Lambda** by comparing the JWT `sub` claim to `authorId`/`userId` — there is no field-level auth engine. `POST /suggest` is intentionally **public** (the AI box is on the public Home page) and protected by **API Gateway throttling/rate limits** rather than auth, to bound Gemini cost/abuse.
 
 ---
 
@@ -216,7 +216,7 @@ Browser renders suggested cards; on error → fall back to plain search
 Guardrails:
 - **Key isolation** — `GEMINI_API_KEY` lives in SSM Parameter Store (SecureString), read by the Lambda at runtime; never reaches the browser.
 - **No hallucinated trips** — Gemini ranks only from candidate IDs passed in; returned IDs validated against DynamoDB before render.
-- **Cost/latency** — explicit submit only (never per-keystroke); bounded Lambda timeout; plain search is the fallback.
+- **Cost/latency** — explicit submit only (never per-keystroke); bounded Lambda timeout; **API Gateway throttling/rate limits on the public `/suggest` route**; plain search is the fallback.
 
 ---
 

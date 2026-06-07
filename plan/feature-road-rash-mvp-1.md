@@ -84,7 +84,7 @@ This plan turns `docs/road-rash-plan.md` into an executable, phase-by-phase buil
 | TASK-016 | `dynamodb` module: `aws_dynamodb_table` `Favorite` (PK enforcing (`tripId`,`userId`) uniqueness) with a `userId` GSI. | | |
 | TASK-017 | `s3` module: `aws_s3_bucket` thumbnails (private, public-access-block, SSE), CORS rules for browser PUT/GET. | | |
 | TASK-018 | `iam` module: least-privilege roles/policies per Lambda (scoped DynamoDB actions, S3 object actions on the bucket prefix, SSM `GetParameter` on specific names). | | |
-| TASK-019 | `apigateway` module: `aws_apigatewayv2_api` (HTTP), `aws_apigatewayv2_authorizer` (JWT, Cognito issuer/audience), default `aws_apigatewayv2_stage`, CORS config. | | |
+| TASK-019 | `apigateway` module: `aws_apigatewayv2_api` (HTTP), `aws_apigatewayv2_authorizer` (JWT, Cognito issuer/audience), default `aws_apigatewayv2_stage` with throttling/rate limits (notably on the public `POST /suggest` route), CORS config. | | |
 | TASK-020 | `lambda` module: reusable `aws_lambda_function` + `aws_lambda_permission` + `aws_cloudwatch_log_group`; standardize TS bundling (esbuild) and zip packaging. | | |
 | TASK-021 | Create `lib/api-client.ts` (frontend) with a typed `fetch` wrapper that injects the Cognito JWT into `Authorization` for protected calls and reads the API base URL from env. | | |
 
@@ -95,8 +95,8 @@ This plan turns `docs/road-rash-plan.md` into an executable, phase-by-phase buil
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
 | TASK-022 | Create `lib/validation.ts`: `validateMyMapsUrl(url)` (allow only `www.google.com/maps/d/` + embed paths) and `toMyMapsEmbedUrl(url)`. Add unit tests. | | |
-| TASK-023 | `services/trips/handler.ts` Lambda: handle `GET /trips`, `GET /trips/{id}`, `POST/PUT/DELETE /trips/{id}`; on write, set/verify `authorId` from JWT `sub`; init `favoriteCount: 0` on create. Wire routes in the `apigateway` module. | | |
-| TASK-024 | `services/presign/handler.ts` Lambda + `POST /uploads/presign`: validate content-type/size, return a presigned S3 PUT URL and object key. | | |
+| TASK-023 | `services/trips/handler.ts` Lambda: handle `GET /trips`, `GET /trips/{id}`, `POST /trips` (create), `PUT /trips/{id}`, `DELETE /trips/{id}`; on write, set/verify `authorId` from JWT `sub`; init `favoriteCount: 0` on create. Wire routes in the `apigateway` module. | | |
+| TASK-024 | `services/presign/handler.ts` Lambda + `POST /uploads/presign` (JWT-authenticated): validate content-type/size, return a presigned S3 PUT URL and object key scoped to the caller. | | |
 | TASK-025 | Create `components/TripForm.tsx` with all `Trip` fields (text, `tripType`/`vehicle` selects, `durationDays`, structured `city`/`province`/`country`, `myMapsUrl` with validation + help, optional `googleMapsUrl`); thumbnail upload via presign → S3 PUT → store key. | | |
 | TASK-026 | Create `app/trips/new/page.tsx` (auth-gated) and `app/trips/[id]/edit/page.tsx` (owner-gated) using `TripForm` against the trips API. | | |
 | TASK-027 | Create `components/TripCard.tsx` (thumbnail via presigned GET, name, location, duration, vehicle icon, author, heart + count) and `components/TripGrid.tsx` (responsive grid). | | |
@@ -132,7 +132,7 @@ This plan turns `docs/road-rash-plan.md` into an executable, phase-by-phase buil
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
 | TASK-038 | Store the AI key: `aws_ssm_parameter` (SecureString) `gemini_api_key` per environment. | | |
-| TASK-039 | `services/suggest-trips/handler.ts` Lambda + `POST /suggest`: read candidate trips, build a compact prompt, call the Gemini REST API (key from SSM), parse strict JSON `[{id, reason}]`, and filter to IDs present in the candidate set. Bounded timeout (~30s). | | |
+| TASK-039 | `services/suggest-trips/handler.ts` Lambda + `POST /suggest` (public, throttled via API Gateway): read candidate trips, build a compact prompt, call the Gemini REST API (key from SSM), parse strict JSON `[{id, reason}]`, and filter to IDs present in the candidate set. Bounded timeout (~30s). | | |
 | TASK-040 | Grant the suggest Lambda IAM read on the Trip table and `GetParameter` on `gemini_api_key`. | | |
 | TASK-041 | Create `components/AiSuggestBox.tsx` ("Where do you want to ride?") submitting on explicit click to `POST /suggest`; render suggested cards with optional "why it fits". | | |
 | TASK-042 | Implement graceful fallback: on Gemini error/timeout, show a message and fall back to plain search. | | |
