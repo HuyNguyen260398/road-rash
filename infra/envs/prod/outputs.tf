@@ -32,6 +32,16 @@ output "cognito_domain" {
   value       = module.cognito.domain
 }
 
+output "cognito_issuer" {
+  description = "Cognito OIDC issuer URL (for the API Gateway JWT authorizer in M2)."
+  value       = module.cognito.issuer
+}
+
+output "cognito_audience" {
+  description = "JWT audience (app client ID) for the API Gateway authorizer."
+  value       = module.cognito.audience
+}
+
 output "api_base_url" {
   description = "HTTP API base URL."
   value       = module.apigateway.api_base_url
