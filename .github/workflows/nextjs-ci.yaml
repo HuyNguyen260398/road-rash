@@ -1,0 +1,58 @@
+name: Next.js CI
+
+# Runs on every pull request (opened, updated with new commits, or reopened).
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+# Cancel superseded runs when a PR is updated with new commits.
+concurrency:
+  group: nextjs-ci-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+# Least privilege: CI only needs to read the repository.
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Lint, format, build, test
+    runs-on: ubuntu-latest
+    steps:
+      # All actions below are pinned to majors whose runtime is Node 24, per the
+      # Node 20 deprecation on GitHub Actions runners (github.blog changelog
+      # 2025-09-19). pnpm is provided by Corepack instead of pnpm/action-setup,
+      # and dependency caching uses setup-node's built-in pnpm cache instead of
+      # actions/cache — avoiding actions that still run on Node 20.
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # Corepack activates the pnpm version pinned in package.json#packageManager.
+      # Enabled before setup-node so `cache: pnpm` can resolve the pnpm store.
+      - name: Enable Corepack
+        run: corepack enable
+
+      # node-version-file reads .nvmrc (Node 24) for the build. Node 24 is also
+      # required by pnpm 11 (needs >= 22.13).
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Build
+        run: pnpm build
+
+      # No test runner is wired yet (chosen in TASK-022); --if-present makes this
+      # a no-op until a `test` script exists, then it runs automatically.
+      - name: Test
+        run: pnpm run --if-present test

@@ -21,6 +21,9 @@ crash.*.log
 *.tfvars
 *.tfvars.json
 !example.tfvars
+# partial-backend config holds the account-specific state bucket name:
+backend.hcl
+!backend.hcl.example
 override.tf
 override.tf.json
 *_override.tf

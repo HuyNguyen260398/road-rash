@@ -1,0 +1,20 @@
+# Dependencies & build output
+node_modules
+.next
+out
+build
+dist
+coverage
+
+# Lockfiles & generated files
+pnpm-lock.yaml
+next-env.d.ts
+
+# Static assets
+public
+
+# Terraform is formatted with `terraform fmt`, not Prettier
+infra
+
+# Long-form, hand-authored Markdown (docs/, plan/, READMEs, CLAUDE.md, …)
+*.md

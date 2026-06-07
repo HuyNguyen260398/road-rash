@@ -108,7 +108,7 @@ the Cognito issuer/audience; throttling configured; outputs the **API base URL**
 **Do:**
 1. Reusable module producing `aws_lambda_function` + `aws_lambda_permission`
    (for API Gateway invoke) + `aws_cloudwatch_log_group` per function.
-2. Standardize TS → JS bundling with **esbuild** (Node 20 runtime) and zip
+2. Standardize TS → JS bundling with **esbuild** (Node 24 runtime) and zip
    packaging (e.g. `archive_file` or a build step that outputs the zip).
 3. Inputs: handler name, role ARN (from `iam`), env vars (table names, bucket,
    **SSM parameter names** — not values), memory/timeout.

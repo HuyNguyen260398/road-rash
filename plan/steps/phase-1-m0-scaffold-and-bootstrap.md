@@ -11,7 +11,7 @@ backend, and provision Amplify Hosting.
 
 ## Prerequisites
 
-- Node 20+ and `corepack` available (`corepack enable`).
+- Node 24+ and `corepack` available (`corepack enable`). (pnpm 11 requires Node ≥ 22.13.)
 - Terraform ≥ 1.10 (needed for S3 native state locking via `use_lockfile`).
 - AWS credentials configured locally with permissions for S3, Amplify, IAM
   (and later: Cognito, API Gateway, Lambda, DynamoDB, SSM, CloudWatch).
@@ -28,7 +28,7 @@ backend, and provision Amplify Hosting.
    mobile-first UI later.)
 2. Add to `package.json`:
    - `"packageManager": "pnpm@<version>"` (pin the exact version you used).
-   - `"engines": { "node": ">=20" }`.
+   - `"engines": { "node": ">=24" }`.
 3. Commit `pnpm-lock.yaml`.
 4. Add a `.gitignore` entry for `.next/`, `node_modules/`, and Terraform state/dirs
    (`.terraform/`, `*.tfstate*`, `*.tfvars` if they hold secrets).
@@ -180,17 +180,24 @@ deploys the default Next.js page to the Amplify URL.
 
 ## Phase verification (M0 exit)
 
-- [ ] `pnpm dev` and `pnpm build` work locally.
-- [ ] `terraform -chdir=infra/envs/staging validate` passes.
-- [ ] State lives in the S3 backend with locking; bootstrap ordering documented.
-- [ ] Amplify builds `staging` with pnpm and serves the app from its URL.
+- [x] `pnpm dev` and `pnpm build` work locally. *(dev → HTTP 200 on :3000; build OK)*
+- [x] `terraform -chdir=infra/envs/staging validate` passes. *(staging + prod)*
+- [~] State lives in the S3 backend with locking; bootstrap ordering documented.
+  *(IaC + `infra/README.md` done; actual `terraform apply` deferred — needs AWS creds)*
+- [~] Amplify builds `staging` with pnpm and serves the app from its URL.
+  *(app + build spec coded; deferred — needs live GitHub/Amplify connection)*
 
 ## Task checklist
 
-- [ ] TASK-001 — Next.js scaffold (pnpm, App Router, TS)
-- [ ] TASK-002 — Bootstrap state bucket (local state)
-- [ ] TASK-003 — `backend "s3"` + `init -migrate-state` + `infra/README.md`
-- [ ] TASK-004 — Module + per-env layout
-- [ ] TASK-005 — `hosting` module (Amplify app + branches)
-- [ ] TASK-006 — Outputs → Amplify env vars
-- [ ] TASK-007 — `amplify.yml` committed
+- [x] TASK-001 — Next.js scaffold (pnpm, App Router, TS)
+- [x] TASK-002 — Bootstrap state bucket (local state) *(code+validate; apply deferred)*
+- [x] TASK-003 — `backend "s3"` + `infra/README.md` *(per-env roots, partial backend)*
+- [x] TASK-004 — Module + per-env layout
+- [x] TASK-005 — `hosting` module (Amplify app + branches) *(one app per env)*
+- [x] TASK-006 — Outputs → Amplify env vars *(placeholders until M1/M2)*
+- [x] TASK-007 — `amplify.yml` committed
+
+> **Deferred to apply-time (needs AWS credentials + GitHub/Amplify token):**
+> `terraform -chdir=infra/bootstrap apply`, per-env `init -backend-config` +
+> `apply`, and the live Amplify→GitHub connection / first `staging` build.
+> See `infra/README.md` for the exact commands.

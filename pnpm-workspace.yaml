@@ -1,0 +1,6 @@
+# Allow native build scripts that Next.js/ESLint rely on:
+#   sharp         — Next.js production image optimization
+#   unrs-resolver — ESLint module resolution (eslint-config-next)
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
