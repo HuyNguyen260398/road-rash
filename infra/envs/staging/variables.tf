@@ -39,3 +39,38 @@ variable "branch_name" {
   type        = string
   default     = "staging"
 }
+
+# --- Cognito (cognito module) ---------------------------------------------
+# OAuth redirect targets for the app. Defaults cover local dev; add the Amplify
+# branch/custom-domain URL once the first apply surfaces it. Not derived from
+# the hosting module to avoid a hosting<->cognito dependency cycle.
+
+variable "app_callback_urls" {
+  description = "Allowed OAuth sign-in redirect URLs for the app."
+  type        = list(string)
+  default     = ["http://localhost:3000/"]
+}
+
+variable "app_logout_urls" {
+  description = "Allowed OAuth sign-out redirect URLs for the app."
+  type        = list(string)
+  default     = ["http://localhost:3000/"]
+}
+
+# Google OAuth credentials (TASK-008/009). Secret — supply via
+# TF_VAR_google_oauth_client_id / _secret or a gitignored tfvars, never commit.
+# Null leaves the Google IdP uncreated so the pool/domain can be applied first.
+
+variable "google_oauth_client_id" {
+  description = "Google OAuth 2.0 client ID for the Cognito Google IdP."
+  type        = string
+  default     = null
+  sensitive   = true
+}
+
+variable "google_oauth_client_secret" {
+  description = "Google OAuth 2.0 client secret for the Cognito Google IdP."
+  type        = string
+  default     = null
+  sensitive   = true
+}

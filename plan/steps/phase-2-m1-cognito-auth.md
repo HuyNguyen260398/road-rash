@@ -148,10 +148,10 @@ adapter patterns).
 
 ## Task checklist
 
-- [ ] TASK-008 — Google OAuth client + consent screen
-- [ ] TASK-009 — Google secrets in SSM (SecureString)
-- [ ] TASK-010 — `cognito` module (pool/client/domain/IdP/identity pool)
-- [ ] TASK-011 — Client Amplify config + layout mount
-- [ ] TASK-012 — SSR `createServerRunner` util
-- [ ] TASK-013 — `/login` page
-- [ ] TASK-014 — Middleware/server route guards
+- [ ] TASK-008 — Google OAuth client + consent screen *(manual — Google Cloud Console; pending)*
+- [x] TASK-009 — Google secrets in SSM (SecureString) *(code + validate; apply deferred)*
+- [x] TASK-010 — `cognito` module (pool/client/domain/IdP/identity pool) *(code + validate; apply deferred)*
+- [x] TASK-011 — Client Amplify config + layout mount
+- [x] TASK-012 — SSR `createServerRunner` util
+- [x] TASK-013 — `/login` page
+- [x] TASK-014 — Middleware/server route guards *(implemented as `proxy.ts`, Next 16's renamed convention)*

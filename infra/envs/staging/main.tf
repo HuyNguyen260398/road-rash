@@ -39,6 +39,13 @@ module "cognito" {
   source      = "../../modules/cognito"
   project     = var.project
   environment = var.environment
+
+  callback_urls = var.app_callback_urls
+  logout_urls   = var.app_logout_urls
+
+  # Secrets — supplied via TF_VAR_* or a gitignored tfvars, never committed.
+  google_oauth_client_id     = var.google_oauth_client_id
+  google_oauth_client_secret = var.google_oauth_client_secret
 }
 
 module "lambda" {

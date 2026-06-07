@@ -66,13 +66,13 @@ This plan turns `docs/road-rash-plan.md` into an executable, phase-by-phase buil
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
-| TASK-008 | In Google Cloud Console, create an OAuth 2.0 client (consent screen; redirect URIs for each Cognito Hosted UI domain). Record client ID/secret. | | |
-| TASK-009 | Store secrets in SSM: `aws_ssm_parameter` (SecureString) for `google_oauth_client_id` and `google_oauth_client_secret` per environment. | | |
-| TASK-010 | `cognito` module: `aws_cognito_user_pool`, `_user_pool_client`, `_user_pool_domain`, `_identity_provider` (Google, scopes email/profile/openid), `_identity_pool`, authenticated/unauthenticated `aws_iam_role`, `_identity_pool_roles_attachment`. | | |
-| TASK-011 | Create `lib/amplify-config.ts` configuring Amplify JS (`Amplify.configure`) with Cognito IDs from env vars; `components/ConfigureAmplifyClientSide.tsx` (`'use client'`, `ssr: true`) mounted in `app/layout.tsx`. | | |
-| TASK-012 | Create `lib/amplify-server-utils.ts` exporting `runWithAmplifyServerContext` via `createServerRunner` from `@aws-amplify/adapter-nextjs`. | | |
-| TASK-013 | Create `app/login/page.tsx` (`'use client'`) with `signInWithRedirect({ provider: 'Google' })` and `signOut()`. | | |
-| TASK-014 | Add `middleware.ts` / server guards using `fetchAuthSession` in server context to protect `/trips/new`, `/trips/[id]/edit`, `/my-trips`, `/saved`; redirect unauthenticated users to `/login`. | | |
+| TASK-008 | In Google Cloud Console, create an OAuth 2.0 client (consent screen; redirect URIs for each Cognito Hosted UI domain). Record client ID/secret. | ⏳ (manual — user step) | |
+| TASK-009 | Store secrets in SSM: `aws_ssm_parameter` (SecureString) for `google_oauth_client_id` and `google_oauth_client_secret` per environment. | ✅ (code+validate; apply deferred) | 2026-06-07 |
+| TASK-010 | `cognito` module: `aws_cognito_user_pool`, `_user_pool_client`, `_user_pool_domain`, `_identity_provider` (Google, scopes email/profile/openid), `_identity_pool`, authenticated/unauthenticated `aws_iam_role`, `_identity_pool_roles_attachment`. | ✅ (code+validate; apply deferred) | 2026-06-07 |
+| TASK-011 | Create `lib/amplify-config.ts` configuring Amplify JS (`Amplify.configure`) with Cognito IDs from env vars; `components/ConfigureAmplifyClientSide.tsx` (`'use client'`, `ssr: true`) mounted in `app/layout.tsx`. | ✅ | 2026-06-07 |
+| TASK-012 | Create `lib/amplify-server-utils.ts` exporting `runWithAmplifyServerContext` via `createServerRunner` from `@aws-amplify/adapter-nextjs`. | ✅ | 2026-06-07 |
+| TASK-013 | Create `app/login/page.tsx` (`'use client'`) with `signInWithRedirect({ provider: 'Google' })` and `signOut()`. | ✅ (build verified; live OAuth pending) | 2026-06-07 |
+| TASK-014 | Add `middleware.ts` / server guards using `fetchAuthSession` in server context to protect `/trips/new`, `/trips/[id]/edit`, `/my-trips`, `/saved`; redirect unauthenticated users to `/login`. | ✅ (as `proxy.ts` — Next 16 convention) | 2026-06-07 |
 
 ### Implementation Phase 3
 
