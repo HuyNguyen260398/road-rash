@@ -28,10 +28,11 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  const loginUrl = new URL("/login", request.url);
-  // Preserve where the user was headed so we can return them after sign-in.
-  loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
-  return NextResponse.redirect(loginUrl);
+  // Redirect unauthenticated users to the login page. Return-to-origin after
+  // sign-in is out of scope for M1: the OAuth flow lands on the configured
+  // redirect URL, so deep-link return would need its own state handling and
+  // can be added later if the product calls for it.
+  return NextResponse.redirect(new URL("/login", request.url));
 }
 
 // Protected subtrees only. The public trip detail view (/trip/[id], singular),

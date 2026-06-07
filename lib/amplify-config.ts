@@ -37,7 +37,12 @@ export const amplifyConfig: ResourcesConfig = {
   },
 };
 
-// Side effect: configure the global Amplify singleton for client-side use.
-// `ssr: true` enables cookie-backed token storage so the SSR adapter
-// (lib/amplify-server-utils.ts) can read the session on the server.
-Amplify.configure(amplifyConfig, { ssr: true });
+// Side effect: configure the global Amplify singleton for CLIENT use only.
+// Guarded to the browser so that importing `amplifyConfig` on the server (via
+// lib/amplify-server-utils.ts) does NOT configure the global singleton
+// server-side — SSR auth reads go through createServerRunner's isolated
+// per-request context, never the shared singleton. `ssr: true` enables
+// cookie-backed token storage so the server can read the session from cookies.
+if (typeof window !== "undefined") {
+  Amplify.configure(amplifyConfig, { ssr: true });
+}
