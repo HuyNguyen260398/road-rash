@@ -48,3 +48,41 @@ resource "aws_apigatewayv2_stage" "default" {
     throttling_rate_limit  = var.throttling_rate_limit
   }
 }
+
+# --- Integrations + routes (M3) --------------------------------------------
+# One AWS_PROXY integration per Lambda. integration_method is always POST for
+# the Lambda proxy invocation regardless of the HTTP method the route exposes.
+resource "aws_apigatewayv2_integration" "lambda" {
+  for_each = var.integrations
+
+  api_id                 = aws_apigatewayv2_api.this.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = each.value.invoke_arn
+  integration_method     = "POST"
+  payload_format_version = "2.0"
+}
+
+# Routes. Protected routes attach the JWT authorizer; public routes set NONE
+# (PAT-002): GET /trips, GET /trips/{id}, GET /uploads/thumbnail stay open.
+resource "aws_apigatewayv2_route" "this" {
+  for_each = { for r in var.routes : r.route_key => r }
+
+  api_id    = aws_apigatewayv2_api.this.id
+  route_key = each.value.route_key
+  target    = "integrations/${aws_apigatewayv2_integration.lambda[each.value.target].id}"
+
+  authorization_type = each.value.authorized ? "JWT" : "NONE"
+  authorizer_id      = each.value.authorized ? aws_apigatewayv2_authorizer.jwt.id : null
+}
+
+# Allow API Gateway to invoke each integrated Lambda. Scoped to this API's
+# execution ARN; /*/* covers every stage+route so new routes need no new grant.
+resource "aws_lambda_permission" "apigw" {
+  for_each = var.integrations
+
+  statement_id  = "AllowAPIGatewayInvoke-${each.key}"
+  action        = "lambda:InvokeFunction"
+  function_name = each.value.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.this.execution_arn}/*/*"
+}

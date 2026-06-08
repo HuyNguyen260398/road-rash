@@ -131,17 +131,27 @@ trip and uploads a thumbnail to S3.
 
 ## Phase verification (M3 exit)
 
-- [ ] Create → it appears on Home (SSR) and My Trips.
-- [ ] Edit/delete enforce ownership (UI + Lambda 403).
-- [ ] Thumbnail presign upload works; cards show images via presigned GET.
-- [ ] My Maps URL validation blocks bad URLs; `pnpm test` green.
+- [x] My Maps URL validation blocks bad URLs; `pnpm test` green (17 passing).
+- [~] Create → it appears on Home (SSR) and My Trips *(code complete; runtime
+  verification deferred until `terraform apply` stands up the API/tables).*
+- [~] Edit/delete enforce ownership (UI + Lambda 403) *(server guard + Lambda
+  owner check coded; live 403 check deferred to apply).*
+- [~] Thumbnail presign upload works; cards show images via presigned GET
+  *(presign PUT + public GET routes coded; end-to-end S3 check deferred to apply).*
+
+> **Deferred-apply note:** per the M2 decision, all AWS resources for M3 (two new
+> Lambdas + 7 routes) are coded and `terraform validate`-clean for staging+prod
+> but **not applied**. Before integration testing, run `pnpm build:lambdas` then
+> `terraform -chdir=infra/envs/<env> apply`. Outstanding live checks: TEST-005/006
+> (public GET / JWT-gated mutations / cross-user 403) and TEST-008 (presign
+> oversized/non-image rejection + working PUT URL).
 
 ## Task checklist
 
-- [ ] TASK-022 — `lib/validation.ts` + tests (TEST-001/002)
-- [ ] TASK-023 — trips Lambda + routes (TEST-005/006)
-- [ ] TASK-024 — presign Lambda + route (TEST-008)
-- [ ] TASK-025 — `TripForm`
-- [ ] TASK-026 — new/edit pages
-- [ ] TASK-027 — `TripCard` + `TripGrid`
-- [ ] TASK-028 — Home + My Trips
+- [x] TASK-022 — `lib/validation.ts` + tests (TEST-001/002) *(17 tests green)*
+- [x] TASK-023 — trips Lambda + routes (TEST-005/006) *(handler + routes; live tests deferred to apply)*
+- [x] TASK-024 — presign Lambda + route (TEST-008) *(PUT + public GET presign; live test deferred to apply)*
+- [x] TASK-025 — `TripForm` *(incl. optional `description` field per task spec; not in §3 data model)*
+- [x] TASK-026 — new/edit pages *(`/trips/new`, `/trips/[id]/edit`; SSR auth/owner gating)*
+- [x] TASK-027 — `TripCard` + `TripGrid` *(presigned-GET thumbnails; links to `/trip/[id]`, built in M4)*
+- [x] TASK-028 — Home + My Trips

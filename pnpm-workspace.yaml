@@ -1,6 +1,8 @@
 # Allow native build scripts that Next.js/ESLint rely on:
 #   sharp         — Next.js production image optimization
 #   unrs-resolver — ESLint module resolution (eslint-config-next)
+#   esbuild       — bundles the Lambda handlers (services/) for deployment
 allowBuilds:
+  esbuild: true
   sharp: true
   unrs-resolver: true
