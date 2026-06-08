@@ -11,10 +11,13 @@ sub-steps, the files to create, commands to run, and a verification/done check.
 
 1. Work the phases **in order** — each assumes the previous one is done and verified.
 2. Treat each task's **Done check** as the gate; don't mark a task complete until it passes.
-3. As tasks land, update the `Completed`/`Date` columns in
+3. **Commit each task on its own.** One task = one git commit, made right after its
+   **Done check** passes and **before** the next task begins (see Conventions). Use the
+   `**Commit:**` line in each task as the suggested message.
+4. As tasks land, update the `Completed`/`Date` columns in
    `plan/feature-road-rash-mvp-1.md` (the canonical tracker) **and** tick the
    checklist at the bottom of the relevant phase file.
-4. Set the front-matter `status` in the source plan to `In progress` once M0 starts.
+5. Set the front-matter `status` in the source plan to `In progress` once M0 starts.
 
 ## Phases
 
@@ -32,6 +35,11 @@ sub-steps, the files to create, commands to run, and a verification/done check.
 
 ## Conventions used in every guide
 
+- **One commit per task:** when a task's *Done check* passes, commit **only that
+  task's** changes before starting the next —
+  `git commit -m "feat(m<N>): <summary> (TASK-XXX)"` (conventional-commit style,
+  scope = milestone `m0`…`m8`). Never bundle multiple tasks into one commit. Each
+  task below carries a suggested `**Commit:**` message.
 - **Package manager:** `pnpm` only (commit `pnpm-lock.yaml`). Never `npm`/`yarn`.
 - **Terraform:** single source of truth for all AWS resources; no console edits.
   Run from a per-env root: `terraform -chdir=infra/envs/<env> <cmd>`.

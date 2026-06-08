@@ -34,6 +34,9 @@ thumbnail upload and My Maps validation; card grid; My Trips.
 **Done check:** `pnpm test` passes; malicious hosts (e.g. `evil.com`, `javascript:`)
 are rejected.
 
+**Commit:** `feat(m3): My Maps URL validation + tests (TASK-022)` — one task, one
+commit, before TASK-023.
+
 ---
 
 ## TASK-023 — `services/trips/handler.ts` Lambda + routes
@@ -55,6 +58,9 @@ are rejected.
 **Done check (also TEST-005/006):** public GETs work without a token; mutating
 routes reject missing/invalid JWT; editing another user's trip returns 403.
 
+**Commit:** `feat(m3): trips Lambda + routes (TASK-023)` — one task, one commit,
+before TASK-024.
+
 ---
 
 ## TASK-024 — `services/presign/handler.ts` + `POST /uploads/presign`
@@ -71,6 +77,9 @@ routes reject missing/invalid JWT; editing another user's trip returns 403.
 
 **Done check (TEST-008):** presign rejects oversized/non-image content-type;
 returns a working PUT URL + key for valid requests.
+
+**Commit:** `feat(m3): presign Lambda + route (TASK-024)` — one task, one commit,
+before TASK-025.
 
 ---
 
@@ -89,6 +98,8 @@ returns a working PUT URL + key for valid requests.
 **Done check:** invalid My Maps URLs are blocked inline; a valid submit creates a
 trip and uploads a thumbnail to S3.
 
+**Commit:** `feat(m3): TripForm (TASK-025)` — one task, one commit, before TASK-026.
+
 ---
 
 ## TASK-026 — Create/Edit pages
@@ -101,6 +112,9 @@ trip and uploads a thumbnail to S3.
 **Files:** `app/trips/new/page.tsx`, `app/trips/[id]/edit/page.tsx`.
 
 **Done check:** owner can create and edit; a non-owner cannot reach/save the edit.
+
+**Commit:** `feat(m3): create/edit pages (TASK-026)` — one task, one commit, before
+TASK-027.
 
 ---
 
@@ -115,6 +129,9 @@ trip and uploads a thumbnail to S3.
 
 **Done check:** cards render with thumbnails on phone/tablet/desktop widths.
 
+**Commit:** `feat(m3): TripCard + TripGrid (TASK-027)` — one task, one commit, before
+TASK-028.
+
 ---
 
 ## TASK-028 — Home/Discover + My Trips
@@ -126,6 +143,9 @@ trip and uploads a thumbnail to S3.
 **Files:** `app/page.tsx`, `app/my-trips/page.tsx`.
 
 **Done check:** newly created trips appear on Home and (for the author) on My Trips.
+
+**Commit:** `feat(m3): Home/Discover + My Trips (TASK-028)` — final task of the phase;
+one commit.
 
 ---
 

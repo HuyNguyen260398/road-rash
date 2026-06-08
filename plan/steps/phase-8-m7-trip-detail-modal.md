@@ -27,6 +27,9 @@ Maps" deep link.
 **Done check:** valid My Maps URLs embed; a non–My Maps URL is never injected into
 the iframe `src`.
 
+**Commit:** `feat(m7): TripDetailModal + safe iframe (TASK-043)` — one task, one
+commit, before TASK-044.
+
 ---
 
 ## TASK-044 — Iframe load-failure fallback
@@ -39,6 +42,9 @@ the iframe `src`.
 
 **Done check:** a private/blocked map shows the fallback link instead of a broken
 embed.
+
+**Commit:** `feat(m7): iframe load-failure fallback (TASK-044)` — one task, one commit,
+before TASK-045.
 
 ---
 
@@ -54,6 +60,9 @@ embed.
 **Done check:** on mobile the button attempts the native app; on desktop it opens
 maps in the browser.
 
+**Commit:** `feat(m7): Open in Google Maps deep link (TASK-045)` — one task, one
+commit, before TASK-046.
+
 ---
 
 ## TASK-046 — Wire modal into grid + deep links
@@ -68,6 +77,9 @@ maps in the browser.
 
 **Done check:** clicking a card opens the modal; visiting `/trip/[id]` directly
 renders the detail content.
+
+**Commit:** `feat(m7): wire modal + /trip/[id] deep links (TASK-046)` — final task of
+the phase; one commit.
 
 ---
 
