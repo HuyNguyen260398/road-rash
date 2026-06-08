@@ -30,6 +30,9 @@ Option A); empty/no-result states.
 **Done check:** each filter narrows results via the matching GSI; combined
 filters + `q` return the expected trips.
 
+**Commit:** `feat(m5): GET /trips query params (GSI + contains) (TASK-033)` — one task,
+one commit, before TASK-034.
+
 ---
 
 ## TASK-034 — `SearchBar` + `FilterControls`
@@ -43,6 +46,9 @@ filters + `q` return the expected trips.
 **Files:** `components/SearchBar.tsx`, `components/FilterControls.tsx`.
 
 **Done check:** typing/selecting updates results; filters compose with search.
+
+**Commit:** `feat(m5): SearchBar + FilterControls (TASK-034)` — one task, one commit,
+before TASK-035.
 
 ---
 
@@ -58,6 +64,9 @@ filters + `q` return the expected trips.
 **Done check:** `pnpm test` covers case-insensitive matching; results match the
 server filter for the loaded set.
 
+**Commit:** `feat(m5): client search fallback + TEST-003 (TASK-035)` — one task, one
+commit, before TASK-036.
+
 ---
 
 ## TASK-036 — Grouping toggle
@@ -71,6 +80,9 @@ server filter for the loaded set.
 **Done check:** toggling grouping renders section headers with the right trips
 under each group.
 
+**Commit:** `feat(m5): grouping toggle (TASK-036)` — one task, one commit, before
+TASK-037.
+
 ---
 
 ## TASK-037 — Empty / no-result states
@@ -83,6 +95,9 @@ under each group.
 
 **Done check:** each surface shows a sensible message when it has no items / no
 matches.
+
+**Commit:** `feat(m5): empty / no-result states (TASK-037)` — final task of the phase;
+one commit.
 
 ---
 

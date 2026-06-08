@@ -19,6 +19,9 @@ smoke test.
 **Done check:** no layout breakage across breakpoints; all three states present and
 sane on every screen.
 
+**Commit:** `fix(m8): responsive QA fixes (TASK-047)` — commit any fixes this pass
+produces as one task commit (skip if QA finds nothing), before TASK-048.
+
 ---
 
 ## TASK-048 — Enforce limits & validation
@@ -32,6 +35,9 @@ sane on every screen.
 **Done check (ties TEST-008):** oversized/non-image uploads are rejected client-side
 and server-side; invalid forms can't submit.
 
+**Commit:** `feat(m8): enforce upload/form limits (client + presign) (TASK-048)` — one
+task, one commit, before TASK-049.
+
 ---
 
 ## TASK-049 — Production provision + deploy
@@ -44,6 +50,9 @@ and server-side; invalid forms can't submit.
 
 **Done check (TEST-009):** `prod` plan shows no unexpected diffs; apply succeeds;
 `main` deploys and serves on the prod Amplify domain.
+
+**Commit:** `chore(m8): prod tfvars + apply + deploy (TASK-049)` — commit any tfvars/
+config changes (never secret values) as one task commit, before TASK-050.
 
 ---
 
@@ -61,6 +70,9 @@ and server-side; invalid forms can't submit.
 
 **Done check:** every step passes end-to-end; log any defects and resolve before
 declaring launch.
+
+**Commit:** no code change for the smoke test itself — commit each defect fix as its
+own `fix(m8): <defect> (TASK-050)` commit before declaring launch.
 
 ---
 

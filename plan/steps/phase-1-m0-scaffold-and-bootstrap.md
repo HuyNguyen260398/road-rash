@@ -38,6 +38,9 @@ backend, and provision Amplify Hosting.
 **Done check:** `pnpm install` then `pnpm dev` serves `http://localhost:3000`
 with the default page; `pnpm build` succeeds.
 
+**Commit:** `feat(m0): scaffold Next.js app (pnpm, App Router, TS) (TASK-001)` — one
+task, one commit, before TASK-002.
+
 ---
 
 ## TASK-002 — Bootstrap the Terraform state bucket (local state)
@@ -61,6 +64,9 @@ with the default page; `pnpm build` succeeds.
 
 **Done check:** the state bucket exists, is versioned, encrypted, and public-access
 blocked; `terraform output` prints the bucket name.
+
+**Commit:** `feat(m0): bootstrap Terraform state bucket (TASK-002)` — one task, one
+commit, before TASK-003.
 
 ---
 
@@ -90,6 +96,9 @@ blocked; `terraform output` prints the bucket name.
 **Done check:** `terraform -chdir=infra init` succeeds against the S3 backend; a
 lock file appears during `plan/apply`; `infra/README.md` explains the ordering.
 
+**Commit:** `feat(m0): wire S3 backend + infra README (TASK-003)` — one task, one
+commit, before TASK-004.
+
 ---
 
 ## TASK-004 — Establish the module + per-env layout
@@ -105,6 +114,9 @@ lock file appears during `plan/apply`; `infra/README.md` explains the ordering.
 
 **Done check:** `terraform -chdir=infra/envs/staging init && ... validate` passes
 with the empty module wiring; layout matches PAT-001.
+
+**Commit:** `feat(m0): Terraform module + per-env layout (TASK-004)` — one task, one
+commit, before TASK-005.
 
 ---
 
@@ -126,6 +138,9 @@ with the empty module wiring; layout matches PAT-001.
 the app appears in the Amplify console wired to the repo (RISK-008: build uses pnpm,
 not npm).
 
+**Commit:** `feat(m0): hosting module — Amplify app + branches (TASK-005)` — one task,
+one commit, before TASK-006.
+
 ---
 
 ## TASK-006 — Terraform outputs → Amplify env vars
@@ -142,6 +157,9 @@ not npm).
 
 **Done check:** Amplify branch env vars are populated from Terraform outputs; the
 Next.js app can read `process.env.NEXT_PUBLIC_*` at build/runtime.
+
+**Commit:** `feat(m0): Terraform outputs → Amplify env vars (TASK-006)` — one task,
+one commit, before TASK-007.
 
 ---
 
@@ -175,6 +193,9 @@ Next.js app can read `process.env.NEXT_PUBLIC_*` at build/runtime.
 
 **Done check:** a push to `staging` triggers an Amplify build that uses pnpm and
 deploys the default Next.js page to the Amplify URL.
+
+**Commit:** `feat(m0): amplify.yml pnpm build spec (TASK-007)` — final task of the
+phase; one commit.
 
 ---
 

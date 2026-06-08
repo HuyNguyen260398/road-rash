@@ -24,6 +24,9 @@ AI prompt UI with safe fallback.
 
 **Done check:** parameter exists as SecureString; value absent from git.
 
+**Commit:** `feat(m6): gemini_api_key in SSM (TASK-038)` — one task, one commit,
+before TASK-039.
+
 ---
 
 ## TASK-039 — `services/suggest-trips/handler.ts` + `POST /suggest`
@@ -45,6 +48,9 @@ AI prompt UI with safe fallback.
 **Done check (TEST-004):** any Gemini-returned ID **not** in the candidate set is
 dropped; only validated IDs are returned.
 
+**Commit:** `feat(m6): suggestTrips Lambda + POST /suggest (TASK-039)` — one task, one
+commit, before TASK-040.
+
 ---
 
 ## TASK-040 — IAM for the suggest Lambda
@@ -56,6 +62,9 @@ dropped; only validated IDs are returned.
 **Files:** `infra/modules/iam/`.
 
 **Done check:** policy ARNs are scoped to `Trip` + the one parameter; no wildcards.
+
+**Commit:** `feat(m6): suggest Lambda IAM (Trip read + GetParameter) (TASK-040)` — one
+task, one commit, before TASK-041.
 
 ---
 
@@ -70,6 +79,9 @@ dropped; only validated IDs are returned.
 
 **Done check:** submitting a prompt returns ranked cards; nothing fires while typing.
 
+**Commit:** `feat(m6): AiSuggestBox (TASK-041)` — one task, one commit, before
+TASK-042.
+
 ---
 
 ## TASK-042 — Graceful fallback
@@ -82,6 +94,9 @@ dropped; only validated IDs are returned.
 
 **Done check:** simulate a Gemini failure → the UI degrades to plain search results
 with a clear message; no crash, no spinner hang.
+
+**Commit:** `feat(m6): graceful fallback to plain search (TASK-042)` — final task of
+the phase; one commit.
 
 ---
 

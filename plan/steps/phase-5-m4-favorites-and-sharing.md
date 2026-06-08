@@ -28,6 +28,9 @@ UI; saved view; public share page.
 **Done check (TEST-007):** favoriting creates a `Favorite` and bumps the count;
 unfavoriting reverses both; double-favorite is prevented.
 
+**Commit:** `feat(m4): favorites Lambda + routes (TASK-029)` — one task, one commit,
+before TASK-030.
+
 ---
 
 ## TASK-030 — Optimistic heart toggle in `TripCard`
@@ -40,6 +43,9 @@ unfavoriting reverses both; double-favorite is prevented.
 **Files:** `components/TripCard.tsx`.
 
 **Done check:** the heart toggles instantly and self-corrects if the request fails.
+
+**Commit:** `feat(m4): optimistic heart toggle (TASK-030)` — one task, one commit,
+before TASK-031.
 
 ---
 
@@ -54,6 +60,8 @@ unfavoriting reverses both; double-favorite is prevented.
 
 **Done check:** favorited trips show on `/saved`; unfavoriting removes them.
 
+**Commit:** `feat(m4): /saved view (TASK-031)` — one task, one commit, before TASK-032.
+
 ---
 
 ## TASK-032 — Public shareable trip page
@@ -67,6 +75,9 @@ unfavoriting reverses both; double-favorite is prevented.
 
 **Done check:** the page renders unauthenticated and produces correct OG tags when
 shared (link preview shows name + thumbnail).
+
+**Commit:** `feat(m4): public /trip/[id] share page + OG (TASK-032)` — final task of
+the phase; one commit.
 
 ---
 

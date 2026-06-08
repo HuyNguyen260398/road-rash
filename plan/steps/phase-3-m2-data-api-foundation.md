@@ -31,6 +31,9 @@ the base API Gateway + JWT authorizer, and Lambda IAM roles via Terraform.
 
 **Done check:** table + 5 GSIs created; `terraform plan` is clean on re-run.
 
+**Commit:** `feat(m2): Trip table + GSIs (TASK-015)` — one task, one commit, before
+TASK-016.
+
 ---
 
 ## TASK-016 — `dynamodb` module: `Favorite` table
@@ -47,6 +50,9 @@ the base API Gateway + JWT authorizer, and Lambda IAM roles via Terraform.
 **Done check:** table + `userId` GSI created; uniqueness key shape supports a
 conditional-put dedupe.
 
+**Commit:** `feat(m2): Favorite table + userId GSI (TASK-016)` — one task, one commit,
+before TASK-017.
+
 ---
 
 ## TASK-017 — `s3` module: thumbnails bucket
@@ -62,6 +68,9 @@ conditional-put dedupe.
 
 **Done check:** bucket is private with public access blocked, encrypted, and CORS
 permits presigned PUT/GET from the app origin only.
+
+**Commit:** `feat(m2): S3 thumbnails bucket + CORS (TASK-017)` — one task, one commit,
+before TASK-018.
 
 ---
 
@@ -80,6 +89,9 @@ permits presigned PUT/GET from the app origin only.
 
 **Done check:** each policy names specific table/bucket-prefix/parameter ARNs — no
 `Resource: "*"` beyond logs; `terraform validate` passes.
+
+**Commit:** `feat(m2): least-privilege Lambda IAM roles (TASK-018)` — one task, one
+commit, before TASK-019.
 
 ---
 
@@ -101,6 +113,9 @@ permits presigned PUT/GET from the app origin only.
 the Cognito issuer/audience; throttling configured; outputs the **API base URL**
 (feeds Amplify env var + `lib/api-client.ts`).
 
+**Commit:** `feat(m2): HTTP API + JWT authorizer + throttling (TASK-019)` — one task,
+one commit, before TASK-020.
+
 ---
 
 ## TASK-020 — `lambda` module (reusable)
@@ -118,6 +133,9 @@ the Cognito issuer/audience; throttling configured; outputs the **API base URL**
 **Done check:** a trivial test function deploys, is invokable via its route, and
 logs to its own CloudWatch group; bundling produces a zip from TS.
 
+**Commit:** `feat(m2): reusable lambda module (TASK-020)` — one task, one commit,
+before TASK-021.
+
 ---
 
 ## TASK-021 — Frontend API client
@@ -134,6 +152,9 @@ logs to its own CloudWatch group; bundling produces a zip from TS.
 
 **Done check:** an authenticated call to a protected test route succeeds with the
 JWT attached; an unauthenticated call to a public route succeeds without one.
+
+**Commit:** `feat(m2): frontend api-client (JWT fetch wrapper) (TASK-021)` — final
+task of the phase; one commit.
 
 ---
 

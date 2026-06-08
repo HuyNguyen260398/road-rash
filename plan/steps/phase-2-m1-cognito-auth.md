@@ -34,6 +34,9 @@ by Lambdas in M3+.
 **Done check:** an OAuth client exists with consent screen configured and redirect
 URIs pointing at each Cognito Hosted UI domain.
 
+**Commit:** no code change (manual Google Cloud Console) — record IDs/redirect URIs
+in notes only, then proceed to TASK-009.
+
 ---
 
 ## TASK-009 — Store Google secrets in SSM
@@ -49,6 +52,9 @@ URIs pointing at each Cognito Hosted UI domain.
 
 **Done check:** parameters exist as SecureString; no secret value appears in git
 or in plan output committed anywhere.
+
+**Commit:** `feat(m1): Google OAuth secrets in SSM (TASK-009)` — one task, one commit,
+before TASK-010.
 
 ---
 
@@ -72,6 +78,9 @@ or in plan output committed anywhere.
 **Done check:** `terraform apply` creates the pool/client/domain/IdP/identity pool;
 Google appears as a federated IdP; outputs flow to Amplify `NEXT_PUBLIC_*` env vars.
 
+**Commit:** `feat(m1): cognito module (pool/client/domain/IdP/identity pool) (TASK-010)`
+— one task, one commit, before TASK-011.
+
 ---
 
 ## TASK-011 — Client-side Amplify configuration
@@ -91,6 +100,9 @@ Google appears as a federated IdP; outputs flow to Amplify `NEXT_PUBLIC_*` env v
 **Done check:** the app loads with Amplify configured client-side and no console
 errors about missing Auth config.
 
+**Commit:** `feat(m1): client-side Amplify config + layout mount (TASK-011)` — one
+task, one commit, before TASK-012.
+
 ---
 
 ## TASK-012 — SSR server context
@@ -103,6 +115,9 @@ errors about missing Auth config.
 
 **Done check:** server components/route handlers can run
 `runWithAmplifyServerContext({ nextServerContext, operation })` without error.
+
+**Commit:** `feat(m1): SSR Amplify server context (TASK-012)` — one task, one commit,
+before TASK-013.
 
 ---
 
@@ -118,6 +133,8 @@ errors about missing Auth config.
 
 **Done check:** clicking "Continue with Google" goes through Cognito Hosted UI →
 Google → back to the app authenticated; `signOut()` clears the session.
+
+**Commit:** `feat(m1): /login page (TASK-013)` — one task, one commit, before TASK-014.
 
 ---
 
@@ -136,6 +153,9 @@ Google → back to the app authenticated; `signOut()` clears the session.
 **Done check:** visiting a protected route while signed out redirects to `/login`;
 after sign-in it renders; public routes never redirect (RISK-009 — uses official
 adapter patterns).
+
+**Commit:** `feat(m1): route guards (middleware/server) (TASK-014)` — final task of
+the phase; one commit.
 
 ---
 
