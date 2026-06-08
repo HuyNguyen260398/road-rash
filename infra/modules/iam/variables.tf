@@ -19,6 +19,12 @@ variable "favorite_table_arn" {
 }
 
 variable "thumbnails_bucket_arn" {
-  description = "ARN of the thumbnails S3 bucket (object access scoped via arn/*)."
+  description = "ARN of the thumbnails S3 bucket."
   type        = string
+}
+
+variable "thumbnail_object_prefix" {
+  description = "Key prefix within the thumbnails bucket the presign role may read/write (least-privilege scope; the presign Lambda + M5 uploads must use this prefix)."
+  type        = string
+  default     = "thumbnails/"
 }

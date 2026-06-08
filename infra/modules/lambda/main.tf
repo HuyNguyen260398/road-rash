@@ -12,9 +12,12 @@ locals {
 }
 
 data "archive_file" "this" {
-  type        = "zip"
-  source_dir  = var.source_dir
-  output_path = "${path.module}/.build/${var.function_name}.zip"
+  type       = "zip"
+  source_dir = var.source_dir
+  # Write the zip under the root module's .terraform scratch dir (already
+  # gitignored) so build artifacts never land in the version-controlled module
+  # source tree. archive_file creates the parent directory.
+  output_path = "${path.root}/.terraform/lambda-build/${var.function_name}.zip"
 }
 
 # Explicit log group so retention is controlled (Lambda would otherwise create

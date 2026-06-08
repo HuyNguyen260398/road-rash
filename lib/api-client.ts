@@ -80,7 +80,15 @@ export async function apiFetch<T>(
   });
 
   const text = await response.text();
-  const data = text ? (JSON.parse(text) as unknown) : undefined;
+  // Parse defensively: error responses (API Gateway/CloudFront HTML pages,
+  // plain-text 5xx) may not be JSON. Fall back to the raw text so callers get a
+  // structured ApiError instead of an unhandled SyntaxError.
+  let data: unknown;
+  try {
+    data = text ? (JSON.parse(text) as unknown) : undefined;
+  } catch {
+    data = text;
+  }
 
   if (!response.ok) {
     const message =

@@ -126,10 +126,11 @@ data "aws_iam_policy_document" "presign" {
   source_policy_documents = [data.aws_iam_policy_document.logs.json]
 
   statement {
-    sid       = "ThumbnailObjectRw"
-    effect    = "Allow"
-    actions   = ["s3:PutObject", "s3:GetObject"]
-    resources = ["${var.thumbnails_bucket_arn}/*"]
+    sid     = "ThumbnailObjectRw"
+    effect  = "Allow"
+    actions = ["s3:PutObject", "s3:GetObject"]
+    # Scoped to the thumbnail object prefix, not the whole bucket.
+    resources = ["${var.thumbnails_bucket_arn}/${var.thumbnail_object_prefix}*"]
   }
 }
 
