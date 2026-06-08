@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Bundled Lambda handler output (esbuild) — built artifacts, not source.
+    "services/**/dist/**",
   ]),
 ]);
 

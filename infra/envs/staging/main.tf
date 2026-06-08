@@ -36,9 +36,10 @@ module "iam" {
   project     = var.project
   environment = var.environment
 
-  trip_table_arn        = module.dynamodb.trip_table_arn
-  favorite_table_arn    = module.dynamodb.favorite_table_arn
-  thumbnails_bucket_arn = module.s3.thumbnails_bucket_arn
+  trip_table_arn          = module.dynamodb.trip_table_arn
+  favorite_table_arn      = module.dynamodb.favorite_table_arn
+  thumbnails_bucket_arn   = module.s3.thumbnails_bucket_arn
+  thumbnail_object_prefix = var.thumbnail_object_prefix
 }
 
 module "cognito" {
@@ -54,8 +55,37 @@ module "cognito" {
   google_oauth_client_secret = var.google_oauth_client_secret
 }
 
-# NOTE: the reusable `lambda` module is instantiated per handler in M3 (trips,
-# favorites, presign, suggest-trips), each wired to its iam role + env vars.
+# Lambda handlers (M3). Each points at its esbuild-bundled dist/ output (run
+# `pnpm build:lambdas` before plan/apply) and gets its least-privilege iam role
+# + env vars (table/bucket names + SSM parameter names — never secret values).
+# favorites + suggest-trips land in M4/M6.
+module "lambda_trips" {
+  source        = "../../modules/lambda"
+  project       = var.project
+  environment   = var.environment
+  function_name = "trips"
+  source_dir    = "${path.root}/../../../services/trips/dist"
+  role_arn      = module.iam.trips_role_arn
+
+  environment_variables = {
+    TRIP_TABLE = module.dynamodb.trip_table_name
+  }
+}
+
+module "lambda_presign" {
+  source        = "../../modules/lambda"
+  project       = var.project
+  environment   = var.environment
+  function_name = "presign"
+  source_dir    = "${path.root}/../../../services/presign/dist"
+  role_arn      = module.iam.presign_role_arn
+
+  environment_variables = {
+    THUMBNAILS_BUCKET = module.s3.thumbnails_bucket_name
+    THUMBNAIL_PREFIX  = var.thumbnail_object_prefix
+    MAX_UPLOAD_BYTES  = tostring(var.max_thumbnail_bytes)
+  }
+}
 
 module "apigateway" {
   source      = "../../modules/apigateway"
@@ -65,6 +95,30 @@ module "apigateway" {
   jwt_issuer           = module.cognito.issuer
   jwt_audience         = module.cognito.audience
   cors_allowed_origins = var.app_origins
+
+  integrations = {
+    trips = {
+      invoke_arn    = module.lambda_trips.invoke_arn
+      function_name = module.lambda_trips.function_name
+    }
+    presign = {
+      invoke_arn    = module.lambda_presign.invoke_arn
+      function_name = module.lambda_presign.function_name
+    }
+  }
+
+  # GET routes public (REQ-002); mutating routes + the upload presign behind the
+  # JWT authorizer (SEC-002). The public GET /uploads/thumbnail issues read URLs
+  # for thumbnails shown on the public card grid.
+  routes = [
+    { route_key = "GET /trips", target = "trips", authorized = false },
+    { route_key = "GET /trips/{id}", target = "trips", authorized = false },
+    { route_key = "POST /trips", target = "trips", authorized = true },
+    { route_key = "PUT /trips/{id}", target = "trips", authorized = true },
+    { route_key = "DELETE /trips/{id}", target = "trips", authorized = true },
+    { route_key = "POST /uploads/presign", target = "presign", authorized = true },
+    { route_key = "GET /uploads/thumbnail", target = "presign", authorized = false },
+  ]
 }
 
 module "hosting" {

@@ -11,6 +11,8 @@ next-env.d.ts
 # production build
 /build
 /dist
+# bundled Lambda handlers (built by `pnpm build:lambdas` before terraform apply)
+services/**/dist/
 
 # terraform
 **/.terraform/*

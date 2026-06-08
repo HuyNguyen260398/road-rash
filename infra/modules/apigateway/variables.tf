@@ -35,3 +35,28 @@ variable "throttling_rate_limit" {
   type        = number
   default     = 100
 }
+
+# --- Lambda integrations + routes (M3+) -----------------------------------
+# One AWS_PROXY integration per Lambda (keyed by a logical name); routes target
+# an integration by that key. The lambda module no longer needs the API
+# execution ARN — invoke permission is granted here, keeping the dependency
+# graph acyclic (apigateway -> lambda, never the reverse).
+
+variable "integrations" {
+  description = "Lambda integrations keyed by logical name; routes target one by key."
+  type = map(object({
+    invoke_arn    = string
+    function_name = string
+  }))
+  default = {}
+}
+
+variable "routes" {
+  description = "HTTP API routes. authorized=true attaches the JWT authorizer (protected); false leaves the route public (open GETs)."
+  type = list(object({
+    route_key  = string # e.g. "POST /trips"
+    target     = string # key into var.integrations
+    authorized = bool
+  }))
+  default = []
+}

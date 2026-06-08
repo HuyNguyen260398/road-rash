@@ -50,6 +50,22 @@ variable "app_origins" {
   default     = ["http://localhost:3000"]
 }
 
+# --- Thumbnails (presign Lambda + iam scope) ------------------------------
+# One source of truth for the thumbnail key prefix so the presign IAM policy
+# scope and the keys the Lambda generates always match.
+
+variable "thumbnail_object_prefix" {
+  description = "Key prefix for thumbnail objects; scopes both the presign IAM policy and the keys the presign Lambda generates."
+  type        = string
+  default     = "thumbnails/"
+}
+
+variable "max_thumbnail_bytes" {
+  description = "Maximum allowed thumbnail upload size in bytes (enforced by the presign Lambda, SEC-004)."
+  type        = number
+  default     = 5242880
+}
+
 # --- Cognito (cognito module) ---------------------------------------------
 # OAuth redirect targets for the app. Defaults cover local dev; add the Amplify
 # branch/custom-domain URL once the first apply surfaces it. Not derived from

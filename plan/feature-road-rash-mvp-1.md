@@ -94,13 +94,13 @@ This plan turns `docs/road-rash-plan.md` into an executable, phase-by-phase buil
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
-| TASK-022 | Create `lib/validation.ts`: `validateMyMapsUrl(url)` (allow only `www.google.com/maps/d/` + embed paths) and `toMyMapsEmbedUrl(url)`. Add unit tests. | | |
-| TASK-023 | `services/trips/handler.ts` Lambda: handle `GET /trips`, `GET /trips/{id}`, `POST /trips` (create), `PUT /trips/{id}`, `DELETE /trips/{id}`; on write, set/verify `authorId` from JWT `sub`; init `favoriteCount: 0` on create. Wire routes in the `apigateway` module. | | |
-| TASK-024 | `services/presign/handler.ts` Lambda + `POST /uploads/presign` (JWT-authenticated): validate content-type/size, return a presigned S3 PUT URL and object key scoped to the caller. | | |
-| TASK-025 | Create `components/TripForm.tsx` with all `Trip` fields (text, `tripType`/`vehicle` selects, `durationDays`, structured `city`/`province`/`country`, `myMapsUrl` with validation + help, optional `googleMapsUrl`); thumbnail upload via presign → S3 PUT → store key. | | |
-| TASK-026 | Create `app/trips/new/page.tsx` (auth-gated) and `app/trips/[id]/edit/page.tsx` (owner-gated) using `TripForm` against the trips API. | | |
-| TASK-027 | Create `components/TripCard.tsx` (thumbnail via presigned GET, name, location, duration, vehicle icon, author, heart + count) and `components/TripGrid.tsx` (responsive grid). | | |
-| TASK-028 | Create `app/page.tsx` (Home/Discover, SSR `GET /trips`) and `app/my-trips/page.tsx` (auth-gated; `authorId` == current sub). | | |
+| TASK-022 | Create `lib/validation.ts`: `validateMyMapsUrl(url)` (allow only `www.google.com/maps/d/` + embed paths) and `toMyMapsEmbedUrl(url)`. Add unit tests. | ✅ (validation + 17 Vitest tests; TEST-001/002 green) | 2026-06-08 |
+| TASK-023 | `services/trips/handler.ts` Lambda: handle `GET /trips`, `GET /trips/{id}`, `POST /trips` (create), `PUT /trips/{id}`, `DELETE /trips/{id}`; on write, set/verify `authorId` from JWT `sub`; init `favoriteCount: 0` on create. Wire routes in the `apigateway` module. | ✅ (handler + routes coded, tsc/validate clean; live TEST-005/006 deferred to apply) | 2026-06-08 |
+| TASK-024 | `services/presign/handler.ts` Lambda + `POST /uploads/presign` (JWT-authenticated): validate content-type/size, return a presigned S3 PUT URL and object key scoped to the caller. | ✅ (presign PUT + public GET routes; live TEST-008 deferred to apply) | 2026-06-08 |
+| TASK-025 | Create `components/TripForm.tsx` with all `Trip` fields (text, `tripType`/`vehicle` selects, `durationDays`, structured `city`/`province`/`country`, `myMapsUrl` with validation + help, optional `googleMapsUrl`); thumbnail upload via presign → S3 PUT → store key. | ✅ (TripForm: inline My Maps validation + presign upload; build verified) | 2026-06-08 |
+| TASK-026 | Create `app/trips/new/page.tsx` (auth-gated) and `app/trips/[id]/edit/page.tsx` (owner-gated) using `TripForm` against the trips API. | ✅ (new + edit pages, SSR auth/owner gating; build verified) | 2026-06-08 |
+| TASK-027 | Create `components/TripCard.tsx` (thumbnail via presigned GET, name, location, duration, vehicle icon, author, heart + count) and `components/TripGrid.tsx` (responsive grid). | ✅ (TripCard presigned-GET thumb + responsive TripGrid; build verified) | 2026-06-08 |
+| TASK-028 | Create `app/page.tsx` (Home/Discover, SSR `GET /trips`) and `app/my-trips/page.tsx` (auth-gated; `authorId` == current sub). | ✅ (Home SSR grid + auth-gated My Trips; build verified) | 2026-06-08 |
 
 ### Implementation Phase 5
 

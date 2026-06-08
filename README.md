@@ -101,6 +101,17 @@ pnpm build   # production build
 pnpm lint    # lint
 ```
 
+### Test
+
+Unit tests run on [Vitest](https://vitest.dev).
+
+```bash
+pnpm test                       # run the whole suite once
+pnpm test lib/validation.test.ts  # run a single file
+pnpm test -t "rejects http"     # run tests matching a name
+pnpm test:watch                 # watch mode
+```
+
 ## Project structure
 
 ```

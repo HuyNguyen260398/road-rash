@@ -1,4 +1,5 @@
 import { fetchAuthSession } from "aws-amplify/auth";
+import type { Trip, TripInput } from "./types";
 
 // Typed fetch wrapper for the REST API (M2 / TASK-021). Reads the base URL from
 // the Terraform-populated env var, attaches a Cognito JWT to protected calls,
@@ -100,20 +101,45 @@ export async function apiFetch<T>(
   return data as T;
 }
 
-// --- Typed methods (request/response types refined as routes land in M3+) ---
+// --- Response shapes ------------------------------------------------------
+export type TripListResponse = { trips: Trip[] };
+export type PresignResponse = {
+  uploadUrl: string;
+  key: string;
+  expiresIn: number;
+};
+export type ThumbnailUrlResponse = { url: string; expiresIn: number };
+
+// --- Typed methods --------------------------------------------------------
 // Public GET routes need no auth; mutating routes set `auth: true` so the JWT
-// is attached and the API Gateway authorizer + Lambda owner check apply.
+// is attached and the API Gateway authorizer + Lambda owner check apply. SSR
+// callers pass a pre-fetched `token` (the browser fetches it automatically).
 export const api = {
   // Public browsing (REQ-002).
   getTrips: (query?: Record<string, string | undefined>) =>
-    apiFetch<unknown>("/trips", { query }),
-  getTrip: (id: string) => apiFetch<unknown>(`/trips/${id}`),
+    apiFetch<TripListResponse>("/trips", { query }),
+  getTrip: (id: string) => apiFetch<Trip>(`/trips/${id}`),
 
-  // Authenticated mutations (REQ-003) — wired in M3.
-  createTrip: (body: unknown) =>
-    apiFetch<unknown>("/trips", { method: "POST", body, auth: true }),
-  updateTrip: (id: string, body: unknown) =>
-    apiFetch<unknown>(`/trips/${id}`, { method: "PUT", body, auth: true }),
-  deleteTrip: (id: string) =>
-    apiFetch<unknown>(`/trips/${id}`, { method: "DELETE", auth: true }),
+  // Authenticated mutations (REQ-003).
+  createTrip: (body: TripInput, token?: string) =>
+    apiFetch<Trip>("/trips", { method: "POST", body, auth: true, token }),
+  updateTrip: (id: string, body: TripInput, token?: string) =>
+    apiFetch<Trip>(`/trips/${id}`, { method: "PUT", body, auth: true, token }),
+  deleteTrip: (id: string, token?: string) =>
+    apiFetch<void>(`/trips/${id}`, { method: "DELETE", auth: true, token }),
+
+  // Thumbnail upload (TASK-024): request a presigned PUT, then PUT the file to
+  // S3 directly. Authenticated — the key is scoped to the caller's sub.
+  getUploadUrl: (input: { contentType: string; size: number }) =>
+    apiFetch<PresignResponse>("/uploads/presign", {
+      method: "POST",
+      body: input,
+      auth: true,
+    }),
+
+  // Public presigned GET for rendering a stored thumbnail on the card grid.
+  getThumbnailUrl: (key: string) =>
+    apiFetch<ThumbnailUrlResponse>("/uploads/thumbnail", {
+      query: { key },
+    }),
 };
