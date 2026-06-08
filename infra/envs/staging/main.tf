@@ -17,12 +17,6 @@ locals {
   }
 }
 
-module "iam" {
-  source      = "../../modules/iam"
-  project     = var.project
-  environment = var.environment
-}
-
 module "dynamodb" {
   source      = "../../modules/dynamodb"
   project     = var.project
@@ -33,6 +27,18 @@ module "s3" {
   source      = "../../modules/s3"
   project     = var.project
   environment = var.environment
+
+  cors_allowed_origins = var.app_origins
+}
+
+module "iam" {
+  source      = "../../modules/iam"
+  project     = var.project
+  environment = var.environment
+
+  trip_table_arn        = module.dynamodb.trip_table_arn
+  favorite_table_arn    = module.dynamodb.favorite_table_arn
+  thumbnails_bucket_arn = module.s3.thumbnails_bucket_arn
 }
 
 module "cognito" {
@@ -48,16 +54,17 @@ module "cognito" {
   google_oauth_client_secret = var.google_oauth_client_secret
 }
 
-module "lambda" {
-  source      = "../../modules/lambda"
-  project     = var.project
-  environment = var.environment
-}
+# NOTE: the reusable `lambda` module is instantiated per handler in M3 (trips,
+# favorites, presign, suggest-trips), each wired to its iam role + env vars.
 
 module "apigateway" {
   source      = "../../modules/apigateway"
   project     = var.project
   environment = var.environment
+
+  jwt_issuer           = module.cognito.issuer
+  jwt_audience         = module.cognito.audience
+  cors_allowed_origins = var.app_origins
 }
 
 module "hosting" {

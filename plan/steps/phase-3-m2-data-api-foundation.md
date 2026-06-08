@@ -148,10 +148,10 @@ JWT attached; an unauthenticated call to a public route succeeds without one.
 
 ## Task checklist
 
-- [ ] TASK-015 — `Trip` table + GSIs
-- [ ] TASK-016 — `Favorite` table + `userId` GSI
-- [ ] TASK-017 — S3 thumbnails bucket + CORS
-- [ ] TASK-018 — Per-Lambda least-privilege IAM
-- [ ] TASK-019 — HTTP API + JWT authorizer + throttling
-- [ ] TASK-020 — Reusable `lambda` module (esbuild bundling)
-- [ ] TASK-021 — `lib/api-client.ts` JWT fetch wrapper
+- [x] TASK-015 — `Trip` table + GSIs *(code + validate; apply deferred)*
+- [x] TASK-016 — `Favorite` table + `userId` GSI *(code + validate; apply deferred)*
+- [x] TASK-017 — S3 thumbnails bucket + CORS *(code + validate; apply deferred)*
+- [x] TASK-018 — Per-Lambda least-privilege IAM *(code + validate; apply deferred)*
+- [x] TASK-019 — HTTP API + JWT authorizer + throttling *(per-route /suggest throttle deferred to M6)*
+- [x] TASK-020 — Reusable `lambda` module *(module + standalone validate; esbuild bundling lands with handlers in M3)*
+- [x] TASK-021 — `lib/api-client.ts` JWT fetch wrapper *(build verified)*
