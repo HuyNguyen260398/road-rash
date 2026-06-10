@@ -106,9 +106,7 @@ export function parseSuggestions(text: string): Suggestion[] {
     if (typeof entry !== "object" || entry === null) continue;
     const { id, reason } = entry as Record<string, unknown>;
     if (typeof id !== "string" || id.length === 0) continue;
-    result.push(
-      typeof reason === "string" ? { id, reason } : { id },
-    );
+    result.push(typeof reason === "string" ? { id, reason } : { id });
   }
   return result;
 }

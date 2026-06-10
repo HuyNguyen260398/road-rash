@@ -12,11 +12,7 @@ import {
   parseSuggestRequest,
   parseSuggestions,
 } from "./select";
-import type {
-  SuggestRequest,
-  SuggestionResult,
-  Trip,
-} from "../../lib/types";
+import type { SuggestRequest, SuggestionResult, Trip } from "../../lib/types";
 
 // suggestTrips handler behind the public POST /suggest route (throttled hard at
 // the API Gateway stage — RISK-006). Gemini is server-side ONLY (SEC-001): the
@@ -32,7 +28,10 @@ const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-2.0-flash";
 // Bounded so we always answer within the API Gateway HTTP API 30s integration
 // ceiling (the Lambda timeout sits just under it); on overrun we fall back. A
 // bad/non-numeric override falls back rather than becoming NaN (= a 0ms abort).
-const GEMINI_TIMEOUT_MS = parsePositiveInt(process.env.GEMINI_TIMEOUT_MS, 20000);
+const GEMINI_TIMEOUT_MS = parsePositiveInt(
+  process.env.GEMINI_TIMEOUT_MS,
+  20000,
+);
 
 // Cap how many ranked ids we re-validate + return. The candidate-count and
 // per-field input bounds live in parseSuggestRequest (select.ts).

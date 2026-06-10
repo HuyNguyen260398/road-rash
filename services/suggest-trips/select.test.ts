@@ -68,9 +68,9 @@ describe("filterToCandidates", () => {
   });
 
   it("returns [] when nothing the model returned is a candidate", () => {
-    expect(
-      filterToCandidates([{ id: "x" }, { id: "y" }], candidates),
-    ).toEqual([]);
+    expect(filterToCandidates([{ id: "x" }, { id: "y" }], candidates)).toEqual(
+      [],
+    );
   });
 
   it("preserves the model's ranking order", () => {
