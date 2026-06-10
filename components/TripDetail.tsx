@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { toMyMapsEmbedUrl, validateMyMapsUrl } from "@/lib/validation";
+import { googleMapsLink } from "@/lib/maps";
 import { formatEnum } from "@/lib/format";
 import type { Trip, Vehicle } from "@/lib/types";
 
@@ -134,6 +135,17 @@ export default function TripDetail({ trip }: { trip: Trip }) {
             </div>
           )}
         </div>
+        {/* Best-effort native handoff (TASK-045, CON-001): on mobile a
+            google.com/maps URL prompts the OS to open the Maps app; on desktop
+            it opens Maps in the browser. */}
+        <a
+          href={googleMapsLink(trip)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center gap-2 rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
+        >
+          <span aria-hidden>📍</span> Open in Google Maps
+        </a>
       </section>
     </article>
   );
