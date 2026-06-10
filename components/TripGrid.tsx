@@ -1,4 +1,5 @@
 import TripCard from "./TripCard";
+import EmptyState from "./EmptyState";
 import type { Trip } from "@/lib/types";
 
 // Responsive, mobile-first card grid (TASK-027 / REQ-001): 1 column on phones,
@@ -31,7 +32,7 @@ export default function TripGrid({
     : trips.length;
 
   if (total === 0) {
-    return <p className="py-16 text-center opacity-60">{emptyMessage}</p>;
+    return <EmptyState title={emptyMessage} />;
   }
 
   if (groups) {

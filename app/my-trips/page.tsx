@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import TripGrid from "@/components/TripGrid";
+import EmptyState from "@/components/EmptyState";
 import { getServerSession } from "@/lib/server-session";
 import { api } from "@/lib/api-client";
 import type { Trip } from "@/lib/types";
@@ -19,7 +20,7 @@ export default async function MyTripsPage() {
     const { trips } = await api.getTrips();
     mine = trips.filter((t) => t.authorId === session.sub);
   } catch {
-    loadError = "Couldn’t load your trips right now. Please try again later.";
+    loadError = "Please try again in a moment.";
   }
 
   return (
@@ -35,12 +36,27 @@ export default async function MyTripsPage() {
       </header>
 
       {loadError ? (
-        <p className="py-16 text-center opacity-60">{loadError}</p>
-      ) : (
-        <TripGrid
-          trips={mine}
-          emptyMessage="You haven’t created any trips yet."
+        <EmptyState
+          icon="⚠️"
+          title="Couldn’t load your trips"
+          description={loadError}
         />
+      ) : mine.length === 0 ? (
+        <EmptyState
+          icon="🧳"
+          title="You haven’t created any trips yet"
+          description="Share your first travel plan with the community."
+          action={
+            <Link
+              href="/trips/new"
+              className="rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
+            >
+              Create trip
+            </Link>
+          }
+        />
+      ) : (
+        <TripGrid trips={mine} />
       )}
     </main>
   );
