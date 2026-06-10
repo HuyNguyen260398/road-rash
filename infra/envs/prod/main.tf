@@ -55,6 +55,17 @@ module "cognito" {
   google_oauth_client_secret = var.google_oauth_client_secret
 }
 
+# SecureString secrets read by Lambdas at runtime (M6). The Gemini key value is a
+# secret — supplied via TF_VAR_gemini_api_key on first apply, then maintained
+# out-of-band (the module ignores value changes). Never committed (SEC-001).
+module "ssm" {
+  source      = "../../modules/ssm"
+  project     = var.project
+  environment = var.environment
+
+  gemini_api_key = var.gemini_api_key
+}
+
 # Lambda handlers (M3). Each points at its esbuild-bundled dist/ output (run
 # `pnpm build:lambdas` before plan/apply) and gets its least-privilege iam role
 # + env vars (table/bucket names + SSM parameter names — never secret values).
@@ -87,6 +98,25 @@ module "lambda_presign" {
   }
 }
 
+# suggest-trips Lambda (M6). Reads the Trip table (re-validating ranked ids) and
+# the Gemini key from SSM by *name* — the secret value is never in env/Terraform.
+# Timeout sits just under the API Gateway 30s integration ceiling so we always
+# answer (the client falls back to plain search on error/timeout).
+module "lambda_suggest_trips" {
+  source        = "../../modules/lambda"
+  project       = var.project
+  environment   = var.environment
+  function_name = "suggest-trips"
+  source_dir    = "${path.root}/../../../services/suggest-trips/dist"
+  role_arn      = module.iam.suggest_trips_role_arn
+  timeout       = 29
+
+  environment_variables = {
+    TRIP_TABLE        = module.dynamodb.trip_table_name
+    GEMINI_PARAM_NAME = module.ssm.gemini_api_key_param_name
+  }
+}
+
 module "apigateway" {
   source      = "../../modules/apigateway"
   project     = var.project
@@ -105,11 +135,16 @@ module "apigateway" {
       invoke_arn    = module.lambda_presign.invoke_arn
       function_name = module.lambda_presign.function_name
     }
+    suggest = {
+      invoke_arn    = module.lambda_suggest_trips.invoke_arn
+      function_name = module.lambda_suggest_trips.function_name
+    }
   }
 
   # GET routes public (REQ-002); mutating routes + the upload presign behind the
   # JWT authorizer (SEC-002). The public GET /uploads/thumbnail issues read URLs
-  # for thumbnails shown on the public card grid.
+  # for thumbnails shown on the public card grid. POST /suggest is public but
+  # hard-throttled below (RISK-006) since each call drives Gemini spend.
   routes = [
     { route_key = "GET /trips", target = "trips", authorized = false },
     { route_key = "GET /trips/{id}", target = "trips", authorized = false },
@@ -118,7 +153,14 @@ module "apigateway" {
     { route_key = "DELETE /trips/{id}", target = "trips", authorized = true },
     { route_key = "POST /uploads/presign", target = "presign", authorized = true },
     { route_key = "GET /uploads/thumbnail", target = "presign", authorized = false },
+    { route_key = "POST /suggest", target = "suggest", authorized = false },
   ]
+
+  # Hard cap on the public AI route: ~2 req/s steady, burst 5 — well under the
+  # stage default, so abuse can't run up Gemini cost (RISK-006).
+  route_throttles = {
+    "POST /suggest" = { burst_limit = 5, rate_limit = 2 }
+  }
 }
 
 module "hosting" {

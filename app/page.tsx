@@ -1,5 +1,6 @@
 import Link from "next/link";
 import TripBrowser from "@/components/TripBrowser";
+import AiSuggestBox from "@/components/AiSuggestBox";
 import EmptyState from "@/components/EmptyState";
 import { api } from "@/lib/api-client";
 import type { Trip } from "@/lib/types";
@@ -50,10 +51,13 @@ export default async function Home() {
           description={loadError}
         />
       ) : (
-        <TripBrowser
-          trips={trips}
-          emptyMessage="No trips yet — be the first to share one."
-        />
+        <div className="flex flex-col gap-6">
+          {trips.length > 0 && <AiSuggestBox trips={trips} />}
+          <TripBrowser
+            trips={trips}
+            emptyMessage="No trips yet — be the first to share one."
+          />
+        </div>
       )}
     </main>
   );

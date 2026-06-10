@@ -39,6 +39,39 @@ export interface Trip {
   favoriteCount: number;
 }
 
+// --- AI suggestions (M6 / POST /suggest) ----------------------------------
+// Compact trip projection the client sends as the candidate set. Only the
+// fields useful for ranking travel out — never the full record (keeps the
+// prompt small; the handler re-validates returned ids against DynamoDB anyway).
+export interface SuggestCandidate {
+  id: string;
+  name: string;
+  location: string;
+  city: string;
+  province: string;
+  country: string;
+  tripType: TripType;
+  vehicle: Vehicle;
+  durationDays: number;
+  description?: string;
+}
+
+export interface SuggestRequest {
+  prompt: string;
+  candidates: SuggestCandidate[];
+}
+
+// A ranked suggestion: a trip id (always from the candidate set, validated
+// server-side) plus an optional "why it fits" blurb from the model.
+export interface SuggestionResult {
+  id: string;
+  reason?: string;
+}
+
+export interface SuggestResponse {
+  suggestions: SuggestionResult[];
+}
+
 // The fields the create/edit form submits. Server-owned fields are excluded so
 // a client can't spoof authorId or inflate favoriteCount.
 export interface TripInput {
