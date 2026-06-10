@@ -50,7 +50,7 @@ export default function TripDetailModal({
         >
           ✕
         </button>
-        <TripDetail trip={trip} />
+        <TripDetail key={trip.id} trip={trip} />
       </div>
     </div>
   );

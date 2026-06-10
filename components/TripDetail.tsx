@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { toMyMapsEmbedUrl, validateMyMapsUrl } from "@/lib/validation";
 import { formatEnum } from "@/lib/format";
 import type { Trip, Vehicle } from "@/lib/types";
@@ -32,6 +33,24 @@ export default function TripDetail({ trip }: { trip: Trip }) {
   const embedSrc = validateMyMapsUrl(trip.myMapsUrl)
     ? toMyMapsEmbedUrl(trip.myMapsUrl)
     : null;
+
+  // Load-failure fallback (TASK-044, RISK-004). A private/blocked My Maps map
+  // can't be embedded; detect it via onError plus a timeout (cross-origin frames
+  // often never fire onError) and fall back to a plain "Open map" link. The link
+  // targets the original myMapsUrl, which is already host-allow-listed.
+  // This component is mounted fresh per trip (the modal keys on trip.id, the
+  // share page renders a single trip), so the timeout/ref start clean — no
+  // in-effect reset needed.
+  const [embedFailed, setEmbedFailed] = useState(false);
+  const loadedRef = useRef(false);
+
+  useEffect(() => {
+    if (!embedSrc) return;
+    const timer = setTimeout(() => {
+      if (!loadedRef.current) setEmbedFailed(true);
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, [embedSrc]);
 
   return (
     <article className="flex flex-col gap-5 p-5 sm:p-6">
@@ -84,14 +103,31 @@ export default function TripDetail({ trip }: { trip: Trip }) {
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-semibold opacity-70">Map</h2>
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-black/10 bg-black/5 sm:aspect-video dark:border-white/15 dark:bg-white/10">
-          {embedSrc ? (
+          {embedSrc && !embedFailed ? (
             <iframe
               src={embedSrc}
               title={`Map for ${trip.name}`}
               className="h-full w-full"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
+              onLoad={() => {
+                loadedRef.current = true;
+              }}
+              onError={() => setEmbedFailed(true)}
             />
+          ) : embedSrc ? (
+            // Embed failed/blocked — offer the validated My Maps link instead.
+            <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center text-sm opacity-70">
+              <span>This map couldn’t be embedded.</span>
+              <a
+                href={trip.myMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium underline"
+              >
+                Open map ↗
+              </a>
+            </div>
           ) : (
             <div className="flex h-full w-full items-center justify-center p-4 text-center text-sm opacity-60">
               Map preview unavailable.
