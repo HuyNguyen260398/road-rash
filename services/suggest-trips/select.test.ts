@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { filterToCandidates, parseSuggestions } from "./select";
+import {
+  MAX_CANDIDATES,
+  MAX_FIELD_CHARS,
+  MAX_PROMPT_CHARS,
+  filterToCandidates,
+  parsePositiveInt,
+  parseSuggestRequest,
+  parseSuggestions,
+} from "./select";
 
 // TEST-004 — the suggest-trips handler must only ever return IDs that were in
 // the candidate set passed to Gemini (REQ-007, RISK-007). The model is free to
@@ -82,5 +90,110 @@ describe("filterToCandidates", () => {
     expect(filterToCandidates(suggestions, candidates)).toEqual([
       { id: "a", reason: "first" },
     ]);
+  });
+});
+
+describe("parsePositiveInt", () => {
+  it("returns the parsed value for a positive numeric string", () => {
+    expect(parsePositiveInt("5000", 20000)).toBe(5000);
+  });
+
+  it("falls back when the env var is undefined", () => {
+    expect(parsePositiveInt(undefined, 20000)).toBe(20000);
+  });
+
+  it("falls back on a non-numeric string (would otherwise be NaN → 0ms timeout)", () => {
+    expect(parsePositiveInt("abc", 20000)).toBe(20000);
+  });
+
+  it("falls back on zero and negatives", () => {
+    expect(parsePositiveInt("0", 20000)).toBe(20000);
+    expect(parsePositiveInt("-5", 20000)).toBe(20000);
+  });
+});
+
+describe("parseSuggestRequest", () => {
+  const candidate = {
+    id: "1",
+    name: "Hanoi Loop",
+    location: "Hoan Kiem",
+    city: "Hanoi",
+    province: "Hanoi",
+    country: "Vietnam",
+    tripType: "CITY",
+    vehicle: "MOTORBIKE",
+    durationDays: 2,
+    description: "city ride",
+  };
+
+  it("parses a valid request", () => {
+    const raw = JSON.stringify({ prompt: "coast", candidates: [candidate] });
+    expect(parseSuggestRequest(raw)).toEqual({
+      prompt: "coast",
+      candidates: [candidate],
+    });
+  });
+
+  it("returns undefined for missing/invalid/empty bodies", () => {
+    expect(parseSuggestRequest(undefined)).toBeUndefined();
+    expect(parseSuggestRequest("not json")).toBeUndefined();
+    expect(parseSuggestRequest("[]")).toBeUndefined();
+  });
+
+  it("returns undefined when the prompt is empty or whitespace", () => {
+    const raw = JSON.stringify({ prompt: "   ", candidates: [candidate] });
+    expect(parseSuggestRequest(raw)).toBeUndefined();
+  });
+
+  it("returns undefined when candidates is missing or empty", () => {
+    expect(
+      parseSuggestRequest(JSON.stringify({ prompt: "x" })),
+    ).toBeUndefined();
+    expect(
+      parseSuggestRequest(JSON.stringify({ prompt: "x", candidates: [] })),
+    ).toBeUndefined();
+  });
+
+  it("trims and caps the prompt length", () => {
+    const raw = JSON.stringify({
+      prompt: "  " + "a".repeat(MAX_PROMPT_CHARS + 500) + "  ",
+      candidates: [candidate],
+    });
+    expect(parseSuggestRequest(raw)?.prompt.length).toBe(MAX_PROMPT_CHARS);
+  });
+
+  it("caps oversized candidate string fields", () => {
+    const raw = JSON.stringify({
+      prompt: "x",
+      candidates: [{ ...candidate, name: "n".repeat(MAX_FIELD_CHARS + 300) }],
+    });
+    expect(parseSuggestRequest(raw)?.candidates[0].name.length).toBe(
+      MAX_FIELD_CHARS,
+    );
+  });
+
+  it("drops candidate entries without a string id", () => {
+    const raw = JSON.stringify({
+      prompt: "x",
+      candidates: [candidate, { name: "no id" }, { id: 42 }],
+    });
+    expect(parseSuggestRequest(raw)?.candidates).toEqual([candidate]);
+  });
+
+  it("returns undefined when no candidate entry is valid", () => {
+    const raw = JSON.stringify({
+      prompt: "x",
+      candidates: [{ name: "no id" }],
+    });
+    expect(parseSuggestRequest(raw)).toBeUndefined();
+  });
+
+  it("caps the candidate count", () => {
+    const many = Array.from({ length: MAX_CANDIDATES + 50 }, (_, i) => ({
+      ...candidate,
+      id: String(i),
+    }));
+    const raw = JSON.stringify({ prompt: "x", candidates: many });
+    expect(parseSuggestRequest(raw)?.candidates.length).toBe(MAX_CANDIDATES);
   });
 });

@@ -6,9 +6,13 @@ import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { GetParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
 import { ddb } from "../shared/dynamo";
 import { error, json } from "../shared/http";
-import { filterToCandidates, parseSuggestions } from "./select";
+import {
+  filterToCandidates,
+  parsePositiveInt,
+  parseSuggestRequest,
+  parseSuggestions,
+} from "./select";
 import type {
-  SuggestCandidate,
   SuggestRequest,
   SuggestionResult,
   Trip,
@@ -26,11 +30,12 @@ const TABLE = process.env.TRIP_TABLE ?? "";
 const GEMINI_PARAM_NAME = process.env.GEMINI_PARAM_NAME ?? "";
 const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-2.0-flash";
 // Bounded so we always answer within the API Gateway HTTP API 30s integration
-// ceiling (the Lambda timeout sits just under it); on overrun we fall back.
-const GEMINI_TIMEOUT_MS = Number(process.env.GEMINI_TIMEOUT_MS ?? 20000);
+// ceiling (the Lambda timeout sits just under it); on overrun we fall back. A
+// bad/non-numeric override falls back rather than becoming NaN (= a 0ms abort).
+const GEMINI_TIMEOUT_MS = parsePositiveInt(process.env.GEMINI_TIMEOUT_MS, 20000);
 
-// Bound the prompt + the post-rank DynamoDB fan-out for the small launch dataset.
-const MAX_CANDIDATES = 100;
+// Cap how many ranked ids we re-validate + return. The candidate-count and
+// per-field input bounds live in parseSuggestRequest (select.ts).
 const MAX_SUGGESTIONS = 12;
 
 const ssm = new SSMClient({});
@@ -51,48 +56,6 @@ async function getGeminiKey(): Promise<string> {
   if (!value) throw new Error("Gemini API key parameter is empty");
   cachedKey = value;
   return value;
-}
-
-function parseRequest(raw: string | undefined): SuggestRequest | undefined {
-  if (!raw) return undefined;
-  let body: unknown;
-  try {
-    body = JSON.parse(raw);
-  } catch {
-    return undefined;
-  }
-  if (typeof body !== "object" || body === null) return undefined;
-
-  const b = body as Record<string, unknown>;
-  const prompt = typeof b.prompt === "string" ? b.prompt.trim() : "";
-  if (!prompt) return undefined;
-  if (!Array.isArray(b.candidates) || b.candidates.length === 0) {
-    return undefined;
-  }
-
-  // Keep only the fields we prompt with; ignore anything else the client sends.
-  const candidates: SuggestCandidate[] = [];
-  for (const entry of b.candidates.slice(0, MAX_CANDIDATES)) {
-    if (typeof entry !== "object" || entry === null) continue;
-    const c = entry as Record<string, unknown>;
-    if (typeof c.id !== "string" || c.id.length === 0) continue;
-    const str = (v: unknown) => (typeof v === "string" ? v : "");
-    candidates.push({
-      id: c.id,
-      name: str(c.name),
-      location: str(c.location),
-      city: str(c.city),
-      province: str(c.province),
-      country: str(c.country),
-      tripType: str(c.tripType) as SuggestCandidate["tripType"],
-      vehicle: str(c.vehicle) as SuggestCandidate["vehicle"],
-      durationDays: Number(c.durationDays) || 0,
-      description: typeof c.description === "string" ? c.description : undefined,
-    });
-  }
-  if (candidates.length === 0) return undefined;
-
-  return { prompt, candidates };
 }
 
 // Compact, one-line-per-trip rendering so the prompt stays small (don't dump full
@@ -185,7 +148,16 @@ async function validateAgainstTable(
 async function suggest(
   event: APIGatewayProxyEventV2,
 ): Promise<APIGatewayProxyStructuredResultV2> {
-  const req = parseRequest(event.body);
+  // Missing required wiring is a server misconfiguration, not an upstream Gemini
+  // outage — surface it as 500 so it isn't masked by the 502 fallback path.
+  if (!TABLE || !GEMINI_PARAM_NAME) {
+    console.error(
+      "suggest-trips misconfigured: TRIP_TABLE/GEMINI_PARAM_NAME not set",
+    );
+    return error(500, "Internal server error");
+  }
+
+  const req = parseSuggestRequest(event.body);
   if (!req) {
     return error(400, "prompt and a non-empty candidates array are required");
   }

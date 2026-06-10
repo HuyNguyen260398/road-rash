@@ -1,9 +1,11 @@
 # ssm module — SecureString parameters read by Lambdas at runtime (M6 / TASK-038).
 # The Gemini API key lives here (SEC-001) and is read by the suggest-trips Lambda
 # via ssm:GetParameter (scoped in the iam module). The value never reaches the
-# browser and is never committed: Terraform creates the parameter with a
-# placeholder, then ignores subsequent value changes so the real key — injected
-# out-of-band — is not reverted or surfaced through committed config.
+# browser. To keep it out of Terraform state, ALWAYS apply with the placeholder
+# default, then set the real key out-of-band (`aws ssm put-parameter --overwrite`);
+# the ignore_changes on value below preserves that out-of-band value across later
+# applies. (Anything passed via the var is written to aws_ssm_parameter.value in
+# state, so don't pass the real key that way — see variables.tf.)
 #
 # Name convention `/<env>/<project>/gemini_api_key` MUST match the ARN the iam
 # module scopes the suggest-trips GetParameter policy to.

@@ -23,9 +23,9 @@ app_logout_urls   = ["http://localhost:3000/"]
 # Leaving them unset skips the Google IdP so you can apply the pool first,
 # read the Hosted UI domain, register it in Google, then set these and re-apply.
 
-# Gemini API key is a SECRET — do not put it here. The SSM SecureString is
-# created with a placeholder, then set the real value out-of-band (it won't be
-# reverted by later applies):
+# Gemini API key is a SECRET — do not put it here, and do NOT set
+# TF_VAR_gemini_api_key to the real key: aws_ssm_parameter.value is persisted in
+# Terraform state, so that would leak it. Apply with the placeholder, then set
+# the real value out-of-band (it won't be reverted by later applies):
 #   aws ssm put-parameter --name /prod/road-rash/gemini_api_key \
 #     --type SecureString --value "$GEMINI_API_KEY" --overwrite
-# Or supply on first apply only via: export TF_VAR_gemini_api_key=...

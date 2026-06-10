@@ -102,13 +102,14 @@ variable "google_oauth_client_secret" {
 }
 
 # --- Gemini (ssm module, M6) ----------------------------------------------
-# Gemini API key value for the SecureString parameter. Secret — supply via
-# TF_VAR_gemini_api_key on first apply, never commit. The default placeholder
-# lets the parameter be created first; the real value is then injected
-# out-of-band and preserved (the ssm module ignores value changes).
+# Leave at the placeholder. The ssm module creates the SecureString with this
+# value, then the real key is set out-of-band (`aws ssm put-parameter
+# --overwrite`) and preserved (the module ignores value changes). Do NOT pass the
+# real key via TF_VAR_gemini_api_key / tfvars — aws_ssm_parameter.value is
+# persisted in Terraform state, so that would leak the secret into state.
 
 variable "gemini_api_key" {
-  description = "Gemini API key value stored in SSM (SecureString). Secret — supply via TF_VAR_gemini_api_key on first apply, never commit."
+  description = "Placeholder seed for the Gemini SecureString. Leave at the default and set the real key out-of-band — any real value passed here is persisted in Terraform state."
   type        = string
   default     = "REPLACE_ME"
   sensitive   = true

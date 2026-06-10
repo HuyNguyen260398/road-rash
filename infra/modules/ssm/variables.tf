@@ -8,14 +8,18 @@ variable "environment" {
   type        = string
 }
 
-# Gemini API key (SEC-001). SECRET — supplied at create time via
-# TF_VAR_gemini_api_key or a gitignored tfvars, NEVER committed. The default is a
-# harmless placeholder so the first `terraform apply` can create the SecureString
-# without the real key present; the actual value is then injected out-of-band
-# (e.g. `aws ssm put-parameter --overwrite`) and preserved by ignore_changes
-# below, so the secret never has to live in tfvars/state-as-committed/git.
+# Gemini API key (SEC-001). Leave this at the placeholder default. The first
+# `terraform apply` creates the SecureString with the placeholder; the real key
+# is then set out-of-band (`aws ssm put-parameter --overwrite`) and preserved by
+# the ignore_changes on value in main.tf.
+#
+# Do NOT pass the real key via TF_VAR_gemini_api_key / tfvars: whatever value is
+# applied is persisted to `aws_ssm_parameter.value` in Terraform state (the S3
+# backend), which would leak the secret into state. The override exists only to
+# seed a non-placeholder in throwaway/dev setups where state secrecy doesn't
+# matter.
 variable "gemini_api_key" {
-  description = "Gemini API key value for the SecureString parameter. Secret — supply via TF_VAR_gemini_api_key on first apply, never commit."
+  description = "Placeholder seed for the Gemini SecureString. Leave at the default and set the real key out-of-band — any real value passed here is persisted in Terraform state."
   type        = string
   default     = "REPLACE_ME"
   sensitive   = true
