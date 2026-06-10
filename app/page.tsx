@@ -1,10 +1,11 @@
 import Link from "next/link";
-import TripGrid from "@/components/TripGrid";
+import TripBrowser from "@/components/TripBrowser";
+import EmptyState from "@/components/EmptyState";
 import { api } from "@/lib/api-client";
 import type { Trip } from "@/lib/types";
 
-// Home / Discover (TASK-028). Public, server-rendered: fetch all trips and show
-// the responsive card grid. Filter/group/search controls land in M5.
+// Home / Discover (TASK-028). Public, server-rendered: fetch all trips and hand
+// them to the client TripBrowser, which runs instant search/filter/group (M5).
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
@@ -17,7 +18,7 @@ export default async function Home() {
   } catch {
     // API not reachable/configured yet (e.g. before terraform apply) — render
     // the page shell with an empty grid rather than crashing.
-    loadError = "Trips are unavailable right now. Please try again later.";
+    loadError = "Please try again in a moment.";
   }
 
   return (
@@ -43,9 +44,13 @@ export default async function Home() {
       </header>
 
       {loadError ? (
-        <p className="py-16 text-center opacity-60">{loadError}</p>
+        <EmptyState
+          icon="⚠️"
+          title="Trips are unavailable right now"
+          description={loadError}
+        />
       ) : (
-        <TripGrid
+        <TripBrowser
           trips={trips}
           emptyMessage="No trips yet — be the first to share one."
         />
