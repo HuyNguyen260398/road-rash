@@ -55,6 +55,17 @@ module "cognito" {
   google_oauth_client_secret = var.google_oauth_client_secret
 }
 
+# SecureString secrets read by Lambdas at runtime (M6). The Gemini key value is a
+# secret — supplied via TF_VAR_gemini_api_key on first apply, then maintained
+# out-of-band (the module ignores value changes). Never committed (SEC-001).
+module "ssm" {
+  source      = "../../modules/ssm"
+  project     = var.project
+  environment = var.environment
+
+  gemini_api_key = var.gemini_api_key
+}
+
 # Lambda handlers (M3). Each points at its esbuild-bundled dist/ output (run
 # `pnpm build:lambdas` before plan/apply) and gets its least-privilege iam role
 # + env vars (table/bucket names + SSM parameter names — never secret values).

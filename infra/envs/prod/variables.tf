@@ -100,3 +100,16 @@ variable "google_oauth_client_secret" {
   default     = null
   sensitive   = true
 }
+
+# --- Gemini (ssm module, M6) ----------------------------------------------
+# Gemini API key value for the SecureString parameter. Secret — supply via
+# TF_VAR_gemini_api_key on first apply, never commit. The default placeholder
+# lets the parameter be created first; the real value is then injected
+# out-of-band and preserved (the ssm module ignores value changes).
+
+variable "gemini_api_key" {
+  description = "Gemini API key value stored in SSM (SecureString). Secret — supply via TF_VAR_gemini_api_key on first apply, never commit."
+  type        = string
+  default     = "REPLACE_ME"
+  sensitive   = true
+}
