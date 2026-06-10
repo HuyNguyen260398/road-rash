@@ -131,11 +131,11 @@ This plan turns `docs/road-rash-plan.md` into an executable, phase-by-phase buil
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
-| TASK-038 | Store the AI key: `aws_ssm_parameter` (SecureString) `gemini_api_key` per environment. | | |
-| TASK-039 | `services/suggest-trips/handler.ts` Lambda + `POST /suggest` (public, throttled via API Gateway): read candidate trips, build a compact prompt, call the Gemini REST API (key from SSM), parse strict JSON `[{id, reason}]`, and filter to IDs present in the candidate set. Bounded timeout (~30s). | | |
-| TASK-040 | Grant the suggest Lambda IAM read on the Trip table and `GetParameter` on `gemini_api_key`. | | |
-| TASK-041 | Create `components/AiSuggestBox.tsx` ("Where do you want to ride?") submitting on explicit click to `POST /suggest`; render suggested cards with optional "why it fits". | | |
-| TASK-042 | Implement graceful fallback: on Gemini error/timeout, show a message and fall back to plain search. | | |
+| TASK-038 | Store the AI key: `aws_ssm_parameter` (SecureString) `gemini_api_key` per environment. | ✅ | 2026-06-10 |
+| TASK-039 | `services/suggest-trips/handler.ts` Lambda + `POST /suggest` (public, throttled via API Gateway): read candidate trips, build a compact prompt, call the Gemini REST API (key from SSM), parse strict JSON `[{id, reason}]`, and filter to IDs present in the candidate set. Bounded timeout (~30s). | ✅ | 2026-06-10 |
+| TASK-040 | Grant the suggest Lambda IAM read on the Trip table and `GetParameter` on `gemini_api_key`. | ✅ | 2026-06-10 |
+| TASK-041 | Create `components/AiSuggestBox.tsx` ("Where do you want to ride?") submitting on explicit click to `POST /suggest`; render suggested cards with optional "why it fits". | ✅ | 2026-06-10 |
+| TASK-042 | Implement graceful fallback: on Gemini error/timeout, show a message and fall back to plain search. | ✅ | 2026-06-10 |
 
 ### Implementation Phase 8
 

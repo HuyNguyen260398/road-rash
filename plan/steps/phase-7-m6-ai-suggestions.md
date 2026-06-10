@@ -102,15 +102,15 @@ the phase; one commit.
 
 ## Phase verification (M6 exit)
 
-- [ ] `POST /suggest` returns only validated, candidate-set IDs.
-- [ ] Key stays server-side (never in the browser bundle/network from client).
-- [ ] AI fires on submit only; plain search is the fallback on failure/timeout.
-- [ ] `pnpm test` green (incl. TEST-004).
+- [x] `POST /suggest` returns only validated, candidate-set IDs.
+- [x] Key stays server-side (never in the browser bundle/network from client).
+- [x] AI fires on submit only; plain search is the fallback on failure/timeout.
+- [x] `pnpm test` green (incl. TEST-004).
 
 ## Task checklist
 
-- [ ] TASK-038 — `gemini_api_key` in SSM
-- [ ] TASK-039 — suggest Lambda + `POST /suggest` (TEST-004)
-- [ ] TASK-040 — suggest Lambda IAM (Trip read + GetParameter)
-- [ ] TASK-041 — `AiSuggestBox`
-- [ ] TASK-042 — graceful fallback to plain search
+- [x] TASK-038 — `gemini_api_key` in SSM
+- [x] TASK-039 — suggest Lambda + `POST /suggest` (TEST-004)
+- [x] TASK-040 — suggest Lambda IAM (Trip read + GetParameter)
+- [x] TASK-041 — `AiSuggestBox`
+- [x] TASK-042 — graceful fallback to plain search
