@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterTrips, matchesQuery } from "./search";
+import { filterTrips, groupTrips, matchesQuery } from "./search";
 import type { Trip } from "./types";
 
 // TEST-003 — the client-side search fallback (TASK-035) does the authoritative
@@ -110,5 +110,21 @@ describe("filterTrips", () => {
     expect(
       filterTrips(trips, "", { country: "Vietnam", tripType: "FOOD" }),
     ).toEqual([]);
+  });
+});
+
+describe("groupTrips", () => {
+  it("buckets by the chosen field, sorted by key", () => {
+    expect(groupTrips(trips, "country")).toEqual([
+      { key: "Japan", trips: [tokyo] },
+      { key: "Vietnam", trips: [hanoi, dalat] },
+    ]);
+  });
+
+  it("collapses empty values into an 'Other' bucket", () => {
+    const blank = makeTrip({ id: "4", country: "" });
+    expect(groupTrips([blank], "country")).toEqual([
+      { key: "Other", trips: [blank] },
+    ]);
   });
 });

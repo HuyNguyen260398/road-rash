@@ -55,3 +55,29 @@ export function filterTrips(
     (trip) => matchesFilters(trip, filters) && matchesQuery(trip, q),
   );
 }
+
+// Fields the discovery grid can group by (TASK-036). Each is a Trip GSI server
+// side, so the same dimensions drive both the filter and group toggles.
+export type GroupField =
+  | "country"
+  | "province"
+  | "city"
+  | "tripType"
+  | "vehicle";
+
+export type TripGroup = { key: string; trips: Trip[] };
+
+// Buckets trips by the chosen field, sorted by key. Empty values collapse into
+// an "Other" bucket so every trip lands somewhere.
+export function groupTrips(trips: Trip[], field: GroupField): TripGroup[] {
+  const buckets = new Map<string, Trip[]>();
+  for (const trip of trips) {
+    const key = String(trip[field] ?? "").trim() || "Other";
+    const bucket = buckets.get(key);
+    if (bucket) bucket.push(trip);
+    else buckets.set(key, [trip]);
+  }
+  return [...buckets.entries()]
+    .map(([key, groupTrips]) => ({ key, trips: groupTrips }))
+    .sort((a, b) => a.key.localeCompare(b.key));
+}
