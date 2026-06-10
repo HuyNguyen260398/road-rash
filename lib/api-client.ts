@@ -1,5 +1,10 @@
 import { fetchAuthSession } from "aws-amplify/auth";
-import type { Trip, TripInput } from "./types";
+import type {
+  SuggestCandidate,
+  SuggestResponse,
+  Trip,
+  TripInput,
+} from "./types";
 
 // Typed fetch wrapper for the REST API (M2 / TASK-021). Reads the base URL from
 // the Terraform-populated env var, attaches a Cognito JWT to protected calls,
@@ -141,5 +146,15 @@ export const api = {
   getThumbnailUrl: (key: string) =>
     apiFetch<ThumbnailUrlResponse>("/uploads/thumbnail", {
       query: { key },
+    }),
+
+  // AI suggestions (M6). Public + submit-only (CON-003): the client passes the
+  // loaded candidate set; the server ranks only those ids. On a Gemini
+  // failure/timeout this throws an ApiError and the caller falls back to plain
+  // search (TASK-042).
+  suggestTrips: (prompt: string, candidates: SuggestCandidate[]) =>
+    apiFetch<SuggestResponse>("/suggest", {
+      method: "POST",
+      body: { prompt, candidates },
     }),
 };
