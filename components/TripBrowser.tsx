@@ -2,41 +2,16 @@
 
 import { useCallback, useMemo, useState } from "react";
 import SearchBar from "./SearchBar";
-import FilterControls, { type TripFilters } from "./FilterControls";
+import FilterControls from "./FilterControls";
 import TripGrid from "./TripGrid";
+import { filterTrips, type TripFilters } from "@/lib/search";
 import type { Trip } from "@/lib/types";
 
 // Client-side discovery shell (TASK-034). The page fetches the full candidate
 // set server-side (Option A, small dataset — ASSUMPTION-001) and hands it here;
-// search/filter run instantly in the browser. The server `GET /trips` query
-// params (TASK-033) back the same contract for the M6 AI candidate set.
-
-// Free-text searchable fields (REQ-008). Moves to lib/search.ts in TASK-035.
-const SEARCH_FIELDS: (keyof Trip)[] = [
-  "name",
-  "location",
-  "city",
-  "province",
-  "country",
-  "tripType",
-  "vehicle",
-];
-
-function matchesFilters(trip: Trip, filters: TripFilters): boolean {
-  return (
-    Object.entries(filters) as [keyof TripFilters, string | undefined][]
-  ).every(([key, value]) => !value || trip[key as keyof Trip] === value);
-}
-
-function matchesQuery(trip: Trip, q: string): boolean {
-  if (!q) return true;
-  const needle = q.toLowerCase();
-  return SEARCH_FIELDS.some((field) =>
-    String(trip[field] ?? "")
-      .toLowerCase()
-      .includes(needle),
-  );
-}
+// search/filter run instantly in the browser via lib/search.ts (TASK-035). The
+// server `GET /trips` query params (TASK-033) back the same contract for the M6
+// AI candidate set.
 
 export default function TripBrowser({
   trips,
@@ -52,7 +27,7 @@ export default function TripBrowser({
   const handleSearch = useCallback((value: string) => setQ(value), []);
 
   const visible = useMemo(
-    () => trips.filter((t) => matchesFilters(t, filters) && matchesQuery(t, q)),
+    () => filterTrips(trips, q, filters),
     [trips, filters, q],
   );
 
