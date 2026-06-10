@@ -17,8 +17,10 @@ locals {
     "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${local.name_prefix}-*:*",
   ]
 
-  # gemini_api_key SecureString is created in M6; the suggest-trips role is
-  # granted read on exactly this parameter name (value never in Terraform).
+  # gemini_api_key SecureString is created by the ssm module (TASK-038); the
+  # suggest-trips role is granted read on exactly this one parameter name (no
+  # wildcard, value never in Terraform). Must match the ssm module's parameter
+  # name `/<env>/<project>/gemini_api_key`.
   gemini_param_arn = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${var.environment}/${var.project}/gemini_api_key"
 }
 
