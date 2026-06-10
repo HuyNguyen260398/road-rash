@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import TripCard from "./TripCard";
 import { api } from "@/lib/api-client";
+import { filterTrips } from "@/lib/search";
 import type { SuggestCandidate, Trip } from "@/lib/types";
 
 // AI suggestion box (TASK-041, GOAL-007). Submit-only (CON-003): the prompt
@@ -61,9 +62,19 @@ export default function AiSuggestBox({ trips }: { trips: Trip[] }) {
           : null,
       );
     } catch {
-      // TASK-042 replaces this with a plain-search fallback.
-      setResults([]);
-      setMessage("Couldn't get AI suggestions right now.");
+      // Gemini unavailable/timed out (the handler returns 502, apiFetch throws).
+      // Degrade to plain client-side search over the same candidate set (M5) so
+      // the user still gets results — never a crash or a hung spinner (RISK-006,
+      // TASK-042).
+      const fallback = filterTrips(trips, q, {}).map(
+        (trip): Suggestion => ({ trip }),
+      );
+      setResults(fallback);
+      setMessage(
+        fallback.length === 0
+          ? `AI is unavailable and no trips matched “${q}”. Try another search.`
+          : "AI is unavailable right now — showing plain search results instead.",
+      );
     } finally {
       setStatus("done");
     }
