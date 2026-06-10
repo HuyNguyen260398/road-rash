@@ -1,10 +1,10 @@
 import Link from "next/link";
-import TripGrid from "@/components/TripGrid";
+import TripBrowser from "@/components/TripBrowser";
 import { api } from "@/lib/api-client";
 import type { Trip } from "@/lib/types";
 
-// Home / Discover (TASK-028). Public, server-rendered: fetch all trips and show
-// the responsive card grid. Filter/group/search controls land in M5.
+// Home / Discover (TASK-028). Public, server-rendered: fetch all trips and hand
+// them to the client TripBrowser, which runs instant search/filter/group (M5).
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
@@ -45,7 +45,7 @@ export default async function Home() {
       {loadError ? (
         <p className="py-16 text-center opacity-60">{loadError}</p>
       ) : (
-        <TripGrid
+        <TripBrowser
           trips={trips}
           emptyMessage="No trips yet — be the first to share one."
         />
