@@ -60,3 +60,12 @@ variable "routes" {
   }))
   default = []
 }
+
+variable "route_throttles" {
+  description = "Per-route throttling overrides keyed by route_key (e.g. the public POST /suggest gets a tighter cap than the stage default — RISK-006)."
+  type = map(object({
+    burst_limit = number
+    rate_limit  = number
+  }))
+  default = {}
+}

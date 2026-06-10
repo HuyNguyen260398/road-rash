@@ -47,6 +47,18 @@ resource "aws_apigatewayv2_stage" "default" {
     throttling_burst_limit = var.throttling_burst_limit
     throttling_rate_limit  = var.throttling_rate_limit
   }
+
+  # Per-route throttling overrides. The public POST /suggest route is capped much
+  # tighter than the stage default so an unauthenticated caller can't drive Gemini
+  # spend (RISK-006).
+  dynamic "route_settings" {
+    for_each = var.route_throttles
+    content {
+      route_key              = route_settings.key
+      throttling_burst_limit = route_settings.value.burst_limit
+      throttling_rate_limit  = route_settings.value.rate_limit
+    }
+  }
 }
 
 # --- Integrations + routes (M3) --------------------------------------------

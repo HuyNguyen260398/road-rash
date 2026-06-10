@@ -10,7 +10,7 @@ import { dirname, join } from "node:path";
 const servicesDir = dirname(fileURLToPath(import.meta.url));
 
 // Each service: entry handler -> dist/index.js exporting `handler`.
-const services = ["trips", "presign"];
+const services = ["trips", "presign", "suggest-trips"];
 
 await Promise.all(
   services.map((name) =>
