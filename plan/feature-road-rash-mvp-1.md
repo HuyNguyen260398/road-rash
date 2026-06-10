@@ -119,11 +119,11 @@ This plan turns `docs/road-rash-plan.md` into an executable, phase-by-phase buil
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
-| TASK-033 | Extend `services/trips/handler.ts` `GET /trips` to accept `q`, `tripType`, `country`, `province`, `city`, `vehicle`, `group` params; use GSI queries per filter + `contains` for free text. | | |
-| TASK-034 | Create `components/SearchBar.tsx` (debounced) and `components/FilterControls.tsx` (`tripType`/`country`/`province`/`city`/`vehicle`). | | |
-| TASK-035 | Create `lib/search.ts` for client-side case-insensitive substring fallback over the candidate set. | | |
-| TASK-036 | Add a grouping toggle (e.g. by `country`) rendering grouped section headers in `TripGrid`. | | |
-| TASK-037 | Add empty-state and "no results" components for Home, My Trips, Saved, and search. | | |
+| TASK-033 | Extend `services/trips/handler.ts` `GET /trips` to accept `q`, `tripType`, `country`, `province`, `city`, `vehicle`, `group` params; use GSI queries per filter + `contains` for free text. | ✅ | 2026-06-10 |
+| TASK-034 | Create `components/SearchBar.tsx` (debounced) and `components/FilterControls.tsx` (`tripType`/`country`/`province`/`city`/`vehicle`). | ✅ | 2026-06-10 |
+| TASK-035 | Create `lib/search.ts` for client-side case-insensitive substring fallback over the candidate set. | ✅ | 2026-06-10 |
+| TASK-036 | Add a grouping toggle (e.g. by `country`) rendering grouped section headers in `TripGrid`. | ✅ | 2026-06-10 |
+| TASK-037 | Add empty-state and "no results" components for Home, My Trips, Saved, and search. (Saved page ships in M4 — `EmptyState` ready, wired then.) | ✅ | 2026-06-10 |
 
 ### Implementation Phase 7
 

@@ -103,15 +103,16 @@ one commit.
 
 ## Phase verification (M5 exit)
 
-- [ ] Filters use GSIs; free text works via `contains` + client fallback.
-- [ ] Search + filters + grouping compose correctly.
-- [ ] All four surfaces have empty/no-result states.
-- [ ] `pnpm test` green (incl. TEST-003).
+- [x] Filters use GSIs; free text works via `contains` + client fallback.
+- [x] Search + filters + grouping compose correctly.
+- [x] Empty/no-result states wired into Home, My Trips, and search (Saved page
+      ships in M4 — `EmptyState` is ready and documented for that wiring).
+- [x] `pnpm test` green (incl. TEST-003).
 
 ## Task checklist
 
-- [ ] TASK-033 — `GET /trips` query params (GSI + contains)
-- [ ] TASK-034 — `SearchBar` + `FilterControls`
-- [ ] TASK-035 — `lib/search.ts` + TEST-003
-- [ ] TASK-036 — grouping toggle
-- [ ] TASK-037 — empty / no-result states
+- [x] TASK-033 — `GET /trips` query params (GSI + contains)
+- [x] TASK-034 — `SearchBar` + `FilterControls`
+- [x] TASK-035 — `lib/search.ts` + TEST-003
+- [x] TASK-036 — grouping toggle
+- [x] TASK-037 — empty / no-result states
