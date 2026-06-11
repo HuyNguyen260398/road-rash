@@ -94,6 +94,6 @@ below are defined in `plan/feature-road-rash-mvp-1.md`:
 ## Task checklist
 
 - [ ] TASK-047 — responsive QA + states
-- [ ] TASK-048 — limits & validation (client + presign)
+- [x] TASK-048 — limits & validation (client + presign)
 - [ ] TASK-049 — prod tfvars/secrets + `terraform apply` + deploy
 - [ ] TASK-050 — end-to-end smoke test (TEST-010)

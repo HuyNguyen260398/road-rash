@@ -155,7 +155,7 @@ This plan turns `docs/road-rash-plan.md` into an executable, phase-by-phase buil
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
 | TASK-047 | Responsive QA across phone/tablet/desktop; verify loading/empty/error states on every screen. | | |
-| TASK-048 | Enforce form validation, image size/type limits (client + presign), and basic rate-sanity on create. | | |
+| TASK-048 | Enforce form validation, image size/type limits (client + presign), and basic rate-sanity on create. | ✅ (server-side field length/range caps in `services/trips/validate.ts` + 16 tests; client `maxLength` parity; `POST /trips` route throttle) | 2026-06-11 |
 | TASK-049 | Configure `prod` tfvars/secrets; run `terraform plan` then `terraform apply` for `prod`; deploy `main` via Amplify Hosting. | | |
 | TASK-050 | Run an end-to-end smoke test: sign in → create trip with thumbnail + My Maps URL → appears on Home → search/filter finds it → favorite it → AI suggestion returns it → detail modal embeds map → open in Google Maps. | | |
 

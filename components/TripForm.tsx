@@ -183,6 +183,7 @@ export default function TripForm({ trip }: Props) {
           value={location}
           onChange={(e) => setLocation(e.target.value)}
           placeholder="e.g. Northern Vietnam loop"
+          maxLength={200}
         />
       </label>
 
@@ -193,6 +194,7 @@ export default function TripForm({ trip }: Props) {
             className={fieldClass}
             value={city}
             onChange={(e) => setCity(e.target.value)}
+            maxLength={100}
           />
         </label>
         <label className={labelClass}>
@@ -201,6 +203,7 @@ export default function TripForm({ trip }: Props) {
             className={fieldClass}
             value={province}
             onChange={(e) => setProvince(e.target.value)}
+            maxLength={100}
           />
         </label>
         <label className={labelClass}>
@@ -210,6 +213,7 @@ export default function TripForm({ trip }: Props) {
             value={country}
             onChange={(e) => setCountry(e.target.value)}
             required
+            maxLength={100}
           />
         </label>
       </div>
@@ -265,6 +269,7 @@ export default function TripForm({ trip }: Props) {
           onBlur={() => setMapTouched(true)}
           inputMode="url"
           required
+          maxLength={2048}
           aria-invalid={showMapError}
         />
         {showMapError ? (
@@ -286,6 +291,7 @@ export default function TripForm({ trip }: Props) {
           value={googleMapsUrl}
           onChange={(e) => setGoogleMapsUrl(e.target.value)}
           inputMode="url"
+          maxLength={2048}
         />
       </label>
 

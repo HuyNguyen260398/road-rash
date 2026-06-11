@@ -13,9 +13,8 @@ import {
 import { ddb } from "../shared/dynamo";
 import { error, json, noContent } from "../shared/http";
 import { getDisplayName, getUserSub } from "../shared/auth";
-import { validateMyMapsUrl } from "../../lib/validation";
-import { TRIP_TYPES, VEHICLES } from "../../lib/types";
-import type { Trip, TripInput } from "../../lib/types";
+import { validateTripInput } from "./validate";
+import type { Trip } from "../../lib/types";
 
 // Single trips handler routing on the HTTP API routeKey. Public GET routes carry
 // no authorizer; POST/PUT/DELETE sit behind the JWT authorizer (first auth
@@ -102,71 +101,6 @@ function buildFilterExpression(filters: Record<string, string>, q?: string) {
     FilterExpression: clauses.join(" AND "),
     ExpressionAttributeNames: names,
     ExpressionAttributeValues: values,
-  };
-}
-
-type ValidationResult =
-  | { ok: true; value: TripInput }
-  | { ok: false; message: string };
-
-function validateTripInput(body: unknown): ValidationResult {
-  if (typeof body !== "object" || body === null) {
-    return { ok: false, message: "Request body must be a JSON object" };
-  }
-  const b = body as Record<string, unknown>;
-
-  const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
-  const name = str(b.name);
-  const description = str(b.description);
-  const location = str(b.location);
-  const city = str(b.city);
-  const province = str(b.province);
-  const country = str(b.country);
-  const myMapsUrl = str(b.myMapsUrl);
-  const googleMapsUrl = str(b.googleMapsUrl);
-
-  if (!name) return { ok: false, message: "name is required" };
-  if (!country) return { ok: false, message: "country is required" };
-
-  if (!TRIP_TYPES.includes(b.tripType as (typeof TRIP_TYPES)[number])) {
-    return { ok: false, message: "tripType is invalid" };
-  }
-  if (!VEHICLES.includes(b.vehicle as (typeof VEHICLES)[number])) {
-    return { ok: false, message: "vehicle is invalid" };
-  }
-
-  const durationDays = Number(b.durationDays);
-  if (!Number.isInteger(durationDays) || durationDays <= 0) {
-    return { ok: false, message: "durationDays must be a positive integer" };
-  }
-
-  // Server-side re-validation of the My Maps URL — defense in depth behind the
-  // client-side guard (SEC-003); the string ends up as an iframe src.
-  if (!validateMyMapsUrl(myMapsUrl)) {
-    return {
-      ok: false,
-      message: "myMapsUrl is not a valid Google My Maps URL",
-    };
-  }
-
-  const thumbnailKey = str(b.thumbnailKey);
-
-  return {
-    ok: true,
-    value: {
-      name,
-      description: description || undefined,
-      location,
-      tripType: b.tripType as TripInput["tripType"],
-      city,
-      province,
-      country,
-      durationDays,
-      vehicle: b.vehicle as TripInput["vehicle"],
-      thumbnailKey: thumbnailKey || undefined,
-      myMapsUrl,
-      googleMapsUrl: googleMapsUrl || undefined,
-    },
   };
 }
 
