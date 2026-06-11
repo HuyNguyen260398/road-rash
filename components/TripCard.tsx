@@ -23,8 +23,26 @@ function locationLabel(trip: Trip): string {
   );
 }
 
-export default function TripCard({ trip }: { trip: Trip }) {
+export default function TripCard({
+  trip,
+  onOpen,
+}: {
+  trip: Trip;
+  /** When set, a plain click opens the detail modal instead of navigating;
+      the href to /trip/[id] is kept so share/new-tab/crawlers still work. */
+  onOpen?: (trip: Trip) => void;
+}) {
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+
+  function handleClick(e: React.MouseEvent) {
+    if (!onOpen) return;
+    // Let the browser handle modified clicks (new tab/window) and the link's
+    // real navigation; only intercept a plain left-click to open the modal.
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0)
+      return;
+    e.preventDefault();
+    onOpen(trip);
+  }
 
   useEffect(() => {
     if (!trip.thumbnailKey) return;
@@ -45,6 +63,7 @@ export default function TripCard({ trip }: { trip: Trip }) {
   return (
     <Link
       href={`/trip/${trip.id}`}
+      onClick={handleClick}
       className="group flex flex-col overflow-hidden rounded-xl border border-black/10 transition-shadow hover:shadow-md dark:border-white/15"
     >
       <div className="relative aspect-[4/3] w-full bg-black/5 dark:bg-white/10">
