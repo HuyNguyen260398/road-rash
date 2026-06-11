@@ -65,7 +65,11 @@ export default function TripDetail({ trip }: { trip: Trip }) {
             title="Favorites"
           >
             <span aria-hidden>♥</span>
-            <span>{trip.favoriteCount}</span>
+            <span aria-hidden>{trip.favoriteCount}</span>
+            {/* The heart/number are decorative; give screen readers the meaning. */}
+            <span className="sr-only">
+              {trip.favoriteCount} favorite{trip.favoriteCount === 1 ? "" : "s"}
+            </span>
           </span>
         </div>
         <p className="text-sm opacity-70">{locationLabel(trip)}</p>

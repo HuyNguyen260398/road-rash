@@ -17,13 +17,45 @@ const base = {
 };
 
 describe("googleMapsLink", () => {
-  it("uses the explicit googleMapsUrl when it is a valid https URL", () => {
+  it("uses an explicit Google Maps short link (maps.app.goo.gl)", () => {
     expect(
       googleMapsLink({
         ...base,
         googleMapsUrl: "https://maps.app.goo.gl/abc123",
       }),
     ).toBe("https://maps.app.goo.gl/abc123");
+  });
+
+  it("uses an explicit www.google.com/maps URL", () => {
+    expect(
+      googleMapsLink({
+        ...base,
+        googleMapsUrl: "https://www.google.com/maps/place/Hue",
+      }),
+    ).toBe("https://www.google.com/maps/place/Hue");
+  });
+
+  it("rejects a non-Google https URL and falls back to a search query", () => {
+    // A stored googleMapsUrl is NOT host-validated server-side, so it could be
+    // any site; labelling an arbitrary link "Open in Google Maps" would be a
+    // phishing/open-redirect vector. Fall back to the safe Maps search instead.
+    expect(
+      googleMapsLink({
+        ...base,
+        location: "Da Lat",
+        googleMapsUrl: "https://evil.example.com/maps/place/Hue",
+      }),
+    ).toBe("https://www.google.com/maps/search/?api=1&query=Da%20Lat");
+  });
+
+  it("rejects a google.com lookalike host using it as a subdomain", () => {
+    expect(
+      googleMapsLink({
+        ...base,
+        location: "Da Lat",
+        googleMapsUrl: "https://www.google.com.evil.com/maps/place/Hue",
+      }),
+    ).toBe("https://www.google.com/maps/search/?api=1&query=Da%20Lat");
   });
 
   it("ignores a javascript: googleMapsUrl and falls back to a search query", () => {
