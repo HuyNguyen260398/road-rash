@@ -160,6 +160,9 @@ module "apigateway" {
   # stage default, so abuse can't run up Gemini cost (RISK-006).
   route_throttles = {
     "POST /suggest" = { burst_limit = 5, rate_limit = 2 }
+    # Rate-sanity on trip creation (TASK-048): authenticated, but cap the burst so
+    # a single signed-in account can't trivially spam the Trip table.
+    "POST /trips" = { burst_limit = 10, rate_limit = 5 }
   }
 }
 
