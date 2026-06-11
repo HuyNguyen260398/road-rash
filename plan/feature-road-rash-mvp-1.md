@@ -143,10 +143,10 @@ This plan turns `docs/road-rash-plan.md` into an executable, phase-by-phase buil
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
-| TASK-043 | Create `components/TripDetailModal.tsx`: full info, favorite heart, embedded My Maps `<iframe>` via `toMyMapsEmbedUrl` + host allow-list guard. | | |
-| TASK-044 | Add iframe load-failure detection (onError/timeout) falling back to a plain "Open map" link. | | |
-| TASK-045 | Add an "Open in Google Maps" button using `googleMapsUrl` (or a maps query URL) that deep-links to the native app on mobile; test iOS + Android. | | |
-| TASK-046 | Wire `TripCard`/`TripGrid` to open `TripDetailModal`; ensure `/trip/[id]` deep links render detail content. | | |
+| TASK-043 | Create `components/TripDetailModal.tsx`: full info, favorite heart, embedded My Maps `<iframe>` via `toMyMapsEmbedUrl` + host allow-list guard. | ✅ | 2026-06-11 |
+| TASK-044 | Add iframe load-failure detection (onError/timeout) falling back to a plain "Open map" link. | ✅ | 2026-06-11 |
+| TASK-045 | Add an "Open in Google Maps" button using `googleMapsUrl` (or a maps query URL) that deep-links to the native app on mobile; test iOS + Android. | ✅ | 2026-06-11 |
+| TASK-046 | Wire `TripCard`/`TripGrid` to open `TripDetailModal`; ensure `/trip/[id]` deep links render detail content. | ✅ | 2026-06-11 |
 
 ### Implementation Phase 9
 

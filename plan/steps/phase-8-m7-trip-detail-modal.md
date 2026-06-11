@@ -91,7 +91,7 @@ the phase; one commit.
 
 ## Task checklist
 
-- [ ] TASK-043 — `TripDetailModal` + safe iframe
-- [ ] TASK-044 — iframe load-failure fallback
-- [ ] TASK-045 — "Open in Google Maps" deep link (iOS/Android)
-- [ ] TASK-046 — wire modal + `/trip/[id]` deep links
+- [x] TASK-043 — `TripDetailModal` + safe iframe
+- [x] TASK-044 — iframe load-failure fallback
+- [x] TASK-045 — "Open in Google Maps" deep link (iOS/Android)
+- [x] TASK-046 — wire modal + `/trip/[id]` deep links
