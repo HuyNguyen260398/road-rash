@@ -252,6 +252,7 @@ export default function TripForm({ trip }: Props) {
           <input
             type="number"
             min={1}
+            max={365}
             className={fieldClass}
             value={durationDays}
             onChange={(e) => setDurationDays(e.target.value)}

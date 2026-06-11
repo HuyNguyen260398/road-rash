@@ -138,4 +138,20 @@ describe("validateTripInput — server-side bounds (limits)", () => {
     });
     expect(result).toMatchObject({ ok: false });
   });
+
+  it("accepts a presign-shaped thumbnailKey", () => {
+    const result = validateTripInput({
+      ...validBody(),
+      thumbnailKey: `thumbnails/${"a".repeat(36)}/${"b".repeat(36)}.webp`,
+    });
+    expect(result.ok).toBe(true);
+  });
+
+  it("rejects a thumbnailKey over the length limit", () => {
+    const result = validateTripInput({
+      ...validBody(),
+      thumbnailKey: "a".repeat(FIELD_LIMITS.thumbnailKey + 1),
+    });
+    expect(result).toMatchObject({ ok: false });
+  });
 });

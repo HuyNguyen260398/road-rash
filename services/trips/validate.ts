@@ -20,6 +20,10 @@ export const FIELD_LIMITS = {
   // URLs become an iframe src / deep link — bound them well under common limits.
   myMapsUrl: 2048,
   googleMapsUrl: 2048,
+  // Server-issued S3 key (thumbnails/<sub>/<uuid>.<ext>, ~90 chars); cap with
+  // headroom so a bypassed client can't bloat the item or overflow the
+  // /uploads/thumbnail?key=… query when cards render.
+  thumbnailKey: 256,
 } as const;
 
 // Upper bound on a trip's duration — a year of riding is already generous, and
@@ -45,6 +49,7 @@ export function validateTripInput(body: unknown): ValidationResult {
   const country = str(b.country);
   const myMapsUrl = str(b.myMapsUrl);
   const googleMapsUrl = str(b.googleMapsUrl);
+  const thumbnailKey = str(b.thumbnailKey);
 
   if (!name) return { ok: false, message: "name is required" };
   if (!country) return { ok: false, message: "country is required" };
@@ -78,6 +83,7 @@ export function validateTripInput(body: unknown): ValidationResult {
       ["country", country],
       ["myMapsUrl", myMapsUrl],
       ["googleMapsUrl", googleMapsUrl],
+      ["thumbnailKey", thumbnailKey],
     ] as const
   ).find(([field, value]) => value.length > FIELD_LIMITS[field]);
   if (overLimit) {
@@ -109,7 +115,7 @@ export function validateTripInput(body: unknown): ValidationResult {
       country,
       durationDays,
       vehicle: b.vehicle as TripInput["vehicle"],
-      thumbnailKey: str(b.thumbnailKey) || undefined,
+      thumbnailKey: thumbnailKey || undefined,
       myMapsUrl,
       googleMapsUrl: googleMapsUrl || undefined,
     },
