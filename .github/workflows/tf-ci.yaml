@@ -1,0 +1,71 @@
+name: Terraform CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "infra/**"
+      - ".github/workflows/tf-ci.yaml"
+
+# Cancel superseded runs when a PR is updated with new commits.
+concurrency:
+  group: tf-ci-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+# Least privilege: this offline check only reads the repository.
+permissions:
+  contents: read
+
+env:
+  # All three Terraform roots. infra/modules/* are not roots — they're checked
+  # transitively (fmt -recursive formats them; validate checks called modules).
+  TF_ROOTS: "infra/bootstrap infra/envs/staging infra/envs/prod"
+
+jobs:
+  terraform:
+    name: Format, Validate & Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10.5"
+          terraform_wrapper: false
+
+      # Tree-wide formatting check, including infra/modules/*.
+      - name: Terraform fmt (check)
+        run: terraform -chdir=infra fmt -check -recursive -diff
+
+      # -backend=false: validation needs no remote state / AWS credentials. Run
+      # per root since each is an independent configuration.
+      - name: Terraform init & validate (per root)
+        run: |
+          set -euo pipefail
+          for root in $TF_ROOTS; do
+            echo "::group::$root"
+            terraform -chdir="$root" init -backend=false -input=false
+            terraform -chdir="$root" validate -no-color
+            echo "::endgroup::"
+          done
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+
+      # --minimum-failure-severity=error: warnings (e.g. unused declarations) are
+      # printed but don't fail the build — only hard errors block. Drop this flag
+      # to enforce warnings too once the tree is warning-clean.
+      - name: TFLint (per root)
+        run: |
+          set -euo pipefail
+          tflint --init
+          for root in $TF_ROOTS; do
+            echo "::group::$root"
+            tflint --chdir="$root" --no-color -f compact --minimum-failure-severity=error
+            echo "::endgroup::"
+          done
