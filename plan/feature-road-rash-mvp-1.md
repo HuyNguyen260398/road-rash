@@ -108,10 +108,10 @@ This plan turns `docs/road-rash-plan.md` into an executable, phase-by-phase buil
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
-| TASK-029 | `services/favorites/handler.ts` Lambda + routes (`GET /favorites`, `POST /favorites`, `DELETE /favorites/{tripId}`): create/delete `Favorite` keyed by JWT `sub` and increment/decrement `Trip.favoriteCount` (document the race trade-off). | | |
-| TASK-030 | Add optimistic heart toggle to `TripCard.tsx`: update local state immediately, reconcile on response, revert on error. | | |
-| TASK-031 | Create `app/saved/page.tsx` (auth-gated): query `GET /favorites`, batch-load referenced trips. | | |
-| TASK-032 | Create `app/trip/[id]/page.tsx` — public, SSR, shareable trip page with OG metadata from trip fields. | | |
+| TASK-029 | `services/favorites/handler.ts` Lambda + routes (`GET /favorites`, `POST /favorites`, `DELETE /favorites/{tripId}`): create/delete `Favorite` keyed by JWT `sub` and increment/decrement `Trip.favoriteCount` (document the race trade-off). | ✅ (handler + conditional-put dedupe + atomic counter; validate.ts unit-tested; routes/IAM wired both envs; live TEST-007 deferred to apply) | 2026-06-12 |
+| TASK-030 | Add optimistic heart toggle to `TripCard.tsx`: update local state immediately, reconcile on response, revert on error. | ✅ (FavoritesProvider context + optimistic heart with revert; signed-out taps route to /login; build verified) | 2026-06-12 |
+| TASK-031 | Create `app/saved/page.tsx` (auth-gated): query `GET /favorites`, batch-load referenced trips. | ✅ (auth-gated /saved hydrates favorites from the trip list; nav link added; build verified) | 2026-06-12 |
+| TASK-032 | Create `app/trip/[id]/page.tsx` — public, SSR, shareable trip page with OG metadata from trip fields. | ✅ (page pre-existed from M7; added Open Graph title/description + presigned thumbnail image) | 2026-06-12 |
 
 ### Implementation Phase 6
 

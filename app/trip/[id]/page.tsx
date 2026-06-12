@@ -5,10 +5,10 @@ import TripDetail from "@/components/TripDetail";
 import { api, ApiError } from "@/lib/api-client";
 import type { Trip } from "@/lib/types";
 
-// Public, server-rendered share page (TASK-046). Renders the same TripDetail
-// content as the modal so deep links and shared URLs work standalone. Full OG
-// metadata + the favorites surface are part of M4 (TASK-032); this is the
-// minimal route the M7 modal wiring depends on.
+// Public, server-rendered share page (TASK-046 / TASK-032). Renders the same
+// TripDetail content as the modal so deep links and shared URLs work standalone,
+// and emits Open Graph metadata so a shared link previews with the trip name +
+// thumbnail. The favorites heart lives on the cards (TripCard), not here.
 export const dynamic = "force-dynamic";
 
 async function loadTrip(id: string): Promise<Trip> {
@@ -28,9 +28,31 @@ export async function generateMetadata({
   const { id } = await params;
   try {
     const trip = await api.getTrip(id);
+    const description =
+      trip.description ?? `A trip plan by ${trip.authorName}.`;
+
+    // Best-effort OG image: the thumbnail bucket is private, so we mint a public
+    // presigned GET (the same URL the cards use). It's time-limited, which is
+    // fine for a crawler fetching the preview at share time.
+    let images: string[] | undefined;
+    if (trip.thumbnailKey) {
+      try {
+        const { url } = await api.getThumbnailUrl(trip.thumbnailKey);
+        images = [url];
+      } catch {
+        // No preview image — the text card still renders.
+      }
+    }
+
     return {
       title: `${trip.name} · road-rash`,
-      description: trip.description ?? `A trip plan by ${trip.authorName}.`,
+      description,
+      openGraph: {
+        title: trip.name,
+        description,
+        type: "website",
+        images,
+      },
     };
   } catch {
     return { title: "Trip · road-rash" };

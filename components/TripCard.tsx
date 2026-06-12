@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api-client";
+import { useFavorites } from "@/components/FavoritesProvider";
 import type { Trip, Vehicle } from "@/lib/types";
 
 // Trip card for the responsive grid (TASK-027). The thumbnail is fetched via a
-// public presigned GET (the bucket is private); the heart is display-only here
-// and becomes an interactive toggle in M4.
+// public presigned GET (the bucket is private); the heart is an optimistic
+// favorite toggle (M4 / TASK-030) backed by FavoritesProvider — signed-out taps
+// route to /login.
 
 const VEHICLE_ICON: Record<Vehicle, string> = {
   MOTORBIKE: "🏍️",
@@ -33,6 +36,22 @@ export default function TripCard({
   onOpen?: (trip: Trip) => void;
 }) {
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const router = useRouter();
+  const { isFavorited, countDelta, toggle, signedIn } = useFavorites();
+
+  const favorited = isFavorited(trip.id);
+  const favoriteCount = Math.max(0, trip.favoriteCount + countDelta(trip.id));
+
+  function handleFavorite(e: React.MouseEvent) {
+    // The card is a Link — keep the heart from navigating/opening the modal.
+    e.preventDefault();
+    e.stopPropagation();
+    if (!signedIn) {
+      router.push("/login");
+      return;
+    }
+    void toggle(trip.id);
+  }
 
   function handleClick(e: React.MouseEvent) {
     if (!onOpen) return;
@@ -92,10 +111,21 @@ export default function TripCard({
               {trip.durationDays} day{trip.durationDays === 1 ? "" : "s"}
             </span>
           </span>
-          <span className="flex items-center gap-1" title="Favorites">
-            <span aria-hidden>♥</span>
-            <span>{trip.favoriteCount}</span>
-          </span>
+          <button
+            type="button"
+            onClick={handleFavorite}
+            aria-pressed={favorited}
+            aria-label={
+              favorited ? "Remove from favorites" : "Add to favorites"
+            }
+            title={favorited ? "Remove from favorites" : "Add to favorites"}
+            className="flex items-center gap-1 rounded-md px-1.5 py-1 transition-colors hover:bg-black/5 dark:hover:bg-white/10"
+          >
+            <span aria-hidden className={favorited ? "text-red-500" : ""}>
+              {favorited ? "♥" : "♡"}
+            </span>
+            <span>{favoriteCount}</span>
+          </button>
         </div>
         <p className="truncate text-xs opacity-50">by {trip.authorName}</p>
       </div>

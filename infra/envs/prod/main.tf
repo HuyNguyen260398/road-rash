@@ -69,7 +69,6 @@ module "ssm" {
 # Lambda handlers (M3). Each points at its esbuild-bundled dist/ output (run
 # `pnpm build:lambdas` before plan/apply) and gets its least-privilege iam role
 # + env vars (table/bucket names + SSM parameter names — never secret values).
-# favorites + suggest-trips land in M4/M6.
 module "lambda_trips" {
   source        = "../../modules/lambda"
   project       = var.project
@@ -80,6 +79,23 @@ module "lambda_trips" {
 
   environment_variables = {
     TRIP_TABLE = module.dynamodb.trip_table_name
+  }
+}
+
+# favorites Lambda (M4 / TASK-029). Writes the Favorite table (conditional put
+# dedupe) and bumps the denormalized Trip.favoriteCount — its iam role grants
+# Favorite CRUD plus UpdateItem-only on Trip (GUD-003), so it can't read trips.
+module "lambda_favorites" {
+  source        = "../../modules/lambda"
+  project       = var.project
+  environment   = var.environment
+  function_name = "favorites"
+  source_dir    = "${path.root}/../../../services/favorites/dist"
+  role_arn      = module.iam.favorites_role_arn
+
+  environment_variables = {
+    FAVORITE_TABLE = module.dynamodb.favorite_table_name
+    TRIP_TABLE     = module.dynamodb.trip_table_name
   }
 }
 
@@ -131,6 +147,10 @@ module "apigateway" {
       invoke_arn    = module.lambda_trips.invoke_arn
       function_name = module.lambda_trips.function_name
     }
+    favorites = {
+      invoke_arn    = module.lambda_favorites.invoke_arn
+      function_name = module.lambda_favorites.function_name
+    }
     presign = {
       invoke_arn    = module.lambda_presign.invoke_arn
       function_name = module.lambda_presign.function_name
@@ -151,6 +171,10 @@ module "apigateway" {
     { route_key = "POST /trips", target = "trips", authorized = true },
     { route_key = "PUT /trips/{id}", target = "trips", authorized = true },
     { route_key = "DELETE /trips/{id}", target = "trips", authorized = true },
+    # Favorites (M4) — all JWT-gated; the favorite is keyed by the caller's sub.
+    { route_key = "GET /favorites", target = "favorites", authorized = true },
+    { route_key = "POST /favorites", target = "favorites", authorized = true },
+    { route_key = "DELETE /favorites/{tripId}", target = "favorites", authorized = true },
     { route_key = "POST /uploads/presign", target = "presign", authorized = true },
     { route_key = "GET /uploads/thumbnail", target = "presign", authorized = false },
     { route_key = "POST /suggest", target = "suggest", authorized = false },

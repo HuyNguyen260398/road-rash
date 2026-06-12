@@ -83,14 +83,22 @@ the phase; one commit.
 
 ## Phase verification (M4 exit)
 
-- [ ] Favorite/unfavorite updates `favoriteCount` atomically; no double-favorite.
-- [ ] Heart is optimistic and reverts on failure.
-- [ ] `/saved` lists the user's favorites.
-- [ ] `/trip/[id]` is public, SSR, with OG metadata.
+- [~] Favorite/unfavorite updates `favoriteCount` atomically; no double-favorite.
+  *(conditional-put dedupe + atomic counter coded; live TEST-007 deferred to apply)*
+- [x] Heart is optimistic and reverts on failure. *(FavoritesProvider)*
+- [~] `/saved` lists the user's favorites. *(page coded; runtime check deferred to apply)*
+- [x] `/trip/[id]` is public, SSR, with OG metadata.
+
+> **Deferred-apply note:** the favorites Lambda + 3 routes are coded, bundled
+> (`pnpm build:lambdas` → `services/favorites/dist`), and `terraform validate`-clean
+> for staging+prod, but **not applied** (per the M2 deferred-apply decision). Run
+> `pnpm build:lambdas` then `terraform -chdir=infra/envs/<env> apply` before the
+> live check: TEST-007 (favorite bumps count; unfavorite reverses; double-favorite
+> prevented).
 
 ## Task checklist
 
-- [ ] TASK-029 — favorites Lambda + routes (TEST-007)
-- [ ] TASK-030 — optimistic heart toggle
-- [ ] TASK-031 — `/saved` view
-- [ ] TASK-032 — public `/trip/[id]` share page + OG
+- [x] TASK-029 — favorites Lambda + routes (TEST-007) *(handler + validate.ts unit tests; live test deferred to apply)*
+- [x] TASK-030 — optimistic heart toggle *(FavoritesProvider context; revert on error)*
+- [x] TASK-031 — `/saved` view *(auth-gated; hydrates from the trip list)*
+- [x] TASK-032 — public `/trip/[id]` share page + OG *(OG title/description + presigned thumbnail)*
