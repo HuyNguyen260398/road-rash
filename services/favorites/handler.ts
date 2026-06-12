@@ -115,11 +115,18 @@ async function removeFavorite(
   const userId = getUserSub(event);
   if (!userId) return error(401, "Unauthenticated");
 
+  // The path param is user-controlled and becomes a DynamoDB key — bound it the
+  // same way POST does (rejects oversized/junk keys with a clean 400 instead of
+  // letting DynamoDB raise a ValidationException → 500).
+  const validation = validateFavoriteInput({ tripId });
+  if (!validation.ok) return error(400, validation.message);
+  const normalizedTripId = validation.value.tripId;
+
   try {
     await ddb.send(
       new DeleteCommand({
         TableName: FAVORITE_TABLE,
-        Key: { tripId, userId },
+        Key: { tripId: normalizedTripId, userId },
         // Only decrement if a row actually existed, so a repeat/no-op delete
         // can't drag favoriteCount below the true value.
         ConditionExpression: "attribute_exists(tripId)",
@@ -133,7 +140,7 @@ async function removeFavorite(
     throw err;
   }
 
-  await adjustFavoriteCount(tripId, -1);
+  await adjustFavoriteCount(normalizedTripId, -1);
   return noContent();
 }
 

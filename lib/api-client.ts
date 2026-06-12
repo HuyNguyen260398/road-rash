@@ -117,6 +117,14 @@ export type ThumbnailUrlResponse = { url: string; expiresIn: number };
 // GET /favorites returns the caller's favorited trip ids (the saved view
 // hydrates the full trips from these). KEYS_ONLY GSI → tripId only.
 export type FavoritesResponse = { favorites: { tripId: string }[] };
+// POST /favorites returns the created favorite (201) or, when the trip was
+// already favorited, an idempotent ack (200) — both carry the tripId.
+export type AddFavoriteResponse = {
+  tripId: string;
+  userId?: string;
+  createdAt?: string;
+  alreadyFavorited?: boolean;
+};
 
 // --- Typed methods --------------------------------------------------------
 // Public GET routes need no auth; mutating routes set `auth: true` so the JWT
@@ -158,7 +166,7 @@ export const api = {
   getFavorites: (token?: string) =>
     apiFetch<FavoritesResponse>("/favorites", { auth: true, token }),
   addFavorite: (tripId: string, token?: string) =>
-    apiFetch<{ tripId: string }>("/favorites", {
+    apiFetch<AddFavoriteResponse>("/favorites", {
       method: "POST",
       body: { tripId },
       auth: true,

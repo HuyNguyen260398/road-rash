@@ -74,7 +74,7 @@ Three categories: **manual console prerequisites**, **Terraform applies**, and
 
 ### Step 0 — Bundle the Lambdas (required before every plan/apply)
 - [ ] `pnpm install`
-- [ ] `pnpm build:lambdas` — produces `services/{trips,presign,suggest-trips}/dist/index.js`
+- [ ] `pnpm build:lambdas` — produces `services/{trips,favorites,presign,suggest-trips}/dist/index.js`
       (the `lambda` module zips `dist/`, which is gitignored). **Re-run after any handler change.**
 
 ### Step 1 — Bootstrap the Terraform state bucket (once per AWS account)
