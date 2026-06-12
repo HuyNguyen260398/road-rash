@@ -12,8 +12,3 @@ output "region" {
   description = "Region the state bucket lives in. Use this as the backend `region`."
   value       = var.region
 }
-
-output "github_oidc_provider_arn" {
-  description = "ARN of the account-level GitHub Actions OIDC provider. Per-env deploy roles (modules/github-oidc) federate to it."
-  value       = aws_iam_openid_connect_provider.github_actions.arn
-}

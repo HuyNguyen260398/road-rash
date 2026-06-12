@@ -74,16 +74,9 @@ data "aws_iam_policy_document" "state" {
   }
 }
 
-# Account-level GitHub Actions OIDC provider (singleton — only one per account
-# for this issuer). Lives here, not in a per-env root, so staging and prod can
-# both reference it without colliding. Per-env deploy roles (modules/github-oidc)
-# federate to this provider. The thumbprints are GitHub's well-known intermediate
-# CA fingerprints; IAM also validates against its trusted CA store.
-resource "aws_iam_openid_connect_provider" "github_actions" {
-  url            = "https://token.actions.githubusercontent.com"
-  client_id_list = ["sts.amazonaws.com"]
-  thumbprint_list = [
-    "6938fd4d98bab03faadb97b34396831e3780aea1",
-    "1c58a3a8518e8759bf075b76b750d4f2df264fee",
-  ]
-}
+# NOTE: the account-level GitHub Actions OIDC provider
+# (token.actions.githubusercontent.com) is a per-account singleton and already
+# exists in this account (managed outside this project). road-rash does NOT
+# create or own it — the per-env deploy roles in modules/github-oidc look it up
+# via a data source and federate to it. If you ever run road-rash in a fresh
+# account that has no such provider, create one here (or out-of-band) first.
