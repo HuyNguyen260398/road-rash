@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ConfigureAmplifyClientSide from "@/components/ConfigureAmplifyClientSide";
+import FavoritesProvider from "@/components/FavoritesProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,7 +31,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <ConfigureAmplifyClientSide />
-        {children}
+        <FavoritesProvider>{children}</FavoritesProvider>
       </body>
     </html>
   );

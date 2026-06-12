@@ -114,6 +114,9 @@ export type PresignResponse = {
   expiresIn: number;
 };
 export type ThumbnailUrlResponse = { url: string; expiresIn: number };
+// GET /favorites returns the caller's favorited trip ids (the saved view
+// hydrates the full trips from these). KEYS_ONLY GSI → tripId only.
+export type FavoritesResponse = { favorites: { tripId: string }[] };
 
 // --- Typed methods --------------------------------------------------------
 // Public GET routes need no auth; mutating routes set `auth: true` so the JWT
@@ -146,6 +149,26 @@ export const api = {
   getThumbnailUrl: (key: string) =>
     apiFetch<ThumbnailUrlResponse>("/uploads/thumbnail", {
       query: { key },
+    }),
+
+  // Favorites (M4). All JWT-gated — the server keys the favorite by the caller's
+  // sub, so no userId travels in the request. SSR callers (the /saved page) pass
+  // a pre-fetched `token`; the client fetches it automatically. add/remove are
+  // idempotent server-side (conditional put/delete), so a double-tap is safe.
+  getFavorites: (token?: string) =>
+    apiFetch<FavoritesResponse>("/favorites", { auth: true, token }),
+  addFavorite: (tripId: string, token?: string) =>
+    apiFetch<{ tripId: string }>("/favorites", {
+      method: "POST",
+      body: { tripId },
+      auth: true,
+      token,
+    }),
+  removeFavorite: (tripId: string, token?: string) =>
+    apiFetch<void>(`/favorites/${tripId}`, {
+      method: "DELETE",
+      auth: true,
+      token,
     }),
 
   // AI suggestions (M6). Public + submit-only (CON-003): the client passes the

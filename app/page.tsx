@@ -32,6 +32,9 @@ export default async function Home() {
           </p>
         </div>
         <nav className="flex items-center gap-3 text-sm font-medium">
+          <Link href="/saved" className="hover:underline">
+            Saved
+          </Link>
           <Link href="/my-trips" className="hover:underline">
             My trips
           </Link>
