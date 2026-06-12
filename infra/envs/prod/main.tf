@@ -197,5 +197,19 @@ module "hosting" {
   repository_url        = var.repository_url
   github_access_token   = var.github_access_token
   branch_name           = var.branch_name
+  enable_auto_build     = var.enable_auto_build
   environment_variables = local.amplify_environment_variables
+}
+
+# GitHub Actions OIDC deploy role — CI assumes this (no static keys) to trigger
+# an Amplify RELEASE on this env's app. The account-level OIDC provider lives in
+# infra/bootstrap; repo is derived from repository_url. Output feeds the
+# AWS_DEPLOY_ROLE_ARN variable in the matching GitHub Environment.
+module "github_oidc" {
+  source             = "../../modules/github-oidc"
+  project            = var.project
+  environment        = var.environment
+  repository         = replace(var.repository_url, "https://github.com/", "")
+  github_environment = var.github_deploy_environment
+  amplify_app_arn    = module.hosting.app_arn
 }

@@ -1,0 +1,97 @@
+name: Deploy to Amplify
+
+# Gated deploy: verify the branch, then trigger an Amplify RELEASE and wait for
+# it. Runs on push to the two deploy branches (staging → staging app, main →
+# prod app) and on manual dispatch. Assumes Amplify auto-build is OFF for these
+# branches so this workflow is the single deploy trigger (see docs/aws-deployment.md).
+on:
+  push:
+    branches: [main, staging]
+  workflow_dispatch:
+
+# Never cancel an in-flight deploy; serialize per branch.
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: false
+
+# Least privilege at the top level; the deploy job opts into id-token below.
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: ap-southeast-1
+
+jobs:
+  verify:
+    name: Lint, format, build, test
+    runs-on: ubuntu-latest
+    steps:
+      # Mirrors nextjs-ci.yaml: Node 24 via .nvmrc, pnpm via Corepack, setup-node's
+      # built-in pnpm cache — all on actions whose runtime is Node 24.
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Build
+        run: pnpm build
+
+      - name: Test
+        run: pnpm run --if-present test
+
+  deploy:
+    name: Trigger Amplify Release
+    needs: verify
+    runs-on: ubuntu-latest
+    # Branch → GitHub Environment. Each environment holds its own AMPLIFY_APP_ID
+    # and AWS_DEPLOY_ROLE_ARN, and can carry a protection rule (e.g. prod approval).
+    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    permissions:
+      id-token: write # mint the OIDC token for AWS role assumption
+      contents: read
+    steps:
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Start Amplify release and wait
+        env:
+          APP_ID: ${{ vars.AMPLIFY_APP_ID }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          JOB_ID=$(aws amplify start-job \
+            --app-id "$APP_ID" --branch-name "$BRANCH" \
+            --job-type RELEASE \
+            --query 'jobSummary.jobId' --output text)
+          echo "Started Amplify job $JOB_ID for branch $BRANCH"
+          while true; do
+            STATUS=$(aws amplify get-job \
+              --app-id "$APP_ID" --branch-name "$BRANCH" \
+              --job-id "$JOB_ID" \
+              --query 'job.summary.status' --output text)
+            echo "status=$STATUS"
+            case "$STATUS" in
+              SUCCEED)          echo "✅ deploy succeeded"; exit 0 ;;
+              FAILED|CANCELLED) echo "❌ deploy $STATUS"; exit 1 ;;
+              *)                sleep 15 ;;
+            esac
+          done
