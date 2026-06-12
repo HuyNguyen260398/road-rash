@@ -66,3 +66,8 @@ output "amplify_branch_url" {
   description = "Public URL of the deployed branch."
   value       = module.hosting.branch_url
 }
+
+output "github_deploy_role_arn" {
+  description = "IAM role ARN for GitHub Actions to assume. Set as AWS_DEPLOY_ROLE_ARN in the matching GitHub Environment."
+  value       = module.github_oidc.deploy_role_arn
+}

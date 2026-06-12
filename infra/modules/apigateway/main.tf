@@ -43,6 +43,12 @@ resource "aws_apigatewayv2_stage" "default" {
   name        = "$default"
   auto_deploy = true
 
+  # route_settings below reference route keys (e.g. POST /suggest) by name, but
+  # that's a variable-driven dependency Terraform can't see — so without this it
+  # may create the stage before the routes exist and API Gateway rejects the
+  # CreateStage with "Unable to find Route by key". Force routes first.
+  depends_on = [aws_apigatewayv2_route.this]
+
   default_route_settings {
     throttling_burst_limit = var.throttling_burst_limit
     throttling_rate_limit  = var.throttling_rate_limit

@@ -40,6 +40,24 @@ variable "branch_name" {
   default     = "main"
 }
 
+# GitHub Environment whose Actions OIDC subject may assume the Amplify deploy
+# role (modules/github-oidc). Must match the `environment:` the deploy job sets
+# in .github/workflows/deploy.yaml for this branch.
+variable "github_deploy_environment" {
+  description = "GitHub Environment name the deploy job targets for this env."
+  type        = string
+  default     = "production"
+}
+
+# Off by default: the .github/workflows/deploy.yaml CI job is the single deploy
+# trigger (it runs an Amplify RELEASE after the verify gate). Leaving Amplify's
+# own push auto-build on would double-build every push.
+variable "enable_auto_build" {
+  description = "Let Amplify auto-build the branch on push. Keep false so the gated CI workflow is the only deploy trigger."
+  type        = bool
+  default     = false
+}
+
 # --- App origins (s3 CORS + API Gateway CORS) -----------------------------
 # Browser origins allowed to call the API and PUT/GET thumbnails. No trailing
 # slash (CORS origins are scheme+host only). Add the Amplify URL after apply.

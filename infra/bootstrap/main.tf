@@ -73,3 +73,10 @@ data "aws_iam_policy_document" "state" {
     }
   }
 }
+
+# NOTE: the account-level GitHub Actions OIDC provider
+# (token.actions.githubusercontent.com) is a per-account singleton and already
+# exists in this account (managed outside this project). road-rash does NOT
+# create or own it — the per-env deploy roles in modules/github-oidc look it up
+# via a data source and federate to it. If you ever run road-rash in a fresh
+# account that has no such provider, create one here (or out-of-band) first.
