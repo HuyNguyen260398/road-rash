@@ -1,17 +1,20 @@
 name: Deploy to Amplify
 
 # Gated deploy: verify the branch, then trigger an Amplify RELEASE and wait for
-# it. Runs on push to the two deploy branches (staging → staging app, main →
-# prod app) and on manual dispatch. Assumes Amplify auto-build is OFF for these
-# branches so this workflow is the single deploy trigger (see docs/aws-deployment.md).
+# it. Runs on push to main and on manual dispatch. There is no separate prod
+# environment yet, so main deploys to the existing *staging* Amplify app: the
+# job fast-forwards the `staging` git branch to main and RELEASEs the staging
+# Amplify branch (the only branch registered on that app). Amplify auto-build is
+# OFF for that branch, so this workflow is the single deploy trigger
+# (see docs/aws-deployment.md).
 on:
   push:
-    branches: [main, staging]
+    branches: [main]
   workflow_dispatch:
 
-# Never cancel an in-flight deploy; serialize per branch.
+# Never cancel an in-flight deploy; one staging app, so serialize globally.
 concurrency:
-  group: deploy-${{ github.ref_name }}
+  group: deploy-staging
   cancel-in-progress: false
 
 # Least privilege at the top level; the deploy job opts into id-token below.
@@ -20,6 +23,9 @@ permissions:
 
 env:
   AWS_REGION: ap-southeast-1
+  # Amplify branch registered on the staging app that we RELEASE. The git branch
+  # of the same name is fast-forwarded to main below so it serves main's code.
+  AMPLIFY_BRANCH: staging
 
 jobs:
   verify:
@@ -59,13 +65,24 @@ jobs:
     name: Trigger Amplify Release
     needs: verify
     runs-on: ubuntu-latest
-    # Branch → GitHub Environment. Each environment holds its own AMPLIFY_APP_ID
-    # and AWS_DEPLOY_ROLE_ARN, and can carry a protection rule (e.g. prod approval).
-    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    # The `staging` GitHub Environment holds AMPLIFY_APP_ID and AWS_DEPLOY_ROLE_ARN.
+    # The deploy role's OIDC trust is pinned to this environment's subject, so the
+    # job must declare it to assume the role.
+    environment: staging
     permissions:
       id-token: write # mint the OIDC token for AWS role assumption
-      contents: read
+      contents: write # push main → the staging deploy branch
     steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      # Make the staging Amplify branch serve main's code. Force is safe here:
+      # the staging branch is a deploy pointer only ever advanced by this job.
+      - name: Sync staging deploy branch to main
+        run: git push --force origin "HEAD:refs/heads/${{ env.AMPLIFY_BRANCH }}"
+
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v5
         with:
@@ -75,7 +92,7 @@ jobs:
       - name: Start Amplify release and wait
         env:
           APP_ID: ${{ vars.AMPLIFY_APP_ID }}
-          BRANCH: ${{ github.ref_name }}
+          BRANCH: ${{ env.AMPLIFY_BRANCH }}
         run: |
           set -euo pipefail
           JOB_ID=$(aws amplify start-job \
