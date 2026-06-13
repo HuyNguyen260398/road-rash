@@ -4,6 +4,7 @@ import { AlertTriangleIcon, RouteIcon } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import TripGrid from "@/components/TripGrid";
 import EmptyState from "@/components/EmptyState";
+import { buttonVariants } from "@/components/ui/button";
 import { getServerSession } from "@/lib/server-session";
 import { api } from "@/lib/api-client";
 import type { Trip } from "@/lib/types";
@@ -28,12 +29,19 @@ export default async function MyTripsPage() {
   return (
     <AppShell>
       <div className="mx-auto w-full max-w-6xl px-4 py-8">
-        <header className="mb-6 flex items-center justify-between gap-4">
-          <h1 className="text-2xl font-semibold">My trips</h1>
-          <Link
-            href="/trips/new"
-            className="rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
-          >
+        <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex size-11 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <RouteIcon className="size-5" aria-hidden />
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold">My trips</h1>
+              <p className="text-sm text-muted-foreground">
+                Routes you’ve published for the community to discover.
+              </p>
+            </div>
+          </div>
+          <Link href="/trips/new" className={buttonVariants()}>
             Create trip
           </Link>
         </header>
@@ -50,10 +58,7 @@ export default async function MyTripsPage() {
             title="You haven’t created any trips yet"
             description="Share your first travel plan with the community."
             action={
-              <Link
-                href="/trips/new"
-                className="rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
-              >
+              <Link href="/trips/new" className={buttonVariants()}>
                 Create trip
               </Link>
             }
