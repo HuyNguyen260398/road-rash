@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { fetchAuthSession, signOut } from "aws-amplify/auth";
-import { HeartIcon, LogOutIcon, RouteIcon } from "lucide-react";
+import { HeartIcon, LogOutIcon, PlusIcon, RouteIcon } from "lucide-react";
 import { avatarInitial } from "@/lib/avatar";
 
 // Signed-in account control for the navbar. Reads the email client-side to
@@ -13,6 +13,7 @@ import { avatarInitial } from "@/lib/avatar";
 // visitors keep the plain "Sign in" link in AppHeader.
 
 const MENU_LINKS = [
+  { href: "/trips/new", label: "Create trip", icon: PlusIcon },
   { href: "/saved", label: "Liked trips", icon: HeartIcon },
   { href: "/my-trips", label: "My trips", icon: RouteIcon },
 ] as const;

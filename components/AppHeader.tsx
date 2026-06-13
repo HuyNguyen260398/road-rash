@@ -12,11 +12,9 @@ import { useFavorites } from "@/components/FavoritesProvider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [{ href: "/", label: "Discover" }] as const;
-
-// Destinations that move into the avatar dropdown on desktop but stay in the
+// Destinations that live in the avatar dropdown on desktop but stay in the
 // mobile menu so every view is reachable on small screens. Shown to all users
-// on mobile (matching the prior nav); guests who tap them are redirected to
+// on mobile (the logo links to Discover); guests who tap them are redirected to
 // /login by the target pages' own auth guards.
 const ACCOUNT_LINKS = [
   { href: "/saved", label: "Liked trips" },
@@ -64,18 +62,6 @@ export default function AppHeader() {
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <AppLogo />
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={navLinkClass(isActive(item.href))}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
         <div className="hidden items-center gap-3 lg:flex">
           <ModeToggle />
           {ready && !signedIn ? (
@@ -86,9 +72,6 @@ export default function AppHeader() {
               Sign in
             </Link>
           ) : null}
-          <Link href="/trips/new" className={buttonVariants()}>
-            Create trip
-          </Link>
           <UserMenu />
         </div>
 
@@ -117,16 +100,6 @@ export default function AppHeader() {
             className="mx-auto flex max-w-7xl flex-col gap-2"
             aria-label="Mobile"
           >
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={navLinkClass(isActive(item.href))}
-                onClick={closeMenu}
-              >
-                {item.label}
-              </Link>
-            ))}
             {ACCOUNT_LINKS.map((item) => (
               <Link
                 key={item.href}
@@ -150,13 +123,15 @@ export default function AppHeader() {
                   Sign in
                 </Link>
               ) : null}
-              <Link
-                href="/trips/new"
-                className={buttonVariants()}
-                onClick={closeMenu}
-              >
-                Create trip
-              </Link>
+              {signedIn ? (
+                <Link
+                  href="/trips/new"
+                  className={buttonVariants()}
+                  onClick={closeMenu}
+                >
+                  Create trip
+                </Link>
+              ) : null}
               {signedIn ? (
                 <Button
                   type="button"
