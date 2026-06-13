@@ -28,9 +28,9 @@ export function getGoogleProviderEnabled(
 }
 
 export function getAuthConfigStatus(config: AuthConfigInput): AuthConfigStatus {
-  const missing = REQUIRED_FIELDS.filter(
-    ([key]) => !config[key].trim(),
-  ).map(([, label]) => label);
+  const missing = REQUIRED_FIELDS.filter(([key]) => !config[key].trim()).map(
+    ([, label]) => label,
+  );
 
   if (missing.length > 0) {
     return {

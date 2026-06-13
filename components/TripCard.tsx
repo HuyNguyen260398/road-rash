@@ -3,8 +3,23 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import {
+  BikeIcon,
+  CarIcon,
+  Clock3Icon,
+  CompassIcon,
+  HeartIcon,
+  MapPinIcon,
+  NavigationIcon,
+  type LucideIcon,
+} from "lucide-react";
 import { api } from "@/lib/api-client";
 import { useFavorites } from "@/components/FavoritesProvider";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { formatEnum } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import type { Trip, Vehicle } from "@/lib/types";
 
 // Trip card for the responsive grid (TASK-027). The thumbnail is fetched via a
@@ -12,11 +27,11 @@ import type { Trip, Vehicle } from "@/lib/types";
 // favorite toggle (M4 / TASK-030) backed by FavoritesProvider — signed-out taps
 // route to /login.
 
-const VEHICLE_ICON: Record<Vehicle, string> = {
-  MOTORBIKE: "🏍️",
-  CAR: "🚗",
-  BICYCLE: "🚲",
-  OTHER: "🧭",
+const VEHICLE_ICON: Record<Vehicle, LucideIcon> = {
+  MOTORBIKE: NavigationIcon,
+  CAR: CarIcon,
+  BICYCLE: BikeIcon,
+  OTHER: CompassIcon,
 };
 
 function locationLabel(trip: Trip): string {
@@ -41,6 +56,7 @@ export default function TripCard({
 
   const favorited = isFavorited(trip.id);
   const favoriteCount = Math.max(0, trip.favoriteCount + countDelta(trip.id));
+  const VehicleIcon = VEHICLE_ICON[trip.vehicle];
 
   function handleFavorite(e: React.MouseEvent) {
     // The card is a Link — keep the heart from navigating/opening the modal.
@@ -83,52 +99,75 @@ export default function TripCard({
     <Link
       href={`/trip/${trip.id}`}
       onClick={handleClick}
-      className="group flex flex-col overflow-hidden rounded-xl border border-black/10 transition-shadow hover:shadow-md dark:border-white/15"
+      className="group block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
     >
-      <div className="relative aspect-[4/3] w-full bg-black/5 dark:bg-white/10">
-        {thumbnailUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- presigned S3 URLs are dynamic hosts; next/image remotePatterns is overkill here.
-          <img
-            src={thumbnailUrl}
-            alt={trip.name}
-            className="h-full w-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-3xl opacity-40">
-            {VEHICLE_ICON[trip.vehicle]}
+      <Card className="h-full overflow-hidden transition-shadow group-hover:shadow-md">
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+          {thumbnailUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- presigned S3 URLs are dynamic hosts; next/image remotePatterns is overkill here.
+            <img
+              src={thumbnailUrl}
+              alt={trip.name}
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              loading="lazy"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-primary">
+              <VehicleIcon className="size-12 opacity-70" aria-hidden />
+            </div>
+          )}
+          <div className="absolute left-3 top-3">
+            <Badge variant="secondary">{formatEnum(trip.tripType)}</Badge>
           </div>
-        )}
-      </div>
-
-      <div className="flex flex-1 flex-col gap-1 p-3">
-        <h3 className="line-clamp-1 font-semibold">{trip.name}</h3>
-        <p className="line-clamp-1 text-sm opacity-70">{locationLabel(trip)}</p>
-        <div className="mt-auto flex items-center justify-between pt-2 text-sm opacity-80">
-          <span className="flex items-center gap-2">
-            <span aria-hidden>{VEHICLE_ICON[trip.vehicle]}</span>
-            <span>
-              {trip.durationDays} day{trip.durationDays === 1 ? "" : "s"}
-            </span>
-          </span>
-          <button
-            type="button"
-            onClick={handleFavorite}
-            aria-pressed={favorited}
-            aria-label={
-              favorited ? "Remove from favorites" : "Add to favorites"
-            }
-            title={favorited ? "Remove from favorites" : "Add to favorites"}
-            className="flex items-center gap-1 rounded-md px-1.5 py-1 transition-colors hover:bg-black/5 dark:hover:bg-white/10"
-          >
-            <span aria-hidden className={favorited ? "text-red-500" : ""}>
-              {favorited ? "♥" : "♡"}
-            </span>
-            <span>{favoriteCount}</span>
-          </button>
         </div>
-        <p className="truncate text-xs opacity-50">by {trip.authorName}</p>
-      </div>
+
+        <div className="flex flex-1 flex-col gap-3 p-4">
+          <div className="space-y-1">
+            <h3 className="line-clamp-1 font-semibold">{trip.name}</h3>
+            <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <MapPinIcon className="size-4 shrink-0" aria-hidden />
+              <span className="line-clamp-1">{locationLabel(trip)}</span>
+            </p>
+          </div>
+
+          <div className="mt-auto flex items-center justify-between gap-3 pt-1 text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5">
+              <VehicleIcon className="size-4" aria-hidden />
+              <span>{formatEnum(trip.vehicle)}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Clock3Icon className="size-4" aria-hidden />
+              <span>
+                {trip.durationDays} day{trip.durationDays === 1 ? "" : "s"}
+              </span>
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between gap-3 border-t border-border pt-3">
+            <p className="min-w-0 truncate text-xs text-muted-foreground">
+              by {trip.authorName}
+            </p>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleFavorite}
+              aria-pressed={favorited}
+              aria-label={
+                favorited ? "Remove from favorites" : "Add to favorites"
+              }
+              title={favorited ? "Remove from favorites" : "Add to favorites"}
+              className="h-8 shrink-0 px-2"
+            >
+              <HeartIcon
+                aria-hidden
+                className={cn(favorited ? "fill-current text-destructive" : "")}
+              />
+              <span>{favoriteCount}</span>
+            </Button>
+          </div>
+        </div>
+      </Card>
     </Link>
   );
 }

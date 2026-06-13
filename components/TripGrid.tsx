@@ -4,6 +4,7 @@ import { useState } from "react";
 import TripCard from "./TripCard";
 import TripDetailModal from "./TripDetailModal";
 import EmptyState from "./EmptyState";
+import { Badge } from "@/components/ui/badge";
 import type { Trip } from "@/lib/types";
 
 // Responsive, mobile-first card grid (TASK-027 / REQ-001): 1 column on phones,
@@ -23,7 +24,7 @@ function Cards({
   onOpen: (trip: Trip) => void;
 }) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {trips.map((trip) => (
         <TripCard key={trip.id} trip={trip} onOpen={onOpen} />
       ))}
@@ -51,15 +52,15 @@ export default function TripGrid({
     body = <EmptyState title={emptyMessage} />;
   } else if (groups) {
     body = (
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-10">
         {groups.map((group) => (
           <section key={group.label}>
-            <h2 className="mb-3 text-lg font-semibold">
-              {group.label}{" "}
-              <span className="text-sm font-normal opacity-50">
-                ({group.trips.length})
-              </span>
-            </h2>
+            <div className="mb-4 flex items-center gap-3">
+              <h2 className="text-xl font-semibold">{group.label}</h2>
+              <Badge variant="outline" className="bg-background">
+                {group.trips.length}
+              </Badge>
+            </div>
             <Cards trips={group.trips} onOpen={setSelected} />
           </section>
         ))}

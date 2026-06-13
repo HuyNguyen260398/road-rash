@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { SearchIcon, XIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 // Debounced free-text search input driving the `q` filter (TASK-034 / REQ-008).
 // The debounce keeps plain client-side filtering responsive without re-running
@@ -32,13 +35,34 @@ export default function SearchBar({
   }, [text, delay, onChange]);
 
   return (
-    <input
-      type="search"
-      value={text}
-      onChange={(e) => setText(e.target.value)}
-      placeholder={placeholder}
-      aria-label="Search trips"
-      className="w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm outline-none focus:border-foreground/40 dark:border-white/20"
-    />
+    <div className="relative">
+      <label htmlFor="trip-search" className="sr-only">
+        Search trips
+      </label>
+      <SearchIcon
+        className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+        aria-hidden
+      />
+      <Input
+        id="trip-search"
+        type="search"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder={placeholder}
+        className="h-11 pl-9 pr-11"
+      />
+      {text ? (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label="Clear trip search"
+          className="absolute right-1 top-1/2 size-9 -translate-y-1/2"
+          onClick={() => setText("")}
+        >
+          <XIcon aria-hidden />
+        </Button>
+      ) : null}
+    </div>
   );
 }

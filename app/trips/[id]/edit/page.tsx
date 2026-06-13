@@ -1,4 +1,7 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { ArrowLeftIcon } from "lucide-react";
+import AppShell from "@/components/AppShell";
 import TripForm from "@/components/TripForm";
 import { getServerSession } from "@/lib/server-session";
 import { api, ApiError } from "@/lib/api-client";
@@ -30,9 +33,26 @@ export default async function EditTripPage({
   if (trip.authorId !== session.sub) redirect(`/trip/${id}`);
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-semibold">Edit trip</h1>
-      <TripForm trip={trip} />
-    </main>
+    <AppShell>
+      <div className="mx-auto w-full max-w-2xl px-4 py-8">
+        <header className="mb-8 space-y-3">
+          <Link
+            href={`/trip/${id}`}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeftIcon className="size-4" aria-hidden />
+            Back to trip
+          </Link>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-semibold">Edit trip</h1>
+            <p className="text-sm text-muted-foreground">
+              Update your route details and map links. Changes go live as soon
+              as you save.
+            </p>
+          </div>
+        </header>
+        <TripForm trip={trip} />
+      </div>
+    </AppShell>
   );
 }

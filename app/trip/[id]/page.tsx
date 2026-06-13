@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { ChevronRightIcon, MapIcon } from "lucide-react";
+import AppShell from "@/components/AppShell";
 import TripDetail from "@/components/TripDetail";
 import { api, ApiError } from "@/lib/api-client";
 import type { Trip } from "@/lib/types";
@@ -68,13 +70,26 @@ export default async function TripPage({
   const trip = await loadTrip(id);
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-4 py-8">
-      <Link href="/" className="text-sm opacity-70 hover:underline">
-        ← Back to trips
-      </Link>
-      <div className="mt-4 overflow-hidden rounded-xl border border-black/10 dark:border-white/15">
-        <TripDetail trip={trip} />
+    <AppShell>
+      <div className="mx-auto w-full max-w-2xl px-4 py-8">
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-1.5 text-sm text-muted-foreground"
+        >
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 font-medium transition-colors hover:text-foreground"
+          >
+            <MapIcon className="size-4" aria-hidden />
+            Discover
+          </Link>
+          <ChevronRightIcon className="size-4" aria-hidden />
+          <span className="truncate text-foreground">{trip.name}</span>
+        </nav>
+        <div className="mt-4 overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-sm">
+          <TripDetail trip={trip} />
+        </div>
       </div>
-    </main>
+    </AppShell>
   );
 }

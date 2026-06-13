@@ -8,6 +8,21 @@ import {
   signOut,
 } from "aws-amplify/auth";
 import { Hub } from "aws-amplify/utils";
+import {
+  AlertTriangleIcon,
+  LogInIcon,
+  LogOutIcon,
+  MapIcon,
+} from "lucide-react";
+import AppShell from "@/components/AppShell";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { authConfigStatus } from "@/lib/amplify-config";
 
 type AuthState = {
@@ -89,43 +104,62 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex flex-1 items-center justify-center p-6">
-      <div className="w-full max-w-sm space-y-6 rounded-xl border border-black/10 p-8 text-center dark:border-white/15">
-        <h1 className="text-2xl font-semibold">Sign in to road-rash</h1>
+    <AppShell>
+      <div className="flex min-h-[calc(100dvh-9rem)] items-center justify-center p-6">
+        <Card className="w-full max-w-sm">
+          <CardHeader className="items-center text-center">
+            <div className="mb-2 flex size-12 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <MapIcon className="size-6" aria-hidden />
+            </div>
+            <CardTitle className="text-2xl">Sign in to Road Rash</CardTitle>
+            <CardDescription>
+              Sign in to create routes and save your favorite trips.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4 text-center">
+            {loading ? (
+              <p className="text-sm text-muted-foreground">
+                Checking your session…
+              </p>
+            ) : user ? (
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Signed in as{" "}
+                  <span className="font-medium text-foreground">
+                    {user.email ?? user.username}
+                  </span>
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleSignOut}
+                  className="w-full"
+                >
+                  <LogOutIcon className="size-4" aria-hidden />
+                  Sign out
+                </Button>
+              </div>
+            ) : (
+              <Button
+                type="button"
+                onClick={handleSignIn}
+                disabled={!authConfigStatus.configured}
+                className="w-full"
+              >
+                <LogInIcon className="size-4" aria-hidden />
+                Continue with Google
+              </Button>
+            )}
 
-        {loading ? (
-          <p className="text-sm opacity-70">Checking your session…</p>
-        ) : user ? (
-          <div className="space-y-4">
-            <p className="text-sm opacity-80">
-              Signed in as{" "}
-              <span className="font-medium">{user.email ?? user.username}</span>
-            </p>
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="w-full rounded-md border border-black/15 px-4 py-2 text-sm font-medium transition-colors hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
-            >
-              Sign out
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={handleSignIn}
-            disabled={!authConfigStatus.configured}
-            className="w-full rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Continue with Google
-          </button>
-        )}
-
-        {visibleError ? (
-          <p className="text-sm text-red-600 dark:text-red-400">
-            {visibleError}
-          </p>
-        ) : null}
+            {visibleError ? (
+              <p className="flex items-center justify-center gap-2 text-sm text-destructive">
+                <AlertTriangleIcon className="size-4 shrink-0" aria-hidden />
+                <span>{visibleError}</span>
+              </p>
+            ) : null}
+          </CardContent>
+        </Card>
       </div>
-    </main>
+    </AppShell>
   );
 }

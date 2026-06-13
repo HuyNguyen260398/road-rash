@@ -1,9 +1,12 @@
 "use client";
 
+import { SlidersHorizontalIcon, XIcon } from "lucide-react";
 import { TRIP_TYPES, VEHICLES } from "@/lib/types";
 import type { Trip } from "@/lib/types";
 import type { TripFilters } from "@/lib/search";
 import { formatEnum } from "@/lib/format";
+import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 
 // Filter selects for the discovery grid (TASK-034 / REQ-008). tripType/vehicle
 // options come from the fixed enums; location options (country/province/city)
@@ -32,80 +35,95 @@ export default function FilterControls({
   const set = (key: keyof TripFilters, value: string) =>
     onChange({ ...filters, [key]: value || undefined });
 
-  const selectClass =
-    "rounded-md border border-black/15 bg-transparent px-2 py-2 text-sm outline-none focus:border-foreground/40 dark:border-white/20";
+  const hasFilters = Object.values(filters).some(Boolean);
 
   return (
-    <div className="flex flex-wrap gap-2">
-      <select
-        aria-label="Filter by trip type"
-        className={selectClass}
-        value={filters.tripType ?? ""}
-        onChange={(e) => set("tripType", e.target.value)}
-      >
-        <option value="">All types</option>
-        {TRIP_TYPES.map((t) => (
-          <option key={t} value={t}>
-            {formatEnum(t)}
-          </option>
-        ))}
-      </select>
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <SlidersHorizontalIcon className="size-4 text-muted-foreground" />
+          Filters
+        </div>
+        {hasFilters ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-8"
+            onClick={() => onChange({})}
+          >
+            <XIcon aria-hidden />
+            Clear filters
+          </Button>
+        ) : null}
+      </div>
 
-      <select
-        aria-label="Filter by vehicle"
-        className={selectClass}
-        value={filters.vehicle ?? ""}
-        onChange={(e) => set("vehicle", e.target.value)}
-      >
-        <option value="">All vehicles</option>
-        {VEHICLES.map((v) => (
-          <option key={v} value={v}>
-            {formatEnum(v)}
-          </option>
-        ))}
-      </select>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
+        <Select
+          aria-label="Filter by trip type"
+          value={filters.tripType ?? ""}
+          onChange={(e) => set("tripType", e.target.value)}
+        >
+          <option value="">All types</option>
+          {TRIP_TYPES.map((t) => (
+            <option key={t} value={t}>
+              {formatEnum(t)}
+            </option>
+          ))}
+        </Select>
 
-      <select
-        aria-label="Filter by country"
-        className={selectClass}
-        value={filters.country ?? ""}
-        onChange={(e) => set("country", e.target.value)}
-      >
-        <option value="">All countries</option>
-        {distinct(trips, "country").map((c) => (
-          <option key={c} value={c}>
-            {c}
-          </option>
-        ))}
-      </select>
+        <Select
+          aria-label="Filter by vehicle"
+          value={filters.vehicle ?? ""}
+          onChange={(e) => set("vehicle", e.target.value)}
+        >
+          <option value="">All vehicles</option>
+          {VEHICLES.map((v) => (
+            <option key={v} value={v}>
+              {formatEnum(v)}
+            </option>
+          ))}
+        </Select>
 
-      <select
-        aria-label="Filter by province"
-        className={selectClass}
-        value={filters.province ?? ""}
-        onChange={(e) => set("province", e.target.value)}
-      >
-        <option value="">All provinces</option>
-        {distinct(trips, "province").map((p) => (
-          <option key={p} value={p}>
-            {p}
-          </option>
-        ))}
-      </select>
+        <Select
+          aria-label="Filter by country"
+          value={filters.country ?? ""}
+          onChange={(e) => set("country", e.target.value)}
+        >
+          <option value="">All countries</option>
+          {distinct(trips, "country").map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </Select>
 
-      <select
-        aria-label="Filter by city"
-        className={selectClass}
-        value={filters.city ?? ""}
-        onChange={(e) => set("city", e.target.value)}
-      >
-        <option value="">All cities</option>
-        {distinct(trips, "city").map((c) => (
-          <option key={c} value={c}>
-            {c}
-          </option>
-        ))}
-      </select>
+        <Select
+          aria-label="Filter by province"
+          value={filters.province ?? ""}
+          onChange={(e) => set("province", e.target.value)}
+        >
+          <option value="">All provinces</option>
+          {distinct(trips, "province").map((p) => (
+            <option key={p} value={p}>
+              {p}
+            </option>
+          ))}
+        </Select>
+
+        <Select
+          aria-label="Filter by city"
+          value={filters.city ?? ""}
+          onChange={(e) => set("city", e.target.value)}
+        >
+          <option value="">All cities</option>
+          {distinct(trips, "city").map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </Select>
+      </div>
     </div>
   );
 }
