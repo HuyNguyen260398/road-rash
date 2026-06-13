@@ -1,3 +1,4 @@
+import { AlertTriangleIcon } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import DiscoverHero from "@/components/DiscoverHero";
 import TripBrowser from "@/components/TripBrowser";
@@ -37,7 +38,7 @@ export default async function Home() {
 
           {loadError ? (
             <EmptyState
-              icon="⚠️"
+              icon={<AlertTriangleIcon className="size-6" aria-hidden />}
               title="Trips are unavailable right now"
               description={loadError}
             />

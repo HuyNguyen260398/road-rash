@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { AlertTriangleIcon, RouteIcon } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import TripGrid from "@/components/TripGrid";
 import EmptyState from "@/components/EmptyState";
@@ -39,13 +40,13 @@ export default async function MyTripsPage() {
 
         {loadError ? (
           <EmptyState
-            icon="⚠️"
+            icon={<AlertTriangleIcon className="size-6" aria-hidden />}
             title="Couldn’t load your trips"
             description={loadError}
           />
         ) : mine.length === 0 ? (
           <EmptyState
-            icon="🧳"
+            icon={<RouteIcon className="size-6" aria-hidden />}
             title="You haven’t created any trips yet"
             description="Share your first travel plan with the community."
             action={

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { AlertTriangleIcon, HeartIcon } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import TripGrid from "@/components/TripGrid";
 import EmptyState from "@/components/EmptyState";
@@ -43,13 +44,13 @@ export default async function SavedPage() {
 
         {loadError ? (
           <EmptyState
-            icon="⚠️"
+            icon={<AlertTriangleIcon className="size-6" aria-hidden />}
             title="Couldn’t load your saved trips"
             description={loadError}
           />
         ) : saved.length === 0 ? (
           <EmptyState
-            icon="🤍"
+            icon={<HeartIcon className="size-6" aria-hidden />}
             title="No saved trips yet"
             description="Tap the heart on any trip to save it here for later."
             action={
