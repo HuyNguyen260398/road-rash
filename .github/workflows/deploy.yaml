@@ -24,6 +24,7 @@ on:
       - "eslint.config.mjs"
       - "tsconfig.json"
       - "package.json"
+      - "amplify.yml"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
       - ".nvmrc"
