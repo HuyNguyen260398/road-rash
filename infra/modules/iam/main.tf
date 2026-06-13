@@ -70,6 +70,7 @@ data "aws_iam_policy_document" "trips" {
       "dynamodb:UpdateItem",
       "dynamodb:DeleteItem",
       "dynamodb:Query",
+      "dynamodb:Scan",
     ]
     resources = [var.trip_table_arn, "${var.trip_table_arn}/index/*"]
   }
