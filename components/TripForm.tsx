@@ -1,11 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import {
+  ImageIcon,
+  InfoIcon,
+  MapIcon,
+  MapPinIcon,
+  RouteIcon,
+} from "lucide-react";
 import { api, ApiError } from "@/lib/api-client";
 import { validateMyMapsUrl } from "@/lib/validation";
 import { TRIP_TYPES, VEHICLES } from "@/lib/types";
 import type { Trip, TripInput, TripType, Vehicle } from "@/lib/types";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 // Create/edit trip form (TASK-025). Inline My Maps validation is the visible
 // half of the SEC-003 guard (the trips Lambda re-validates server-side). The
@@ -28,6 +47,39 @@ type Props = {
   /** Present when editing; prefills the form and switches to update. */
   trip?: Trip;
 };
+
+// Section wrapper keeps each group of fields in its own un-nested card with a
+// lucide section marker (PAT-001, REQ-007: no nested cards).
+function FormSection({
+  icon,
+  title,
+  description,
+  children,
+}: {
+  icon: ReactNode;
+  title: string;
+  description?: string;
+  children: ReactNode;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-3">
+          <div className="flex size-10 items-center justify-center rounded-md bg-primary/10 text-primary">
+            {icon}
+          </div>
+          <div className="space-y-1">
+            <CardTitle className="text-lg">{title}</CardTitle>
+            {description ? (
+              <CardDescription>{description}</CardDescription>
+            ) : null}
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">{children}</CardContent>
+    </Card>
+  );
+}
 
 export default function TripForm({ trip }: Props) {
   const router = useRouter();
@@ -146,192 +198,205 @@ export default function TripForm({ trip }: Props) {
     }
   }
 
-  const fieldClass =
-    "w-full rounded-md border border-black/15 bg-transparent px-3 py-2 text-sm " +
-    "outline-none focus:border-black/40 dark:border-white/20 dark:focus:border-white/50";
-  const labelClass = "block space-y-1 text-sm";
-  const labelText = "font-medium";
-
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
-      <label className={labelClass}>
-        <span className={labelText}>Trip name</span>
-        <input
-          className={fieldClass}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          maxLength={120}
-        />
-      </label>
-
-      <label className={labelClass}>
-        <span className={labelText}>Description</span>
-        <textarea
-          className={fieldClass}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={3}
-          maxLength={2000}
-        />
-      </label>
-
-      <label className={labelClass}>
-        <span className={labelText}>Location label</span>
-        <input
-          className={fieldClass}
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          placeholder="e.g. Northern Vietnam loop"
-          maxLength={200}
-        />
-      </label>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <label className={labelClass}>
-          <span className={labelText}>City</span>
-          <input
-            className={fieldClass}
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            maxLength={100}
-          />
-        </label>
-        <label className={labelClass}>
-          <span className={labelText}>Province / state</span>
-          <input
-            className={fieldClass}
-            value={province}
-            onChange={(e) => setProvince(e.target.value)}
-            maxLength={100}
-          />
-        </label>
-        <label className={labelClass}>
-          <span className={labelText}>Country</span>
-          <input
-            className={fieldClass}
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
+    <form onSubmit={onSubmit} className="space-y-6">
+      <FormSection
+        icon={<InfoIcon className="size-5" aria-hidden />}
+        title="Trip basics"
+        description="Name your route and tell travelers what to expect."
+      >
+        <div className="space-y-1.5">
+          <Label htmlFor="trip-name">Trip name</Label>
+          <Input
+            id="trip-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
-            maxLength={100}
+            maxLength={120}
           />
-        </label>
-      </div>
+        </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <label className={labelClass}>
-          <span className={labelText}>Trip type</span>
-          <select
-            className={fieldClass}
-            value={tripType}
-            onChange={(e) => setTripType(e.target.value as TripType)}
-          >
-            {TRIP_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t.replace(/_/g, " ")}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className={labelClass}>
-          <span className={labelText}>Vehicle</span>
-          <select
-            className={fieldClass}
-            value={vehicle}
-            onChange={(e) => setVehicle(e.target.value as Vehicle)}
-          >
-            {VEHICLES.map((v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className={labelClass}>
-          <span className={labelText}>Duration (days)</span>
-          <input
-            type="number"
-            min={1}
-            max={365}
-            className={fieldClass}
-            value={durationDays}
-            onChange={(e) => setDurationDays(e.target.value)}
+        <div className="space-y-1.5">
+          <Label htmlFor="trip-description">Description</Label>
+          <Textarea
+            id="trip-description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            maxLength={2000}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="trip-type">Trip type</Label>
+            <Select
+              id="trip-type"
+              value={tripType}
+              onChange={(e) => setTripType(e.target.value as TripType)}
+            >
+              {TRIP_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {t.replace(/_/g, " ")}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="trip-vehicle">Vehicle</Label>
+            <Select
+              id="trip-vehicle"
+              value={vehicle}
+              onChange={(e) => setVehicle(e.target.value as Vehicle)}
+            >
+              {VEHICLES.map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="trip-duration">Duration (days)</Label>
+            <Input
+              id="trip-duration"
+              type="number"
+              min={1}
+              max={365}
+              value={durationDays}
+              onChange={(e) => setDurationDays(e.target.value)}
+              required
+            />
+          </div>
+        </div>
+      </FormSection>
+
+      <FormSection
+        icon={<MapPinIcon className="size-5" aria-hidden />}
+        title="Location"
+        description="Where does this route take riders?"
+      >
+        <div className="space-y-1.5">
+          <Label htmlFor="trip-location">Location label</Label>
+          <Input
+            id="trip-location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="e.g. Northern Vietnam loop"
+            maxLength={200}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="trip-city">City</Label>
+            <Input
+              id="trip-city"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              maxLength={100}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="trip-province">Province / state</Label>
+            <Input
+              id="trip-province"
+              value={province}
+              onChange={(e) => setProvince(e.target.value)}
+              maxLength={100}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="trip-country">Country</Label>
+            <Input
+              id="trip-country"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              required
+              maxLength={100}
+            />
+          </div>
+        </div>
+      </FormSection>
+
+      <FormSection
+        icon={<RouteIcon className="size-5" aria-hidden />}
+        title="Route links"
+        description="Maps are user supplied — paste the links you built in Google My Maps."
+      >
+        <div className="space-y-1.5">
+          <Label htmlFor="trip-mymaps">Google My Maps link</Label>
+          <Input
+            id="trip-mymaps"
+            value={myMapsUrl}
+            onChange={(e) => setMyMapsUrl(e.target.value)}
+            onBlur={() => setMapTouched(true)}
+            inputMode="url"
             required
+            maxLength={2048}
+            aria-invalid={showMapError}
           />
-        </label>
-      </div>
+          {showMapError ? (
+            <p className="text-xs text-destructive">
+              That doesn’t look like a Google My Maps link. {MY_MAPS_HELP}
+            </p>
+          ) : (
+            <p className="text-xs text-muted-foreground">{MY_MAPS_HELP}</p>
+          )}
+        </div>
 
-      <label className={labelClass}>
-        <span className={labelText}>Google My Maps link</span>
-        <input
-          className={fieldClass}
-          value={myMapsUrl}
-          onChange={(e) => setMyMapsUrl(e.target.value)}
-          onBlur={() => setMapTouched(true)}
-          inputMode="url"
-          required
-          maxLength={2048}
-          aria-invalid={showMapError}
-        />
-        {showMapError ? (
-          <span className="text-xs text-red-600 dark:text-red-400">
-            That doesn’t look like a Google My Maps link. {MY_MAPS_HELP}
-          </span>
-        ) : (
-          <span className="text-xs opacity-60">{MY_MAPS_HELP}</span>
-        )}
-      </label>
+        <div className="space-y-1.5">
+          <Label htmlFor="trip-googlemaps">
+            Open-in-Google-Maps link{" "}
+            <span className="text-muted-foreground">(optional)</span>
+          </Label>
+          <Input
+            id="trip-googlemaps"
+            value={googleMapsUrl}
+            onChange={(e) => setGoogleMapsUrl(e.target.value)}
+            inputMode="url"
+            maxLength={2048}
+          />
+        </div>
+      </FormSection>
 
-      <label className={labelClass}>
-        <span className={labelText}>
-          Open-in-Google-Maps link{" "}
-          <span className="opacity-60">(optional)</span>
-        </span>
-        <input
-          className={fieldClass}
-          value={googleMapsUrl}
-          onChange={(e) => setGoogleMapsUrl(e.target.value)}
-          inputMode="url"
-          maxLength={2048}
-        />
-      </label>
-
-      <label className={labelClass}>
-        <span className={labelText}>
-          Thumbnail <span className="opacity-60">(optional, ≤ 5 MB)</span>
-        </span>
-        <input
-          type="file"
-          accept={ALLOWED_IMAGE_TYPES.join(",")}
-          className="block text-sm"
-          onChange={(e) => onSelectFile(e.target.files?.[0] ?? null)}
-        />
-        {thumbnailKey && !file ? (
-          <span className="text-xs opacity-60">
-            Current thumbnail kept unless you choose a new file.
-          </span>
-        ) : null}
-      </label>
+      <FormSection
+        icon={<ImageIcon className="size-5" aria-hidden />}
+        title="Thumbnail"
+        description="Add a cover image so your route stands out (optional, ≤ 5 MB)."
+      >
+        <div className="space-y-1.5">
+          <Label htmlFor="trip-thumbnail">Thumbnail image</Label>
+          <Input
+            id="trip-thumbnail"
+            type="file"
+            accept={ALLOWED_IMAGE_TYPES.join(",")}
+            onChange={(e) => onSelectFile(e.target.files?.[0] ?? null)}
+          />
+          {thumbnailKey && !file ? (
+            <p className="text-xs text-muted-foreground">
+              Current thumbnail kept unless you choose a new file.
+            </p>
+          ) : null}
+        </div>
+      </FormSection>
 
       {formError ? (
-        <p className="text-sm text-red-600 dark:text-red-400">{formError}</p>
+        <p className="text-sm text-destructive">{formError}</p>
       ) : null}
 
-      <div className="flex gap-3">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
-        >
+      <div className="flex items-center gap-3">
+        <Button type="submit" disabled={submitting}>
+          <MapIcon className="size-4" aria-hidden />
           {submitting ? "Saving…" : isEdit ? "Save changes" : "Create trip"}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="outline"
           onClick={() => router.back()}
-          className="rounded-md border border-black/15 px-4 py-2 text-sm font-medium transition-colors hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
         >
           Cancel
-        </button>
+        </Button>
       </div>
     </form>
   );
