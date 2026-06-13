@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useFavorites } from "@/components/FavoritesProvider";
 import {
   BikeIcon,
   CarIcon,
@@ -9,11 +12,13 @@ import {
   HeartIcon,
   MapIcon,
   NavigationIcon,
+  PencilIcon,
   UserIcon,
   type LucideIcon,
 } from "lucide-react";
+import { fetchAuthSession } from "aws-amplify/auth";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { toMyMapsEmbedUrl, validateMyMapsUrl } from "@/lib/validation";
 import { googleMapsLink } from "@/lib/maps";
 import { formatEnum } from "@/lib/format";
@@ -69,6 +74,38 @@ export default function TripDetail({ trip }: { trip: Trip }) {
 
   const VehicleIcon = VEHICLE_ICON[trip.vehicle];
 
+  const router = useRouter();
+  const { isFavorited, countDelta, toggle, signedIn } = useFavorites();
+  const favorited = isFavorited(trip.id);
+  const favoriteCount = Math.max(0, trip.favoriteCount + countDelta(trip.id));
+
+  function handleFavorite() {
+    if (!signedIn) {
+      router.push("/login");
+      return;
+    }
+    void toggle(trip.id);
+  }
+
+  const [currentSub, setCurrentSub] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    fetchAuthSession()
+      .then((session) => {
+        const sub = session.tokens?.idToken?.payload.sub;
+        if (active && typeof sub === "string") setCurrentSub(sub);
+      })
+      .catch(() => {
+        // Signed out / no session — no owner controls.
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const isOwner = currentSub !== null && currentSub === trip.authorId;
+
   return (
     <article className="flex flex-col gap-6 p-5 sm:p-6">
       <header className="flex flex-col gap-3">
@@ -79,16 +116,30 @@ export default function TripDetail({ trip }: { trip: Trip }) {
             </Badge>
             <h1 className="text-2xl font-semibold sm:text-3xl">{trip.name}</h1>
           </div>
-          <span
-            className="flex shrink-0 items-center gap-1.5 rounded-md border border-border px-2 py-1 text-sm text-muted-foreground"
-            title="Favorites"
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleFavorite}
+            aria-pressed={favorited}
+            aria-label={
+              favorited ? "Remove from favorites" : "Add to favorites"
+            }
+            title={favorited ? "Remove from favorites" : "Add to favorites"}
+            className="shrink-0 gap-1.5"
           >
-            <HeartIcon className="size-4" aria-hidden />
-            <span aria-hidden>{trip.favoriteCount}</span>
+            <HeartIcon
+              aria-hidden
+              className={cn(
+                "size-4",
+                favorited ? "fill-current text-destructive" : "",
+              )}
+            />
+            <span aria-hidden>{favoriteCount}</span>
             <span className="sr-only">
-              {trip.favoriteCount} favorite{trip.favoriteCount === 1 ? "" : "s"}
+              {favoriteCount} favorite{favoriteCount === 1 ? "" : "s"}
             </span>
-          </span>
+          </Button>
         </div>
         <p className="text-sm text-muted-foreground">{locationLabel(trip)}</p>
       </header>
@@ -138,15 +189,28 @@ export default function TripDetail({ trip }: { trip: Trip }) {
             <MapIcon className="size-4" aria-hidden />
             Map
           </h2>
-          <a
-            href={googleMapsLink(trip)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(buttonVariants({ size: "sm" }), "shrink-0")}
-          >
-            <NavigationIcon aria-hidden />
-            Open in Google Maps
-          </a>
+          <div className="flex shrink-0 items-center gap-2">
+            {isOwner ? (
+              <Link
+                href={`/trips/${trip.id}/edit`}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                )}
+              >
+                <PencilIcon className="size-4" aria-hidden />
+                Edit
+              </Link>
+            ) : null}
+            <a
+              href={googleMapsLink(trip)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(buttonVariants({ size: "sm" }))}
+            >
+              <NavigationIcon aria-hidden />
+              Open in Google Maps
+            </a>
+          </div>
         </div>
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-border bg-muted sm:aspect-video">
           {embedSrc && !embedFailed ? (

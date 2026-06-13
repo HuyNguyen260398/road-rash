@@ -12,6 +12,7 @@ import { ddb } from "../shared/dynamo";
 import { error, json, noContent } from "../shared/http";
 import { getUserSub } from "../shared/auth";
 import { validateFavoriteInput } from "./validate";
+import { buildFavoriteCountUpdate } from "./count";
 
 // Favorites handler (M4 / TASK-029). All three routes sit behind the JWT
 // authorizer (first auth layer); the favorite is keyed by the verified Cognito
@@ -55,17 +56,7 @@ async function adjustFavoriteCount(
 ): Promise<void> {
   try {
     await ddb.send(
-      new UpdateCommand({
-        TableName: TRIP_TABLE,
-        Key: { id: tripId },
-        UpdateExpression: "SET favoriteCount = favoriteCount + :delta",
-        // Only touch existing trips, and never decrement below zero.
-        ConditionExpression:
-          delta > 0
-            ? "attribute_exists(id)"
-            : "attribute_exists(id) AND favoriteCount > :zero",
-        ExpressionAttributeValues: { ":delta": delta, ":zero": 0 },
-      }),
+      new UpdateCommand(buildFavoriteCountUpdate(TRIP_TABLE, tripId, delta)),
     );
   } catch (err) {
     // The trip may have been deleted, or the count already floored at 0 — the

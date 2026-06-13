@@ -11,7 +11,7 @@ import { Select } from "@/components/ui/select";
 // Filter selects for the discovery grid (TASK-034 / REQ-008). tripType/vehicle
 // options come from the fixed enums; location options (country/province/city)
 // are derived from the loaded candidate set so we only offer values that exist.
-// Selections compose with the SearchBar `q` and are applied client-side
+// Selections compose with the search pill's `q` and are applied client-side
 // (lib/search.ts) for instant results over the small launch dataset.
 
 function distinct(trips: Trip[], key: keyof Trip): string[] {

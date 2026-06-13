@@ -2,16 +2,22 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { MenuIcon, XIcon } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { signOut } from "aws-amplify/auth";
+import { LogOutIcon, MenuIcon, XIcon } from "lucide-react";
 import AppLogo from "@/components/AppLogo";
+import UserMenu from "@/components/UserMenu";
 import ModeToggle from "@/components/ModeToggle";
+import { useFavorites } from "@/components/FavoritesProvider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [
-  { href: "/", label: "Discover" },
-  { href: "/saved", label: "Saved" },
+// Destinations that live in the avatar dropdown on desktop but stay in the
+// mobile menu so every view is reachable on small screens. Shown to all users
+// on mobile (the logo links to Discover); guests who tap them are redirected to
+// /login by the target pages' own auth guards.
+const ACCOUNT_LINKS = [
+  { href: "/saved", label: "Liked trips" },
   { href: "/my-trips", label: "My trips" },
 ] as const;
 
@@ -24,7 +30,12 @@ function navLinkClass(active: boolean) {
 
 export default function AppHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  // Single source of auth state for the shell (FavoritesProvider wraps the app
+  // and resolves the session once). `ready` gates the auth controls so a
+  // signed-in user never flashes the "Sign in" link before the session loads.
+  const { ready, signedIn } = useFavorites();
 
   function isActive(href: string) {
     if (href === "/") return pathname === "/";
@@ -35,34 +46,33 @@ export default function AppHeader() {
     setMenuOpen(false);
   }
 
+  async function handleSignOut() {
+    setMenuOpen(false);
+    try {
+      await signOut();
+    } finally {
+      // Refresh so SSR pages re-render in the signed-out state.
+      router.replace("/");
+      router.refresh();
+    }
+  }
+
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <AppLogo />
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={navLinkClass(isActive(item.href))}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
         <div className="hidden items-center gap-3 lg:flex">
           <ModeToggle />
-          <Link
-            href="/login"
-            className={buttonVariants({ variant: "outline" })}
-          >
-            Sign in
-          </Link>
-          <Link href="/trips/new" className={buttonVariants()}>
-            Create trip
-          </Link>
+          {ready && !signedIn ? (
+            <Link
+              href="/login"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              Sign in
+            </Link>
+          ) : null}
+          <UserMenu />
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
@@ -90,7 +100,7 @@ export default function AppHeader() {
             className="mx-auto flex max-w-7xl flex-col gap-2"
             aria-label="Mobile"
           >
-            {NAV_ITEMS.map((item) => (
+            {ACCOUNT_LINKS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -104,20 +114,35 @@ export default function AppHeader() {
               <ModeToggle />
             </div>
             <div className="mt-2 grid gap-2 border-t border-border pt-4 sm:grid-cols-2">
-              <Link
-                href="/login"
-                className={buttonVariants({ variant: "outline" })}
-                onClick={closeMenu}
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/trips/new"
-                className={buttonVariants()}
-                onClick={closeMenu}
-              >
-                Create trip
-              </Link>
+              {ready && !signedIn ? (
+                <Link
+                  href="/login"
+                  className={buttonVariants({ variant: "outline" })}
+                  onClick={closeMenu}
+                >
+                  Sign in
+                </Link>
+              ) : null}
+              {signedIn ? (
+                <Link
+                  href="/trips/new"
+                  className={buttonVariants()}
+                  onClick={closeMenu}
+                >
+                  Create trip
+                </Link>
+              ) : null}
+              {signedIn ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full gap-1.5"
+                  onClick={handleSignOut}
+                >
+                  <LogOutIcon aria-hidden className="size-4" />
+                  Sign out
+                </Button>
+              ) : null}
             </div>
           </nav>
         </div>
