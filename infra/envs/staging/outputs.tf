@@ -71,3 +71,8 @@ output "github_deploy_role_arn" {
   description = "IAM role ARN for GitHub Actions to assume. Set as AWS_DEPLOY_ROLE_ARN in the matching GitHub Environment."
   value       = module.github_oidc.deploy_role_arn
 }
+
+output "github_terraform_role_arn" {
+  description = "IAM role ARN the CI deploy job assumes for `terraform apply`. Set as AWS_TERRAFORM_ROLE_ARN in the matching GitHub Environment."
+  value       = module.github_oidc.terraform_role_arn
+}

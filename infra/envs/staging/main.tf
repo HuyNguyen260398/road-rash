@@ -213,4 +213,7 @@ module "github_oidc" {
   repository         = replace(var.repository_url, "https://github.com/", "")
   github_environment = var.github_deploy_environment
   amplify_app_arn    = module.hosting.app_arn
+  # CI assumes this to run `terraform apply` for staging (build:lambdas → apply),
+  # gated behind the Terraform fmt/validate/tflint checks in deploy.yaml.
+  create_terraform_role = true
 }

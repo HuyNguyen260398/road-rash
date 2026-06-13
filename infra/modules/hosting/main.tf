@@ -54,6 +54,17 @@ resource "aws_amplify_app" "this" {
 
   # Optional service role granting Amplify SSR compute permission to write logs.
   iam_service_role_arn = var.iam_service_role_arn
+
+  # access_token is write-only — the Amplify API never returns it, and it's only
+  # needed to establish the repo connection on create. Re-applying without it (or
+  # with a different value) makes Terraform send an empty accessToken on
+  # UpdateApp, which the API rejects ("length >= 1"). Ignore post-create changes
+  # so routine applies — including CI, which need not pass the token for an
+  # already-connected app — don't churn it. To rotate the token, set it and
+  # `terraform apply -replace=module.hosting.aws_amplify_app.this` (or taint).
+  lifecycle {
+    ignore_changes = [access_token]
+  }
 }
 
 resource "aws_amplify_branch" "this" {
