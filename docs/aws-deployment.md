@@ -174,6 +174,62 @@ Run the checks the phase files marked "deferred to apply":
 
 ---
 
+## CI deploy (automated, after the one-time manual bootstrap above)
+
+Once staging has been applied manually at least once (Steps 1–7), pushes to
+`main` deploy it automatically via `.github/workflows/deploy.yaml`. The workflow
+runs four jobs, each gating the next:
+
+1. **verify** — `pnpm lint / format:check / build / test`.
+2. **terraform-verify** — `terraform fmt -check` + `validate` + `tflint` across all
+   roots (same checks as `tf-ci.yaml`).
+3. **deploy-backend** — `pnpm build:lambdas`, then `terraform apply` on
+   `infra/envs/staging` (this is what ships Lambda code + infra changes).
+4. **deploy** — fast-forwards the `staging` branch to main and triggers the
+   Amplify RELEASE for the frontend.
+
+### One-time setup to enable the `terraform apply` job
+
+The deploy job assumes a **separate** broad-permission OIDC role
+(`<project>-staging-gha-terraform`, created by the `github-oidc` module with
+`create_terraform_role = true`). Because Terraform creates that role, you must
+run **one manual `terraform apply`** (Step 5) after pulling this change so the
+role exists, then read its ARN:
+
+```bash
+terraform -chdir=infra/envs/staging output -raw github_terraform_role_arn
+```
+
+It attaches AWS-managed **PowerUserAccess** plus a project-scoped IAM policy
+(manage only `<project>-*` roles/policies). That is intentionally broad — review
+it (`infra/modules/github-oidc/main.tf`) before enabling.
+
+### Required `staging` GitHub Environment config
+
+Set these on the **staging** GitHub Environment (Settings → Environments →
+staging). The deploy-backend job **fails fast** (preflight) if any are missing,
+so it can never silently revert live config:
+
+| Kind | Name | Value |
+| --- | --- | --- |
+| Variable | `AWS_TERRAFORM_ROLE_ARN` | ARN from `github_terraform_role_arn` above |
+| Variable | `TF_STATE_BUCKET` | state bucket (`terraform -chdir=infra/bootstrap output -raw state_bucket_name`) |
+| Variable | `APP_ORIGINS` | HCL list literal, e.g. `["https://staging.example.com","http://localhost:3000"]` |
+| Variable | `APP_CALLBACK_URLS` | HCL list, e.g. `["https://staging.example.com/"]` |
+| Variable | `APP_LOGOUT_URLS` | HCL list, e.g. `["https://staging.example.com/"]` |
+| Secret | `AMPLIFY_GITHUB_TOKEN` | GitHub token for the Amplify repo connection (`TF_VAR_github_access_token`) |
+| Secret | `GOOGLE_OAUTH_CLIENT_ID` | Google OAuth client id |
+| Secret | `GOOGLE_OAUTH_CLIENT_SECRET` | Google OAuth client secret |
+
+The list-typed variables must hold the **same values** the manual apply used —
+otherwise the apply would change CORS/OAuth back to the defaults. `gemini_api_key`
+is deliberately **not** wired into CI: the SSM module keeps the placeholder seed
+and the real key is set out-of-band (Step 6), so CI apply never overwrites it.
+(`AWS_DEPLOY_ROLE_ARN` and `AMPLIFY_APP_ID` for the Amplify-release job stay as
+before.)
+
+---
+
 ## Resources Terraform will create per environment
 
 - **DynamoDB:** `Trip` (PK `id`, 5 GSIs on country/province/city/tripType/vehicle,

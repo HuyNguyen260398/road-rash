@@ -1,18 +1,16 @@
 name: Deploy to Amplify
 
-# Gated deploy: verify the branch, then trigger an Amplify RELEASE and wait for
-# it. Runs on push to main and on manual dispatch. There is no separate prod
-# environment yet, so main deploys to the existing *staging* Amplify app: the
-# job fast-forwards the `staging` git branch to main and RELEASEs the staging
-# Amplify branch (the only branch registered on that app). Amplify auto-build is
-# OFF for that branch, so this workflow is the single deploy trigger
-# (see docs/aws-deployment.md).
+# Gated deploy to *staging* (the only environment today). On push to main (or
+# manual dispatch) it: (1) runs the app verify gate, (2) runs the Terraform
+# fmt/validate/tflint gate, (3) builds the Lambda bundles and `terraform apply`s
+# the staging stack (so backend code/infra actually ships), then (4) triggers an
+# Amplify RELEASE for the frontend. See docs/aws-deployment.md for the GitHub
+# Environment variables/secrets the apply step requires.
 on:
   push:
     branches: [main]
     paths:
-      # Application/runtime source and assets only. Docs, plans, Terraform, and
-      # unrelated repository metadata should not trigger an automatic deploy.
+      # Application/runtime source and assets…
       - "app/**"
       - "components/**"
       - "lib/**"
@@ -28,6 +26,10 @@ on:
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
       - ".nvmrc"
+      # …and Terraform, since the deploy now `apply`s the stack (gated by the
+      # terraform-verify job). Docs/plans/unrelated metadata still don't deploy.
+      - "infra/**"
+      - ".github/workflows/deploy.yaml"
   workflow_dispatch:
 
 # Never cancel an in-flight deploy; one staging app, so serialize globally.
@@ -35,7 +37,7 @@ concurrency:
   group: deploy-staging
   cancel-in-progress: false
 
-# Least privilege at the top level; the deploy job opts into id-token below.
+# Least privilege at the top level; the deploy jobs opt into id-token below.
 permissions:
   contents: read
 
@@ -44,6 +46,11 @@ env:
   # Amplify branch registered on the staging app that we RELEASE. The git branch
   # of the same name is fast-forwarded to main below so it serves main's code.
   AMPLIFY_BRANCH: staging
+  # Pinned to match tf-ci.yaml so CI validate/apply use the same Terraform.
+  TF_VERSION: "1.10.5"
+  # All three Terraform roots (mirrors tf-ci.yaml). modules/* are checked
+  # transitively. The deploy `apply` step only ever targets infra/envs/staging.
+  TF_ROOTS: "infra/bootstrap infra/envs/staging infra/envs/prod"
 
 jobs:
   verify:
@@ -79,9 +86,152 @@ jobs:
       - name: Test
         run: pnpm run --if-present test
 
+  terraform-verify:
+    name: Terraform fmt, validate & lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      # Tree-wide formatting check, including infra/modules/*.
+      - name: Terraform fmt (check)
+        run: terraform -chdir=infra fmt -check -recursive -diff
+
+      # -backend=false: validation needs no remote state / AWS credentials.
+      - name: Terraform init & validate (per root)
+        run: |
+          set -euo pipefail
+          for root in $TF_ROOTS; do
+            echo "::group::$root"
+            terraform -chdir="$root" init -backend=false -input=false
+            terraform -chdir="$root" validate -no-color
+            echo "::endgroup::"
+          done
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+
+      - name: TFLint (per root)
+        run: |
+          set -euo pipefail
+          tflint --init
+          for root in $TF_ROOTS; do
+            echo "::group::$root"
+            tflint --chdir="$root" --no-color -f compact --minimum-failure-severity=error
+            echo "::endgroup::"
+          done
+
+  deploy-backend:
+    name: Build Lambdas & terraform apply (staging)
+    needs: [verify, terraform-verify]
+    runs-on: ubuntu-latest
+    # The `staging` GitHub Environment holds the deploy config (vars + secrets).
+    environment: staging
+    permissions:
+      id-token: write # mint the OIDC token for AWS role assumption
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # Fail fast if anything the apply needs is unset — better than letting
+      # Terraform silently revert live config (CORS/OAuth) to its defaults.
+      - name: Preflight — required staging config present
+        env:
+          TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+          AWS_TERRAFORM_ROLE_ARN: ${{ vars.AWS_TERRAFORM_ROLE_ARN }}
+          APP_ORIGINS: ${{ vars.APP_ORIGINS }}
+          APP_CALLBACK_URLS: ${{ vars.APP_CALLBACK_URLS }}
+          APP_LOGOUT_URLS: ${{ vars.APP_LOGOUT_URLS }}
+          AMPLIFY_GITHUB_TOKEN: ${{ secrets.AMPLIFY_GITHUB_TOKEN }}
+          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          missing=()
+          for v in TF_STATE_BUCKET AWS_TERRAFORM_ROLE_ARN \
+                   APP_ORIGINS APP_CALLBACK_URLS APP_LOGOUT_URLS \
+                   AMPLIFY_GITHUB_TOKEN GOOGLE_OAUTH_CLIENT_ID GOOGLE_OAUTH_CLIENT_SECRET; do
+            if [ -z "${!v:-}" ]; then missing+=("$v"); fi
+          done
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing required staging deploy config: ${missing[*]}"
+            echo "Set these on the 'staging' GitHub Environment (variables/secrets) — see docs/aws-deployment.md."
+            exit 1
+          fi
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Bundle each services/<name>/handler.ts → services/<name>/dist/index.js so
+      # Terraform's archive_file has fresh artifacts to zip (the dist/ is
+      # gitignored, so this MUST run before apply).
+      - name: Build Lambda bundles
+        run: pnpm build:lambdas
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ vars.AWS_TERRAFORM_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # bucket + region are account-specific (backend.hcl is gitignored), so they
+      # come from the GitHub Environment; key/lock/encrypt live in backend.tf.
+      - name: Terraform init (staging)
+        env:
+          TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+        run: |
+          terraform -chdir=infra/envs/staging init -input=false \
+            -backend-config="bucket=${TF_STATE_BUCKET}" \
+            -backend-config="region=${AWS_REGION}"
+
+      # Non-secret env config comes from vars; secrets from secrets. gemini_api_key
+      # is intentionally NOT passed — the ssm module seeds a placeholder and the
+      # real key is set out-of-band (passing it would persist it in state).
+      - name: Terraform apply (staging)
+        env:
+          APP_ORIGINS: ${{ vars.APP_ORIGINS }}
+          APP_CALLBACK_URLS: ${{ vars.APP_CALLBACK_URLS }}
+          APP_LOGOUT_URLS: ${{ vars.APP_LOGOUT_URLS }}
+          AMPLIFY_GITHUB_TOKEN: ${{ secrets.AMPLIFY_GITHUB_TOKEN }}
+          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          terraform -chdir=infra/envs/staging apply -auto-approve -input=false \
+            -var="app_origins=${APP_ORIGINS}" \
+            -var="app_callback_urls=${APP_CALLBACK_URLS}" \
+            -var="app_logout_urls=${APP_LOGOUT_URLS}" \
+            -var="github_access_token=${AMPLIFY_GITHUB_TOKEN}" \
+            -var="google_oauth_client_id=${GOOGLE_OAUTH_CLIENT_ID}" \
+            -var="google_oauth_client_secret=${GOOGLE_OAUTH_CLIENT_SECRET}"
+
   deploy:
     name: Trigger Amplify Release
-    needs: verify
+    needs: deploy-backend
     runs-on: ubuntu-latest
     # The `staging` GitHub Environment holds AMPLIFY_APP_ID and AWS_DEPLOY_ROLE_ARN.
     # The deploy role's OIDC trust is pinned to this environment's subject, so the

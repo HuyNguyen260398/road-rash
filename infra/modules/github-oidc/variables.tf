@@ -22,3 +22,9 @@ variable "amplify_app_arn" {
   description = "ARN of the Amplify app this role may trigger RELEASE jobs on (StartJob/GetJob scoped to its branches/jobs)."
   type        = string
 }
+
+variable "create_terraform_role" {
+  description = "Also create a broad-permission role the CI deploy job assumes to run `terraform apply` for this env (state bucket + all managed resources). Off by default — opt in per env (staging) so an unused env never gets a powerful CI role."
+  type        = bool
+  default     = false
+}

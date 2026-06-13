@@ -64,3 +64,103 @@ resource "aws_iam_role_policy" "deploy" {
   role   = aws_iam_role.deploy.id
   policy = data.aws_iam_policy_document.deploy.json
 }
+
+# --- Terraform-apply role (opt-in via create_terraform_role) ----------------
+# A separate, broad-permission role the CI deploy job assumes to run
+# `terraform apply` for this environment. Kept distinct from the Amplify-only
+# `deploy` role above so the minimal release job never inherits infra power.
+# Trust is the same pinned GitHub-Environment subject (data.aws_iam_policy_document.assume).
+#
+# Tradeoff (accepted): running `terraform apply` for the whole stack needs
+# wide access. We attach the AWS-managed PowerUserAccess (every service EXCEPT
+# IAM/Organizations/Account) and add a narrow IAM policy below scoped to this
+# project's roles/policies, rather than granting AdministratorAccess.
+data "aws_caller_identity" "current" {}
+data "aws_partition" "current" {}
+
+resource "aws_iam_role" "terraform" {
+  count              = var.create_terraform_role ? 1 : 0
+  name               = "${local.name_prefix}-gha-terraform"
+  assume_role_policy = data.aws_iam_policy_document.assume.json
+}
+
+# Everything except IAM/Organizations/Account — covers S3 (Terraform state +
+# lock and the app buckets), DynamoDB, Lambda, API Gateway, Cognito, CloudWatch
+# Logs, SSM, Amplify, etc.
+resource "aws_iam_role_policy_attachment" "terraform_poweruser" {
+  count      = var.create_terraform_role ? 1 : 0
+  role       = aws_iam_role.terraform[0].name
+  policy_arn = "arn:${data.aws_partition.current.partition}:iam::aws:policy/PowerUserAccess"
+}
+
+# The IAM piece PowerUserAccess omits: manage only this project's roles and
+# customer-managed policies (name-prefixed), pass project roles to services, and
+# the read-only lookups Terraform data sources need (incl. the bootstrap OIDC
+# provider). Wildcards on the project prefix keep this from touching unrelated
+# identities.
+data "aws_iam_policy_document" "terraform_iam" {
+  statement {
+    sid    = "ProjectRoleManagement"
+    effect = "Allow"
+    actions = [
+      "iam:CreateRole",
+      "iam:DeleteRole",
+      "iam:GetRole",
+      "iam:UpdateRole",
+      "iam:UpdateAssumeRolePolicy",
+      "iam:TagRole",
+      "iam:UntagRole",
+      "iam:ListRoleTags",
+      "iam:PutRolePolicy",
+      "iam:DeleteRolePolicy",
+      "iam:GetRolePolicy",
+      "iam:ListRolePolicies",
+      "iam:AttachRolePolicy",
+      "iam:DetachRolePolicy",
+      "iam:ListAttachedRolePolicies",
+      "iam:ListInstanceProfilesForRole",
+      "iam:PassRole",
+    ]
+    resources = [
+      "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:role/${var.project}-*",
+    ]
+  }
+
+  statement {
+    sid    = "ProjectPolicyManagement"
+    effect = "Allow"
+    actions = [
+      "iam:CreatePolicy",
+      "iam:DeletePolicy",
+      "iam:GetPolicy",
+      "iam:GetPolicyVersion",
+      "iam:CreatePolicyVersion",
+      "iam:DeletePolicyVersion",
+      "iam:ListPolicyVersions",
+    ]
+    resources = [
+      "arn:${data.aws_partition.current.partition}:iam::${data.aws_caller_identity.current.account_id}:policy/${var.project}-*",
+    ]
+  }
+
+  # Read-only lookups that have no resource-level scoping (list/get on the
+  # account-level OIDC provider and roles/policies Terraform refreshes).
+  statement {
+    sid    = "IamReadOnly"
+    effect = "Allow"
+    actions = [
+      "iam:GetOpenIDConnectProvider",
+      "iam:ListOpenIDConnectProviders",
+      "iam:ListRoles",
+      "iam:ListPolicies",
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy" "terraform_iam" {
+  count  = var.create_terraform_role ? 1 : 0
+  name   = "${local.name_prefix}-gha-terraform-iam"
+  role   = aws_iam_role.terraform[0].id
+  policy = data.aws_iam_policy_document.terraform_iam.json
+}
