@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { MenuIcon, XIcon } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { signOut } from "aws-amplify/auth";
+import { LogOutIcon, MenuIcon, XIcon } from "lucide-react";
 import AppLogo from "@/components/AppLogo";
 import UserMenu from "@/components/UserMenu";
 import ModeToggle from "@/components/ModeToggle";
+import { useFavorites } from "@/components/FavoritesProvider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +32,12 @@ function navLinkClass(active: boolean) {
 
 export default function AppHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  // Single source of auth state for the shell (FavoritesProvider wraps the app
+  // and resolves the session once). `ready` gates the auth controls so a
+  // signed-in user never flashes the "Sign in" link before the session loads.
+  const { ready, signedIn } = useFavorites();
 
   function isActive(href: string) {
     if (href === "/") return pathname === "/";
@@ -39,6 +46,17 @@ export default function AppHeader() {
 
   function closeMenu() {
     setMenuOpen(false);
+  }
+
+  async function handleSignOut() {
+    setMenuOpen(false);
+    try {
+      await signOut();
+    } finally {
+      // Refresh so SSR pages re-render in the signed-out state.
+      router.replace("/");
+      router.refresh();
+    }
   }
 
   return (
@@ -60,12 +78,14 @@ export default function AppHeader() {
 
         <div className="hidden items-center gap-3 lg:flex">
           <ModeToggle />
-          <Link
-            href="/login"
-            className={buttonVariants({ variant: "outline" })}
-          >
-            Sign in
-          </Link>
+          {ready && !signedIn ? (
+            <Link
+              href="/login"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              Sign in
+            </Link>
+          ) : null}
           <Link href="/trips/new" className={buttonVariants()}>
             Create trip
           </Link>
@@ -121,13 +141,15 @@ export default function AppHeader() {
               <ModeToggle />
             </div>
             <div className="mt-2 grid gap-2 border-t border-border pt-4 sm:grid-cols-2">
-              <Link
-                href="/login"
-                className={buttonVariants({ variant: "outline" })}
-                onClick={closeMenu}
-              >
-                Sign in
-              </Link>
+              {ready && !signedIn ? (
+                <Link
+                  href="/login"
+                  className={buttonVariants({ variant: "outline" })}
+                  onClick={closeMenu}
+                >
+                  Sign in
+                </Link>
+              ) : null}
               <Link
                 href="/trips/new"
                 className={buttonVariants()}
@@ -135,6 +157,17 @@ export default function AppHeader() {
               >
                 Create trip
               </Link>
+              {signedIn ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full gap-1.5"
+                  onClick={handleSignOut}
+                >
+                  <LogOutIcon aria-hidden className="size-4" />
+                  Sign out
+                </Button>
+              ) : null}
             </div>
           </nav>
         </div>
