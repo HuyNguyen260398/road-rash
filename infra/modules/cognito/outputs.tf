@@ -23,6 +23,11 @@ output "domain" {
   value       = "${aws_cognito_user_pool_domain.this.domain}.auth.${data.aws_region.current.name}.amazoncognito.com"
 }
 
+output "google_provider_enabled" {
+  description = "Whether the Cognito app client includes the Google identity provider."
+  value       = local.enable_google
+}
+
 output "issuer" {
   description = "OIDC issuer URL for the User Pool (used by the API Gateway JWT authorizer)."
   value       = "https://${aws_cognito_user_pool.this.endpoint}"

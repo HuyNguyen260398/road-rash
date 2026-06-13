@@ -1,5 +1,6 @@
 import { Amplify } from "aws-amplify";
 import type { ResourcesConfig } from "aws-amplify";
+import { getAuthConfigStatus, getGoogleProviderEnabled } from "./auth-config";
 
 // Manual Amplify configuration (GUD-001/CON-004): no amplify_outputs.json.
 // Values come from NEXT_PUBLIC_* env vars populated by Terraform Cognito
@@ -17,16 +18,27 @@ const appOrigin =
 
 const redirectUrls = [`${appOrigin}/`];
 
+const authEnv = {
+  userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID ?? "",
+  userPoolClientId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID ?? "",
+  identityPoolId: process.env.NEXT_PUBLIC_COGNITO_IDENTITY_POOL_ID ?? "",
+  domain: process.env.NEXT_PUBLIC_COGNITO_DOMAIN ?? "",
+  googleProviderEnabled: getGoogleProviderEnabled(
+    process.env.NEXT_PUBLIC_COGNITO_GOOGLE_ENABLED,
+  ),
+};
+
+export const authConfigStatus = getAuthConfigStatus(authEnv);
+
 export const amplifyConfig: ResourcesConfig = {
   Auth: {
     Cognito: {
-      userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID ?? "",
-      userPoolClientId:
-        process.env.NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID ?? "",
-      identityPoolId: process.env.NEXT_PUBLIC_COGNITO_IDENTITY_POOL_ID ?? "",
+      userPoolId: authEnv.userPoolId,
+      userPoolClientId: authEnv.userPoolClientId,
+      identityPoolId: authEnv.identityPoolId,
       loginWith: {
         oauth: {
-          domain: process.env.NEXT_PUBLIC_COGNITO_DOMAIN ?? "",
+          domain: authEnv.domain,
           scopes: ["openid", "email", "profile"],
           redirectSignIn: redirectUrls,
           redirectSignOut: redirectUrls,

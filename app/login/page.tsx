@@ -8,6 +8,7 @@ import {
   signOut,
 } from "aws-amplify/auth";
 import { Hub } from "aws-amplify/utils";
+import { authConfigStatus } from "@/lib/amplify-config";
 
 type AuthState = {
   username: string;
@@ -18,6 +19,8 @@ export default function LoginPage() {
   const [user, setUser] = useState<AuthState | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const visibleError =
+    error ?? (!authConfigStatus.configured ? authConfigStatus.message : null);
 
   const refreshUser = useCallback(async () => {
     try {
@@ -64,6 +67,11 @@ export default function LoginPage() {
 
   const handleSignIn = async () => {
     setError(null);
+    if (!authConfigStatus.configured) {
+      setError(authConfigStatus.message);
+      return;
+    }
+
     try {
       await signInWithRedirect({ provider: "Google" });
     } catch {
@@ -105,14 +113,17 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={handleSignIn}
-            className="w-full rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
+            disabled={!authConfigStatus.configured}
+            className="w-full rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Continue with Google
           </button>
         )}
 
-        {error ? (
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        {visibleError ? (
+          <p className="text-sm text-red-600 dark:text-red-400">
+            {visibleError}
+          </p>
         ) : null}
       </div>
     </main>
