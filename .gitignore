@@ -61,3 +61,6 @@ yarn-error.log*
 
 # vercel (if used)
 .vercel
+
+# superpowers brainstorm / visual companion artifacts
+.superpowers/
