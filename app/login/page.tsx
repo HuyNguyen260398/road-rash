@@ -8,7 +8,12 @@ import {
   signOut,
 } from "aws-amplify/auth";
 import { Hub } from "aws-amplify/utils";
-import { AlertTriangleIcon, LogInIcon, LogOutIcon, MapIcon } from "lucide-react";
+import {
+  AlertTriangleIcon,
+  LogInIcon,
+  LogOutIcon,
+  MapIcon,
+} from "lucide-react";
 import AppShell from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import {

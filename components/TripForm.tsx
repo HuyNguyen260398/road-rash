@@ -390,11 +390,7 @@ export default function TripForm({ trip }: Props) {
           <MapIcon className="size-4" aria-hidden />
           {submitting ? "Saving…" : isEdit ? "Save changes" : "Create trip"}
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.back()}
-        >
+        <Button type="button" variant="outline" onClick={() => router.back()}>
           Cancel
         </Button>
       </div>

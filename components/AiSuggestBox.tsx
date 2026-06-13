@@ -132,11 +132,7 @@ export default function AiSuggestBox({ trips }: { trips: Trip[] }) {
             {loading ? "Asking…" : "Ask AI"}
           </Button>
           {status === "done" && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={clear}
-            >
+            <Button type="button" variant="outline" onClick={clear}>
               <RotateCcwIcon aria-hidden />
               Clear
             </Button>
