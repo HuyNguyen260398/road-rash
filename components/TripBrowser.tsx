@@ -1,11 +1,15 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import SearchBar from "./SearchBar";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { SlidersHorizontalIcon } from "lucide-react";
+import SearchPill from "./SearchPill";
 import FilterControls from "./FilterControls";
+import TripCard from "./TripCard";
 import TripGrid from "./TripGrid";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
+import { api } from "@/lib/api-client";
 import {
   filterTrips,
   groupTrips,
@@ -13,13 +17,12 @@ import {
   type TripFilters,
 } from "@/lib/search";
 import { formatEnum } from "@/lib/format";
-import type { Trip } from "@/lib/types";
+import type { SuggestCandidate, Trip } from "@/lib/types";
 
-// Client-side discovery shell (TASK-034). The page fetches the full candidate
-// set server-side (Option A, small dataset — ASSUMPTION-001) and hands it here;
-// search/filter/group run instantly in the browser via lib/search.ts (TASK-035,
-// TASK-036). The server `GET /trips` query params (TASK-033) back the same
-// contract for the M6 AI candidate set.
+// Client-side discovery shell. Typing filters the loaded set instantly
+// (lib/search.ts); the inline "Ask AI" button submits the same text to
+// POST /suggest (submit-only) and the grid switches to the ranked results until
+// cleared. Filters + grouping collapse behind a toggle.
 
 const GROUP_OPTIONS: { value: GroupField; label: string }[] = [
   { value: "country", label: "Country" },
@@ -29,9 +32,26 @@ const GROUP_OPTIONS: { value: GroupField; label: string }[] = [
   { value: "vehicle", label: "Vehicle" },
 ];
 
-// Group keys that are fixed enums need prettifying for the section header;
-// location values are already human-readable.
 const ENUM_GROUPS: ReadonlySet<GroupField> = new Set(["tripType", "vehicle"]);
+
+// Compact projection sent as the AI candidate set — never the full record.
+function toCandidates(trips: Trip[]): SuggestCandidate[] {
+  return trips.map((t) => ({
+    id: t.id,
+    name: t.name,
+    location: t.location,
+    city: t.city,
+    province: t.province,
+    country: t.country,
+    tripType: t.tripType,
+    vehicle: t.vehicle,
+    durationDays: t.durationDays,
+    description: t.description,
+  }));
+}
+
+type AiResult = { trip: Trip; reason?: string };
+type AiStatus = "idle" | "loading" | "done";
 
 export default function TripBrowser({
   trips,
@@ -43,9 +63,32 @@ export default function TripBrowser({
   const [q, setQ] = useState("");
   const [filters, setFilters] = useState<TripFilters>({});
   const [groupBy, setGroupBy] = useState<GroupField | "">("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
-  // Stable callback so SearchBar's debounce effect doesn't re-run each render.
-  const handleSearch = useCallback((value: string) => setQ(value), []);
+  const [aiStatus, setAiStatus] = useState<AiStatus>("idle");
+  const [aiResults, setAiResults] = useState<AiResult[]>([]);
+  const [aiMessage, setAiMessage] = useState<string | null>(null);
+
+  // Monotonic id so a slow AI response for an abandoned query can't overwrite
+  // state after the user has typed again or cleared. Bumped on every reset.
+  const requestIdRef = useRef(0);
+
+  const resetAi = useCallback(() => {
+    requestIdRef.current += 1;
+    setAiStatus("idle");
+    setAiResults([]);
+    setAiMessage(null);
+  }, []);
+
+  const handleChange = useCallback(
+    (value: string) => {
+      setQ(value);
+      // Editing the query drops back to plain search and abandons any in-flight
+      // AI request.
+      resetAi();
+    },
+    [resetAi],
+  );
 
   const visible = useMemo(
     () => filterTrips(trips, q, filters),
@@ -60,18 +103,99 @@ export default function TripBrowser({
     }));
   }, [visible, groupBy]);
 
-  const resultLabel = `${visible.length} route${
-    visible.length === 1 ? "" : "s"
-  }`;
+  async function askAi() {
+    const prompt = q.trim();
+    if (!prompt || trips.length === 0) return;
+    requestIdRef.current += 1;
+    const requestId = requestIdRef.current;
+    setAiStatus("loading");
+    setAiMessage(null);
+
+    const byId = new Map(trips.map((t) => [t.id, t]));
+    try {
+      const { suggestions } = await api.suggestTrips(prompt, toCandidates(trips));
+      if (requestId !== requestIdRef.current) return; // superseded — discard
+      const mapped = suggestions
+        .map((s): AiResult | undefined => {
+          const trip = byId.get(s.id);
+          return trip ? { trip, reason: s.reason } : undefined;
+        })
+        .filter((r): r is AiResult => r !== undefined);
+      setAiResults(mapped);
+      setAiMessage(
+        mapped.length === 0
+          ? "No trips matched that — try a different description, or browse below."
+          : null,
+      );
+    } catch {
+      if (requestId !== requestIdRef.current) return; // superseded — discard
+      // Gemini unavailable/timed out — fall back to plain search over the same
+      // candidate set so the user still gets results.
+      const fallback = filterTrips(trips, prompt, {}).map(
+        (trip): AiResult => ({ trip }),
+      );
+      setAiResults(fallback);
+      setAiMessage(
+        fallback.length === 0
+          ? `AI is unavailable and no trips matched "${prompt}". Try another search.`
+          : "AI is unavailable right now — showing plain search results instead.",
+      );
+    } finally {
+      if (requestId === requestIdRef.current) setAiStatus("done");
+    }
+  }
+
+  function clearSearch() {
+    setQ("");
+    resetAi();
+  }
+
+  const aiActive = aiStatus === "done";
+  const resultCount = aiActive ? aiResults.length : visible.length;
+  const resultLabel = `${resultCount} route${resultCount === 1 ? "" : "s"}`;
+  const hasActiveFilters = Object.values(filters).some(Boolean) || Boolean(groupBy);
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4 shadow-sm">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-          <div className="lg:max-w-sm lg:flex-1">
-            <SearchBar onChange={handleSearch} />
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 shadow-sm">
+        <SearchPill
+          value={q}
+          onChange={handleChange}
+          onAskAi={askAi}
+          onClear={clearSearch}
+          loading={aiStatus === "loading"}
+          aiActive={aiActive}
+          aiDisabled={trips.length === 0}
+        />
+        <div className="flex items-center justify-between gap-3">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-primary"
+            aria-expanded={filtersOpen}
+            aria-controls="filter-panel"
+            onClick={() => setFiltersOpen((v) => !v)}
+          >
+            <SlidersHorizontalIcon className="size-4" aria-hidden />
+            {filtersOpen ? "Hide filters" : "Show filters"}
+            {hasActiveFilters ? (
+              <span className="ml-1 size-2 rounded-full bg-primary" aria-hidden />
+            ) : null}
+          </Button>
+          <Badge variant="outline" className="bg-background">
+            {resultLabel}
+          </Badge>
+        </div>
+
+        {/* Kept mounted (display toggled) so the toggle's aria-controls always
+            references a live element. */}
+        <div
+          id="filter-panel"
+          className={`flex-col gap-3 ${filtersOpen ? "flex" : "hidden"}`}
+        >
+          <FilterControls trips={trips} filters={filters} onChange={setFilters} />
+          <div className="flex items-center gap-2">
             <label
               htmlFor="trip-group-by"
               className="text-sm font-medium text-muted-foreground"
@@ -93,22 +217,39 @@ export default function TripBrowser({
               ))}
             </Select>
           </div>
-          <Badge variant="outline" className="w-fit bg-background">
-            {resultLabel}
-          </Badge>
         </div>
-        <FilterControls trips={trips} filters={filters} onChange={setFilters} />
       </div>
 
-      <TripGrid
-        trips={visible}
-        groups={groups}
-        emptyMessage={
-          trips.length === 0
-            ? emptyMessage
-            : "No trips match your search and filters."
-        }
-      />
+      {aiMessage ? (
+        <p className="text-sm text-muted-foreground">{aiMessage}</p>
+      ) : null}
+
+      {aiActive ? (
+        aiResults.length > 0 ? (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {aiResults.map(({ trip, reason }) => (
+              <div key={trip.id} className="flex flex-col gap-1">
+                <TripCard trip={trip} />
+                {reason ? (
+                  <p className="px-1 text-xs italic text-muted-foreground">
+                    {reason}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        ) : null
+      ) : (
+        <TripGrid
+          trips={visible}
+          groups={groups}
+          emptyMessage={
+            trips.length === 0
+              ? emptyMessage
+              : "No trips match your search and filters."
+          }
+        />
+      )}
     </div>
   );
 }
