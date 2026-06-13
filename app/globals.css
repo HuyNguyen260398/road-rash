@@ -172,3 +172,24 @@
     cursor: not-allowed;
   }
 }
+
+/* Subtle slow-zoom for the discover hero background (disabled for users who
+   prefer reduced motion). */
+@keyframes hero-kenburns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+.hero-kenburns {
+  animation: hero-kenburns 20s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-kenburns {
+    animation: none;
+  }
+}
