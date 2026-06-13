@@ -183,8 +183,10 @@ runs four jobs, each gating the next:
 1. **verify** — `pnpm lint / format:check / build / test`.
 2. **terraform-verify** — `terraform fmt -check` + `validate` + `tflint` across all
    roots (same checks as `tf-ci.yaml`).
-3. **deploy-backend** — `pnpm build:lambdas`, then `terraform apply` on
-   `infra/envs/staging` (this is what ships Lambda code + infra changes).
+3. **deploy-backend** — `pnpm build:lambdas`, then `terraform plan -out` and
+   `terraform apply` of that saved plan on `infra/envs/staging` (this is what
+   ships Lambda code + infra changes). Plan gates apply: a failed plan stops the
+   job, and apply runs the exact plan that was shown in the logs.
 4. **deploy** — fast-forwards the `staging` branch to main and triggers the
    Amplify RELEASE for the frontend.
 

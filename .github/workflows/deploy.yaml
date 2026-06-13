@@ -208,10 +208,13 @@ jobs:
             -backend-config="bucket=${TF_STATE_BUCKET}" \
             -backend-config="region=${AWS_REGION}"
 
-      # Non-secret env config comes from vars; secrets from secrets. gemini_api_key
-      # is intentionally NOT passed — the ssm module seeds a placeholder and the
-      # real key is set out-of-band (passing it would persist it in state).
-      - name: Terraform apply (staging)
+      # Plan first and save it — this is the gate before apply: a failed/invalid
+      # plan stops the job, and the saved plan is what apply consumes so apply
+      # does exactly what was planned (no drift between the two). Non-secret env
+      # config comes from vars; secrets from secrets. gemini_api_key is
+      # intentionally NOT passed — the ssm module seeds a placeholder and the real
+      # key is set out-of-band (passing it would persist it in state).
+      - name: Terraform plan (staging)
         env:
           APP_ORIGINS: ${{ vars.APP_ORIGINS }}
           APP_CALLBACK_URLS: ${{ vars.APP_CALLBACK_URLS }}
@@ -221,13 +224,19 @@ jobs:
           GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
         run: |
           set -euo pipefail
-          terraform -chdir=infra/envs/staging apply -auto-approve -input=false \
+          terraform -chdir=infra/envs/staging plan -out=staging.tfplan -input=false \
             -var="app_origins=${APP_ORIGINS}" \
             -var="app_callback_urls=${APP_CALLBACK_URLS}" \
             -var="app_logout_urls=${APP_LOGOUT_URLS}" \
             -var="github_access_token=${AMPLIFY_GITHUB_TOKEN}" \
             -var="google_oauth_client_id=${GOOGLE_OAUTH_CLIENT_ID}" \
             -var="google_oauth_client_secret=${GOOGLE_OAUTH_CLIENT_SECRET}"
+
+      # Apply the exact saved plan (it already carries the variable values).
+      - name: Terraform apply (staging)
+        run: |
+          set -euo pipefail
+          terraform -chdir=infra/envs/staging apply -input=false staging.tfplan
 
   deploy:
     name: Trigger Amplify Release
