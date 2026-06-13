@@ -4,6 +4,8 @@ import { useCallback, useMemo, useState } from "react";
 import SearchBar from "./SearchBar";
 import FilterControls from "./FilterControls";
 import TripGrid from "./TripGrid";
+import { Badge } from "@/components/ui/badge";
+import { Select } from "@/components/ui/select";
 import {
   filterTrips,
   groupTrips,
@@ -58,29 +60,44 @@ export default function TripBrowser({
     }));
   }, [visible, groupBy]);
 
-  const selectClass =
-    "rounded-md border border-black/15 bg-transparent px-2 py-2 text-sm outline-none focus:border-foreground/40 dark:border-white/20";
+  const resultLabel = `${visible.length} route${
+    visible.length === 1 ? "" : "s"
+  }`;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="sm:max-w-xs sm:flex-1">
-          <SearchBar onChange={handleSearch} />
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4 shadow-sm">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+          <div className="lg:max-w-sm lg:flex-1">
+            <SearchBar onChange={handleSearch} />
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <label
+              htmlFor="trip-group-by"
+              className="text-sm font-medium text-muted-foreground"
+            >
+              Group
+            </label>
+            <Select
+              id="trip-group-by"
+              aria-label="Group trips by"
+              className="min-w-48"
+              value={groupBy}
+              onChange={(e) => setGroupBy(e.target.value as GroupField | "")}
+            >
+              <option value="">No grouping</option>
+              {GROUP_OPTIONS.map((g) => (
+                <option key={g.value} value={g.value}>
+                  By {g.label.toLowerCase()}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <Badge variant="outline" className="w-fit bg-background">
+            {resultLabel}
+          </Badge>
         </div>
         <FilterControls trips={trips} filters={filters} onChange={setFilters} />
-        <select
-          aria-label="Group trips by"
-          className={selectClass}
-          value={groupBy}
-          onChange={(e) => setGroupBy(e.target.value as GroupField | "")}
-        >
-          <option value="">No grouping</option>
-          {GROUP_OPTIONS.map((g) => (
-            <option key={g.value} value={g.value}>
-              Group by {g.label.toLowerCase()}
-            </option>
-          ))}
-        </select>
       </div>
 
       <TripGrid
