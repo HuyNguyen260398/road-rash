@@ -5,13 +5,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MenuIcon, XIcon } from "lucide-react";
 import AppLogo from "@/components/AppLogo";
+import UserMenu from "@/components/UserMenu";
 import ModeToggle from "@/components/ModeToggle";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [
-  { href: "/", label: "Discover" },
-  { href: "/saved", label: "Saved" },
+const NAV_ITEMS = [{ href: "/", label: "Discover" }] as const;
+
+// Destinations that move into the avatar dropdown on desktop but stay in the
+// mobile menu so every view is reachable on small screens. Shown to all users
+// on mobile (matching the prior nav); guests who tap them are redirected to
+// /login by the target pages' own auth guards.
+const ACCOUNT_LINKS = [
+  { href: "/saved", label: "Liked trips" },
   { href: "/my-trips", label: "My trips" },
 ] as const;
 
@@ -63,6 +69,7 @@ export default function AppHeader() {
           <Link href="/trips/new" className={buttonVariants()}>
             Create trip
           </Link>
+          <UserMenu />
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
@@ -91,6 +98,16 @@ export default function AppHeader() {
             aria-label="Mobile"
           >
             {NAV_ITEMS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={navLinkClass(isActive(item.href))}
+                onClick={closeMenu}
+              >
+                {item.label}
+              </Link>
+            ))}
+            {ACCOUNT_LINKS.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
