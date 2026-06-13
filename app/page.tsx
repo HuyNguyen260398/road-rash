@@ -1,4 +1,4 @@
-import Link from "next/link";
+import AppShell from "@/components/AppShell";
 import TripBrowser from "@/components/TripBrowser";
 import AiSuggestBox from "@/components/AiSuggestBox";
 import EmptyState from "@/components/EmptyState";
@@ -23,45 +23,31 @@ export default async function Home() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8">
-      <header className="mb-6 flex items-center justify-between gap-4">
-        <div>
+    <AppShell>
+      <div className="mx-auto w-full max-w-6xl px-4 py-8">
+        <header className="mb-6">
           <h1 className="text-2xl font-semibold">Discover trips</h1>
           <p className="text-sm opacity-70">
             Browse travel plans shared by the community.
           </p>
-        </div>
-        <nav className="flex items-center gap-3 text-sm font-medium">
-          <Link href="/saved" className="hover:underline">
-            Saved
-          </Link>
-          <Link href="/my-trips" className="hover:underline">
-            My trips
-          </Link>
-          <Link
-            href="/trips/new"
-            className="rounded-md bg-foreground px-3 py-2 text-background transition-opacity hover:opacity-90"
-          >
-            Create trip
-          </Link>
-        </nav>
-      </header>
+        </header>
 
-      {loadError ? (
-        <EmptyState
-          icon="⚠️"
-          title="Trips are unavailable right now"
-          description={loadError}
-        />
-      ) : (
-        <div className="flex flex-col gap-6">
-          {trips.length > 0 && <AiSuggestBox trips={trips} />}
-          <TripBrowser
-            trips={trips}
-            emptyMessage="No trips yet — be the first to share one."
+        {loadError ? (
+          <EmptyState
+            icon="⚠️"
+            title="Trips are unavailable right now"
+            description={loadError}
           />
-        </div>
-      )}
-    </main>
+        ) : (
+          <div className="flex flex-col gap-6">
+            {trips.length > 0 && <AiSuggestBox trips={trips} />}
+            <TripBrowser
+              trips={trips}
+              emptyMessage="No trips yet — be the first to share one."
+            />
+          </div>
+        )}
+      </div>
+    </AppShell>
   );
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import AppShell from "@/components/AppShell";
 import TripGrid from "@/components/TripGrid";
 import EmptyState from "@/components/EmptyState";
 import { getServerSession } from "@/lib/server-session";
@@ -31,37 +32,39 @@ export default async function SavedPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8">
-      <header className="mb-6 flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Saved trips</h1>
-        <Link href="/" className="text-sm font-medium hover:underline">
-          Discover more
-        </Link>
-      </header>
+    <AppShell>
+      <div className="mx-auto w-full max-w-6xl px-4 py-8">
+        <header className="mb-6 flex items-center justify-between gap-4">
+          <h1 className="text-2xl font-semibold">Saved trips</h1>
+          <Link href="/" className="text-sm font-medium hover:underline">
+            Discover more
+          </Link>
+        </header>
 
-      {loadError ? (
-        <EmptyState
-          icon="⚠️"
-          title="Couldn’t load your saved trips"
-          description={loadError}
-        />
-      ) : saved.length === 0 ? (
-        <EmptyState
-          icon="🤍"
-          title="No saved trips yet"
-          description="Tap the heart on any trip to save it here for later."
-          action={
-            <Link
-              href="/"
-              className="rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
-            >
-              Browse trips
-            </Link>
-          }
-        />
-      ) : (
-        <TripGrid trips={saved} />
-      )}
-    </main>
+        {loadError ? (
+          <EmptyState
+            icon="⚠️"
+            title="Couldn’t load your saved trips"
+            description={loadError}
+          />
+        ) : saved.length === 0 ? (
+          <EmptyState
+            icon="🤍"
+            title="No saved trips yet"
+            description="Tap the heart on any trip to save it here for later."
+            action={
+              <Link
+                href="/"
+                className="rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
+              >
+                Browse trips
+              </Link>
+            }
+          />
+        ) : (
+          <TripGrid trips={saved} />
+        )}
+      </div>
+    </AppShell>
   );
 }

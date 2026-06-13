@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import AppShell from "@/components/AppShell";
 import TripForm from "@/components/TripForm";
 import { getServerSession } from "@/lib/server-session";
 import { api, ApiError } from "@/lib/api-client";
@@ -30,9 +31,11 @@ export default async function EditTripPage({
   if (trip.authorId !== session.sub) redirect(`/trip/${id}`);
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-semibold">Edit trip</h1>
-      <TripForm trip={trip} />
-    </main>
+    <AppShell>
+      <div className="mx-auto w-full max-w-2xl px-4 py-8">
+        <h1 className="mb-6 text-2xl font-semibold">Edit trip</h1>
+        <TripForm trip={trip} />
+      </div>
+    </AppShell>
   );
 }

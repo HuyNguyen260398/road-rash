@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import AppShell from "@/components/AppShell";
 import TripGrid from "@/components/TripGrid";
 import EmptyState from "@/components/EmptyState";
 import { getServerSession } from "@/lib/server-session";
@@ -24,40 +25,42 @@ export default async function MyTripsPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8">
-      <header className="mb-6 flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">My trips</h1>
-        <Link
-          href="/trips/new"
-          className="rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
-        >
-          Create trip
-        </Link>
-      </header>
+    <AppShell>
+      <div className="mx-auto w-full max-w-6xl px-4 py-8">
+        <header className="mb-6 flex items-center justify-between gap-4">
+          <h1 className="text-2xl font-semibold">My trips</h1>
+          <Link
+            href="/trips/new"
+            className="rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
+          >
+            Create trip
+          </Link>
+        </header>
 
-      {loadError ? (
-        <EmptyState
-          icon="⚠️"
-          title="Couldn’t load your trips"
-          description={loadError}
-        />
-      ) : mine.length === 0 ? (
-        <EmptyState
-          icon="🧳"
-          title="You haven’t created any trips yet"
-          description="Share your first travel plan with the community."
-          action={
-            <Link
-              href="/trips/new"
-              className="rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
-            >
-              Create trip
-            </Link>
-          }
-        />
-      ) : (
-        <TripGrid trips={mine} />
-      )}
-    </main>
+        {loadError ? (
+          <EmptyState
+            icon="⚠️"
+            title="Couldn’t load your trips"
+            description={loadError}
+          />
+        ) : mine.length === 0 ? (
+          <EmptyState
+            icon="🧳"
+            title="You haven’t created any trips yet"
+            description="Share your first travel plan with the community."
+            action={
+              <Link
+                href="/trips/new"
+                className="rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
+              >
+                Create trip
+              </Link>
+            }
+          />
+        ) : (
+          <TripGrid trips={mine} />
+        )}
+      </div>
+    </AppShell>
   );
 }

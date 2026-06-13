@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import AppShell from "@/components/AppShell";
 import TripForm from "@/components/TripForm";
 import { getServerSession } from "@/lib/server-session";
 
@@ -11,9 +12,11 @@ export default async function NewTripPage() {
   if (!session) redirect("/login");
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-semibold">Create a trip</h1>
-      <TripForm />
-    </main>
+    <AppShell>
+      <div className="mx-auto w-full max-w-2xl px-4 py-8">
+        <h1 className="mb-6 text-2xl font-semibold">Create a trip</h1>
+        <TripForm />
+      </div>
+    </AppShell>
   );
 }

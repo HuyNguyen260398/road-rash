@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import AppShell from "@/components/AppShell";
 import TripDetail from "@/components/TripDetail";
 import { api, ApiError } from "@/lib/api-client";
 import type { Trip } from "@/lib/types";
@@ -68,13 +69,15 @@ export default async function TripPage({
   const trip = await loadTrip(id);
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-4 py-8">
-      <Link href="/" className="text-sm opacity-70 hover:underline">
-        ← Back to trips
-      </Link>
-      <div className="mt-4 overflow-hidden rounded-xl border border-black/10 dark:border-white/15">
-        <TripDetail trip={trip} />
+    <AppShell>
+      <div className="mx-auto w-full max-w-2xl px-4 py-8">
+        <Link href="/" className="text-sm opacity-70 hover:underline">
+          ← Back to trips
+        </Link>
+        <div className="mt-4 overflow-hidden rounded-xl border border-black/10 dark:border-white/15">
+          <TripDetail trip={trip} />
+        </div>
       </div>
-    </main>
+    </AppShell>
   );
 }
