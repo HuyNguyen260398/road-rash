@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useFavorites } from "@/components/FavoritesProvider";
 import {
   BikeIcon,
@@ -11,9 +12,11 @@ import {
   HeartIcon,
   MapIcon,
   NavigationIcon,
+  PencilIcon,
   UserIcon,
   type LucideIcon,
 } from "lucide-react";
+import { fetchAuthSession } from "aws-amplify/auth";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { toMyMapsEmbedUrl, validateMyMapsUrl } from "@/lib/validation";
@@ -83,6 +86,25 @@ export default function TripDetail({ trip }: { trip: Trip }) {
     }
     void toggle(trip.id);
   }
+
+  const [currentSub, setCurrentSub] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    fetchAuthSession()
+      .then((session) => {
+        const sub = session.tokens?.idToken?.payload.sub;
+        if (active && typeof sub === "string") setCurrentSub(sub);
+      })
+      .catch(() => {
+        // Signed out / no session — no owner controls.
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const isOwner = currentSub !== null && currentSub === trip.authorId;
 
   return (
     <article className="flex flex-col gap-6 p-5 sm:p-6">
@@ -162,15 +184,26 @@ export default function TripDetail({ trip }: { trip: Trip }) {
             <MapIcon className="size-4" aria-hidden />
             Map
           </h2>
-          <a
-            href={googleMapsLink(trip)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(buttonVariants({ size: "sm" }), "shrink-0")}
-          >
-            <NavigationIcon aria-hidden />
-            Open in Google Maps
-          </a>
+          <div className="flex shrink-0 items-center gap-2">
+            {isOwner ? (
+              <Link
+                href={`/trips/${trip.id}/edit`}
+                className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+              >
+                <PencilIcon className="size-4" aria-hidden />
+                Edit
+              </Link>
+            ) : null}
+            <a
+              href={googleMapsLink(trip)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(buttonVariants({ size: "sm" }))}
+            >
+              <NavigationIcon aria-hidden />
+              Open in Google Maps
+            </a>
+          </div>
         </div>
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-border bg-muted sm:aspect-video">
           {embedSrc && !embedFailed ? (
