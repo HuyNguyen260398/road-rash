@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ConfigureAmplifyClientSide from "@/components/ConfigureAmplifyClientSide";
 import FavoritesProvider from "@/components/FavoritesProvider";
+import ThemeProvider from "@/components/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +34,9 @@ export default function RootLayout({
     >
       <body className="flex min-h-dvh flex-col bg-background text-foreground">
         <ConfigureAmplifyClientSide />
-        <FavoritesProvider>{children}</FavoritesProvider>
+        <ThemeProvider>
+          <FavoritesProvider>{children}</FavoritesProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
