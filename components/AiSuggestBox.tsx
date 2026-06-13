@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { RotateCcwIcon, SparklesIcon } from "lucide-react";
 import TripCard from "./TripCard";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api-client";
 import { filterTrips } from "@/lib/search";
 import type { SuggestCandidate, Trip } from "@/lib/types";
@@ -115,12 +115,12 @@ export default function AiSuggestBox({ trips }: { trips: Trip[] }) {
           <label htmlFor="ai-prompt" className="sr-only">
             Trip idea prompt
           </label>
-          <Textarea
+          <Input
             id="ai-prompt"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Weekend mountain ride, coastal drive with food stops, quiet cycling route..."
-            className="min-h-20 bg-background"
+            className="bg-background"
           />
         </div>
         <div className="flex items-end gap-2">
