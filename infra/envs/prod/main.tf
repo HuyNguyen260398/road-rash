@@ -12,6 +12,7 @@ locals {
     NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID = module.cognito.user_pool_client_id
     NEXT_PUBLIC_COGNITO_IDENTITY_POOL_ID    = module.cognito.identity_pool_id
     NEXT_PUBLIC_COGNITO_DOMAIN              = module.cognito.domain
+    NEXT_PUBLIC_COGNITO_GOOGLE_ENABLED      = tostring(module.cognito.google_provider_enabled)
     NEXT_PUBLIC_API_BASE_URL                = module.apigateway.api_base_url
     NEXT_PUBLIC_THUMBNAILS_BUCKET           = module.s3.thumbnails_bucket_name
   }
