@@ -2,7 +2,6 @@ import Link from "next/link";
 import { MapIcon, SparklesIcon, UsersIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 type DiscoverHeroProps = {
   tripCount: number;
@@ -69,15 +68,6 @@ export default function DiscoverHero({ tripCount }: DiscoverHeroProps) {
               <p className="mt-1 text-sm text-muted-foreground">{label}</p>
             </div>
           ))}
-          <div
-            className={cn(
-              "hidden rounded-lg border border-border bg-card p-4 shadow-sm lg:block",
-              "bg-[linear-gradient(135deg,var(--secondary),var(--primary))]",
-            )}
-            aria-hidden
-          >
-            <div className="h-24 rounded-md bg-background/20" />
-          </div>
         </div>
       </div>
     </section>
