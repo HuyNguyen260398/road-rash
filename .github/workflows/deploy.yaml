@@ -10,6 +10,24 @@ name: Deploy to Amplify
 on:
   push:
     branches: [main]
+    paths:
+      # Application/runtime source and assets only. Docs, plans, Terraform, and
+      # unrelated repository metadata should not trigger an automatic deploy.
+      - "app/**"
+      - "components/**"
+      - "lib/**"
+      - "services/**"
+      - "public/**"
+      - "proxy.ts"
+      - "next.config.ts"
+      - "postcss.config.mjs"
+      - "eslint.config.mjs"
+      - "tsconfig.json"
+      - "package.json"
+      - "amplify.yml"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".nvmrc"
   workflow_dispatch:
 
 # Never cancel an in-flight deploy; one staging app, so serialize globally.
