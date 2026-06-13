@@ -122,13 +122,18 @@ export default function TripDetail({ trip }: { trip: Trip }) {
             size="sm"
             onClick={handleFavorite}
             aria-pressed={favorited}
-            aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+            aria-label={
+              favorited ? "Remove from favorites" : "Add to favorites"
+            }
             title={favorited ? "Remove from favorites" : "Add to favorites"}
             className="shrink-0 gap-1.5"
           >
             <HeartIcon
               aria-hidden
-              className={cn("size-4", favorited ? "fill-current text-destructive" : "")}
+              className={cn(
+                "size-4",
+                favorited ? "fill-current text-destructive" : "",
+              )}
             />
             <span aria-hidden>{favoriteCount}</span>
             <span className="sr-only">
@@ -188,7 +193,9 @@ export default function TripDetail({ trip }: { trip: Trip }) {
             {isOwner ? (
               <Link
                 href={`/trips/${trip.id}/edit`}
-                className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                )}
               >
                 <PencilIcon className="size-4" aria-hidden />
                 Edit

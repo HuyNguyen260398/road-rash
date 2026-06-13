@@ -10,7 +10,10 @@ describe("buildFavoriteCountUpdate", () => {
       "SET favoriteCount = if_not_exists(favoriteCount, :zero) + :delta",
     );
     expect(input.ConditionExpression).toBe("attribute_exists(id)");
-    expect(input.ExpressionAttributeValues).toEqual({ ":delta": 1, ":zero": 0 });
+    expect(input.ExpressionAttributeValues).toEqual({
+      ":delta": 1,
+      ":zero": 0,
+    });
   });
 
   it("guards the decrement so the counter never goes below zero", () => {
@@ -21,6 +24,9 @@ describe("buildFavoriteCountUpdate", () => {
     expect(input.ConditionExpression).toBe(
       "attribute_exists(id) AND favoriteCount > :zero",
     );
-    expect(input.ExpressionAttributeValues).toEqual({ ":delta": -1, ":zero": 0 });
+    expect(input.ExpressionAttributeValues).toEqual({
+      ":delta": -1,
+      ":zero": 0,
+    });
   });
 });

@@ -113,7 +113,10 @@ export default function TripBrowser({
 
     const byId = new Map(trips.map((t) => [t.id, t]));
     try {
-      const { suggestions } = await api.suggestTrips(prompt, toCandidates(trips));
+      const { suggestions } = await api.suggestTrips(
+        prompt,
+        toCandidates(trips),
+      );
       if (requestId !== requestIdRef.current) return; // superseded — discard
       const mapped = suggestions
         .map((s): AiResult | undefined => {
@@ -153,7 +156,8 @@ export default function TripBrowser({
   const aiActive = aiStatus === "done";
   const resultCount = aiActive ? aiResults.length : visible.length;
   const resultLabel = `${resultCount} route${resultCount === 1 ? "" : "s"}`;
-  const hasActiveFilters = Object.values(filters).some(Boolean) || Boolean(groupBy);
+  const hasActiveFilters =
+    Object.values(filters).some(Boolean) || Boolean(groupBy);
 
   return (
     <div className="flex flex-col gap-6">
@@ -180,7 +184,10 @@ export default function TripBrowser({
             <SlidersHorizontalIcon className="size-4" aria-hidden />
             {filtersOpen ? "Hide filters" : "Show filters"}
             {hasActiveFilters ? (
-              <span className="ml-1 size-2 rounded-full bg-primary" aria-hidden />
+              <span
+                className="ml-1 size-2 rounded-full bg-primary"
+                aria-hidden
+              />
             ) : null}
           </Button>
           <Badge variant="outline" className="bg-background">
@@ -194,7 +201,11 @@ export default function TripBrowser({
           id="filter-panel"
           className={`flex-col gap-3 ${filtersOpen ? "flex" : "hidden"}`}
         >
-          <FilterControls trips={trips} filters={filters} onChange={setFilters} />
+          <FilterControls
+            trips={trips}
+            filters={filters}
+            onChange={setFilters}
+          />
           <div className="flex items-center gap-2">
             <label
               htmlFor="trip-group-by"

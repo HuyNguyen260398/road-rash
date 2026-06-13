@@ -39,7 +39,10 @@ export default function DiscoverHero({ tripCount }: DiscoverHeroProps) {
       />
       <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8 lg:py-16">
         <div className="flex max-w-3xl flex-col justify-center gap-6">
-          <Badge variant="outline" className="w-fit border-white/40 bg-white/10 text-white">
+          <Badge
+            variant="outline"
+            className="w-fit border-white/40 bg-white/10 text-white"
+          >
             Community road trips
           </Badge>
           <div className="space-y-4">

@@ -44,9 +44,9 @@ describe("buildSeedTrips", () => {
   });
 
   it("omits googleMapsUrl entirely when the template has none", () => {
-    expect(
-      buildSeedTrips(template).every((t) => !("googleMapsUrl" in t)),
-    ).toBe(true);
+    expect(buildSeedTrips(template).every((t) => !("googleMapsUrl" in t))).toBe(
+      true,
+    );
   });
 
   it("only emits known trip types and vehicles", () => {

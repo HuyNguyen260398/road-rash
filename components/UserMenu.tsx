@@ -43,9 +43,8 @@ export default function UserMenu() {
   // Roving focus across the menu items so the `role="menu"` keyboard contract
   // (arrows / Home / End, plus first-item focus on open) is actually honored.
   function focusItem(index: number) {
-    const items = menuRef.current?.querySelectorAll<HTMLElement>(
-      '[role="menuitem"]',
-    );
+    const items =
+      menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]');
     if (!items || items.length === 0) return;
     const clamped = (index + items.length) % items.length;
     items[clamped].focus();
@@ -62,9 +61,8 @@ export default function UserMenu() {
       if (!containerRef.current?.contains(e.target as Node)) setOpen(false);
     }
     function onKey(e: KeyboardEvent) {
-      const items = menuRef.current?.querySelectorAll<HTMLElement>(
-        '[role="menuitem"]',
-      );
+      const items =
+        menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]');
       if (e.key === "Escape") {
         setOpen(false);
         return;
