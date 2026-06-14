@@ -17,9 +17,8 @@ export const FIELD_LIMITS = {
   city: 100,
   province: 100,
   country: 100,
-  // URLs become an iframe src / deep link — bound them well under common limits.
+  // The URL becomes an iframe src / deep link — bound it well under common limits.
   myMapsUrl: 2048,
-  googleMapsUrl: 2048,
   // Server-issued S3 key (thumbnails/<sub>/<uuid>.<ext>, ~90 chars); cap with
   // headroom so a bypassed client can't bloat the item or overflow the
   // /uploads/thumbnail?key=… query when cards render.
@@ -48,7 +47,6 @@ export function validateTripInput(body: unknown): ValidationResult {
   const province = str(b.province);
   const country = str(b.country);
   const myMapsUrl = str(b.myMapsUrl);
-  const googleMapsUrl = str(b.googleMapsUrl);
   const thumbnailKey = str(b.thumbnailKey);
 
   if (!name) return { ok: false, message: "name is required" };
@@ -82,7 +80,6 @@ export function validateTripInput(body: unknown): ValidationResult {
       ["province", province],
       ["country", country],
       ["myMapsUrl", myMapsUrl],
-      ["googleMapsUrl", googleMapsUrl],
       ["thumbnailKey", thumbnailKey],
     ] as const
   ).find(([field, value]) => value.length > FIELD_LIMITS[field]);
@@ -117,7 +114,6 @@ export function validateTripInput(body: unknown): ValidationResult {
       vehicle: b.vehicle as TripInput["vehicle"],
       thumbnailKey: thumbnailKey || undefined,
       myMapsUrl,
-      googleMapsUrl: googleMapsUrl || undefined,
     },
   };
 }

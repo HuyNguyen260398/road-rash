@@ -31,24 +31,6 @@ describe("buildSeedTrips", () => {
     ).toBe(true);
   });
 
-  it("propagates the template's googleMapsUrl when present", () => {
-    const withLink: TripInput = {
-      ...template,
-      googleMapsUrl: "https://maps.app.goo.gl/EXAMPLE",
-    };
-    expect(
-      buildSeedTrips(withLink).every(
-        (t) => t.googleMapsUrl === withLink.googleMapsUrl,
-      ),
-    ).toBe(true);
-  });
-
-  it("omits googleMapsUrl entirely when the template has none", () => {
-    expect(buildSeedTrips(template).every((t) => !("googleMapsUrl" in t))).toBe(
-      true,
-    );
-  });
-
   it("only emits known trip types and vehicles", () => {
     const types = new Set([
       "ROAD_TRIP",

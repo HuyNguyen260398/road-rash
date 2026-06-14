@@ -14,7 +14,6 @@ const validBody = () => ({
   province: "Ha Giang",
   country: "Vietnam",
   myMapsUrl: "https://www.google.com/maps/d/view?mid=abc123",
-  googleMapsUrl: "https://maps.app.goo.gl/xyz",
 });
 
 describe("validateTripInput — valid input", () => {
@@ -127,14 +126,6 @@ describe("validateTripInput — server-side bounds (limits)", () => {
     const result = validateTripInput({
       ...validBody(),
       myMapsUrl: `https://www.google.com/maps/d/view?mid=${longMid}`,
-    });
-    expect(result).toMatchObject({ ok: false });
-  });
-
-  it("rejects a googleMapsUrl over the length limit", () => {
-    const result = validateTripInput({
-      ...validBody(),
-      googleMapsUrl: `https://maps.app.goo.gl/${"a".repeat(FIELD_LIMITS.googleMapsUrl)}`,
     });
     expect(result).toMatchObject({ ok: false });
   });
