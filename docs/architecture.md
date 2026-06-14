@@ -2,7 +2,7 @@
 
 **Status:** Draft (pre-implementation)
 **Last updated:** 2026-06-06
-**Companion documents:** [`road-rash-plan.md`](road-rash-plan.md) (product plan), [`../plan/feature-road-rash-mvp-1.md`](../plan/feature-road-rash-mvp-1.md) (implementation plan)
+**Companion documents:** [`road-rash-plan.md`](road-rash-plan.md) (product plan), [`plan/feature-road-rash-mvp-1.md`](plan/feature-road-rash-mvp-1.md) (implementation plan)
 
 ---
 

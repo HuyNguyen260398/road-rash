@@ -3,7 +3,7 @@
 A mobile-first web app for creating, sharing, and discovering travel trip plans, built around Google My Maps. Plan a road trip, attach your My Maps route, add a thumbnail, and share it — others can browse, search, favorite, and get AI-powered suggestions for where to ride next.
 
 > [!NOTE]
-> This repository is at the **planning stage**. The architecture, data model, and milestones are defined in [`docs/road-rash-plan.md`](docs/road-rash-plan.md); application code does not exist yet. Start with milestone **M0 — Project setup**.
+> The MVP is **largely built**. Milestones **M0–M7 have landed** (auth, trip CRUD, favorites, search/filter/group, AI suggestions, and the trip detail modal); **M8 (QA + launch)** is in progress. CI deploys `main` to a live **staging** environment; there is no prod deployment yet. See [`docs/Project_Architecture_Blueprint.md`](docs/Project_Architecture_Blueprint.md) for a code-grounded architecture reference and [`docs/plan/feature-road-rash-mvp-1.md`](docs/plan/feature-road-rash-mvp-1.md) for the per-task status.
 
 ## Features
 
@@ -53,26 +53,21 @@ See [`docs/architecture.md`](docs/architecture.md) and [`docs/road-rash-plan.md`
 
 ## Getting started
 
-> [!NOTE]
-> These steps describe the intended M0 setup. The scaffolding does not exist yet — running them is how you create it.
-
 ### Prerequisites
 
-- [Node.js](https://nodejs.org) 20 (an `.nvmrc` is provided — run `nvm use`)
-- [pnpm](https://pnpm.io) (`corepack enable` then `corepack prepare pnpm@latest --activate`)
-- [Terraform](https://developer.hashicorp.com/terraform) ≥ 1.10 and an AWS account with credentials configured
-- A Google Cloud project with an OAuth client and a Gemini API key
+- [Node.js](https://nodejs.org) 24 (an `.nvmrc` is provided — run `nvm use`)
+- [pnpm](https://pnpm.io) 11 (`corepack enable` activates the version pinned in `package.json`)
+- [Terraform](https://developer.hashicorp.com/terraform) ≥ 1.10 and an AWS account with credentials configured (only needed to provision/deploy infrastructure)
+- A Google Cloud project with an OAuth client and a Gemini API key (for auth + AI features)
 
 ### Setup
 
 ```bash
-# Scaffold the Next.js app (M0)
-pnpm create next-app
-
 # Install dependencies
 pnpm install
 
 # Copy environment template and fill in your values
+# (NEXT_PUBLIC_* Cognito/API values come from Terraform outputs)
 cp .env.example .env.local
 ```
 
@@ -116,27 +111,34 @@ pnpm test:watch                 # watch mode
 
 ```
 road-rash/
+├── app/                    # Next.js App Router pages (SSR; home, trip, saved, my-trips, login)
+├── components/             # React UI (TripBrowser, FavoritesProvider, TripDetailModal, ui/*)
+├── lib/                    # Typed API client, search, validation, domain types, Amplify config
+├── services/               # Lambda handlers: trips, favorites, presign, suggest-trips (+ shared/)
+├── infra/                  # Terraform: bootstrap, modules/*, envs/{staging,prod}
+├── scripts/                # Seed + favoriteCount reconcile scripts
 ├── docs/
-│   ├── road-rash-plan.md   # architecture & development plan (source of truth)
-│   └── architecture.md     # architecture document (C4, ADRs, service inventory)
+│   ├── road-rash-plan.md                  # product & development plan
+│   ├── architecture.md                    # architecture document (C4, ADRs)
+│   └── Project_Architecture_Blueprint.md  # code-grounded architecture reference
 ├── plan/                   # executable implementation plan (M0–M8 tasks)
-├── infra/                  # Terraform (created during M0): bootstrap, modules, envs
-├── services/               # Lambda handlers (created during M3+)
-├── CLAUDE.md               # guidance for Claude Code
-└── (app/, components/, lib/ created during M0 scaffolding)
+└── CLAUDE.md / AGENTS.md   # contributor + agent guidance
 ```
 
 ## Roadmap
 
-The build is organized into milestones (full detail in [the plan](docs/road-rash-plan.md)):
+The build is organized into milestones (full detail in [the plan](docs/road-rash-plan.md)). **M0–M7 are complete; M8 is in progress.**
 
-- **M0** Project + Terraform setup · **M1** Auth (Cognito + Google) · **M2** Data + storage
-- **M3** Trip CRUD · **M4** Social (favorites) · **M5** Search/filter/grouping
-- **M6** AI suggestions (Gemini) · **M7** Maps integration · **M8** Polish + deploy
+- ✅ **M0** Project + Terraform setup · ✅ **M1** Auth (Cognito + Google) · ✅ **M2** Data + storage
+- ✅ **M3** Trip CRUD · ✅ **M4** Social (favorites) · ✅ **M5** Search/filter/grouping
+- ✅ **M6** AI suggestions (Gemini) · ✅ **M7** Maps integration (detail modal) · 🚧 **M8** Polish + prod deploy
 
 ## Documentation
 
-- [Architecture document](docs/architecture.md)
+- [Architecture diagrams](docs/architecture-diagrams.md) — Mermaid: AWS resources, flows, data model, CI/CD
+- [Architecture blueprint](docs/Project_Architecture_Blueprint.md) — code-grounded reference
+- [Architecture document](docs/architecture.md) — C4 views & ADRs
 - [Architecture & development plan](docs/road-rash-plan.md)
-- [Implementation plan](plan/feature-road-rash-mvp-1.md)
+- [Implementation plan](docs/plan/feature-road-rash-mvp-1.md)
+- [AWS deployment](docs/aws-deployment.md)
 - [Terraform](https://developer.hashicorp.com/terraform) · [AWS Amplify Hosting](https://docs.amplify.aws/nextjs/start/) · [Next.js](https://nextjs.org/docs)

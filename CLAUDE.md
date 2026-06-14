@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current state
 
-This repo is **well underway**, not pre-code. The Next.js app (`app/`, `components/`, `lib/`), the Terraform infra (`infra/bootstrap`, `infra/modules/*`, `infra/envs/{staging,prod}`), and the Lambda services (`services/{trips,presign,suggest-trips}`) are all on disk, with `package.json` / `pnpm-lock.yaml` committed. Milestones **M0–M3, M5, and M6 have landed**; **M4 (favorites / saved view / public share page) is the main gap** — the heart on `TripCard` is display-only, and there is no `services/favorites/handler.ts`, `app/saved/`, or favorites routes yet (the `services/favorites/dist/` artifact is stale). Treat `plan/feature-road-rash-mvp-1.md` (the per-task status table), `docs/road-rash-plan.md`, and `docs/architecture.md` as the source of truth for what's done.
+This repo is **well underway**, not pre-code. The Next.js app (`app/`, `components/`, `lib/`), the Terraform infra (`infra/bootstrap`, `infra/modules/*`, `infra/envs/{staging,prod}`), and all four Lambda services (`services/{trips,favorites,presign,suggest-trips}`) are on disk, with `package.json` / `pnpm-lock.yaml` committed. Milestones **M0–M7 have landed** — including M4 (favorites: `services/favorites/handler.ts`, optimistic heart in `FavoritesProvider`, `app/saved/`, public share page `app/trip/[id]/`) and M7 (trip detail modal with the safe My Maps iframe). **M8 (QA + launch) is in progress**: responsive polish, infinite scroll, and seeding have shipped; the remaining gaps are the **prod `terraform apply` (TASK-049)** and the **end-to-end smoke test (TASK-050)**. Treat `docs/plan/feature-road-rash-mvp-1.md` (the per-task status table), `docs/architecture.md`, and `docs/Project_Architecture_Blueprint.md` (a code-grounded reference) as the source of truth for what's done.
 
-**Not yet deployed:** Terraform is written and `validate`-clean, but `terraform apply` is **deferred** — no live AWS resources exist. So anything needing real Cognito / API Gateway / DynamoDB / S3 / Gemini (sign-in, CRUD persistence, AI suggestions) can't be exercised end-to-end locally yet; `pnpm test` (Vitest) and `pnpm build` are the current verification. When something is described as "planned" below, verify it exists on disk before assuming.
+**Deployment:** CI (`.github/workflows/deploy.yaml`) deploys `main` to the **staging** environment — it runs `pnpm build:lambdas`, `terraform apply`s the staging stack, and triggers an Amplify RELEASE, so live staging AWS resources (Cognito / API Gateway / DynamoDB / S3 / Gemini) **do exist**. **There is no prod environment deployed yet** (the `prod` Terraform root exists but hasn't been `apply`-ed). Locally, `pnpm test` (Vitest) and `pnpm build` are the primary verification, since local runs don't reach the deployed backend without env wiring. When something is described as "planned" below, verify it exists on disk before assuming.
 
 ## What this project is
 
@@ -36,8 +36,8 @@ This repo is **well underway**, not pre-code. The Next.js app (`app/`, `componen
 ## Repository layout
 
 - `infra/` — Terraform: `bootstrap/` (state bucket), `envs/{staging,prod}` (root with `backend "s3"`), `modules/{cognito,dynamodb,s3,lambda,apigateway,hosting,iam,ssm}`. See `infra/README.md`.
-- `services/{trips,presign,suggest-trips}/` — Lambda handlers (TypeScript), with `services/shared/` (http/dynamo/auth helpers) and `services/build.mjs` (esbuild bundler). The `favorites` handler is planned (M4) but **not yet implemented**.
-- `app/`, `components/`, `lib/` — Next.js frontend (`lib/` holds the typed API client, search, domain types, validation, and Amplify config).
+- `services/{trips,favorites,presign,suggest-trips}/` — Lambda handlers (TypeScript), each with co-located pure helpers (`validate.ts` / `select.ts` / `count.ts`) and `*.test.ts`. Shared helpers in `services/shared/` (http/dynamo/auth); `services/build.mjs` is the esbuild bundler.
+- `app/`, `components/`, `lib/` — Next.js frontend (`lib/` holds the typed API client, search, domain types, validation, Amplify config, and the SSR session reader). Client islands of note: `components/TripBrowser.tsx` (search + AI) and `components/FavoritesProvider.tsx` (app-wide optimistic favorites).
 
 ## Commands
 
@@ -52,4 +52,6 @@ This project uses **pnpm** (not npm/yarn); `pnpm-lock.yaml` is committed.
 
 - `docs/road-rash-plan.md` — product/architecture plan: data model, milestones (M0–M8), risk table. §7 lists deferred open questions (personalization, ratings, PWA, OpenSearch) — explicitly out of scope for the initial build.
 - `docs/architecture.md` — architecture document: C4 context/container views, data/auth/AI flows, security controls, and ADR summary.
-- `plan/feature-road-rash-mvp-1.md` — executable implementation plan with atomic, numbered tasks (TASK-001…) mapped to phases M0–M8; front-matter `status` is `In progress`. **Keep the `Completed`/`Date` columns updated as tasks land** — this table is the authoritative record of what's done. Per-phase step guides live in `plan/steps/`.
+- `docs/Project_Architecture_Blueprint.md` — code-grounded architecture blueprint generated from the source on disk: subsystem map, component-by-component patterns, layer/dependency rules, implementation templates, and a new-development guide.
+- `docs/architecture-diagrams.md` — Mermaid diagrams: AWS resources, request/authorization flow, AI suggestion flow, DynamoDB data model, and the CI/CD + Terraform pipeline.
+- `docs/plan/feature-road-rash-mvp-1.md` — executable implementation plan with atomic, numbered tasks (TASK-001…) mapped to phases M0–M8; front-matter `status` is `In progress`. **Keep the `Completed`/`Date` columns updated as tasks land** — this table is the authoritative record of what's done. Per-phase step guides live in `docs/plan/steps/`.
