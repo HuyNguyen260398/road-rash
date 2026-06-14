@@ -4,7 +4,7 @@
 > and M6, M4 favorites is code-complete — but **no `terraform apply` has run yet; there
 > are zero live AWS resources.** This is the single source for standing an environment up
 > **from zero**: rationale + secret-handling up top, then a command-level checklist.
-> Derived from `plan/steps/phase-*.md`, `infra/README.md`, and the env composition in
+> Derived from `docs/plan/steps/phase-*.md`, `infra/README.md`, and the env composition in
 > `infra/envs/{staging,prod}/main.tf`.
 
 Conventions: region `ap-southeast-1`, project `road-rash`. Run Terraform from a per-env
@@ -264,5 +264,5 @@ pnpm test && pnpm build
 ## Key references
 
 - `infra/README.md` — bootstrap-before-backend ordering, per-env workflow.
-- `plan/steps/phase-1…9` — per-task detail and Done checks.
+- `docs/plan/steps/phase-1…9` — per-task detail and Done checks.
 - `infra/envs/staging/example.tfvars`, `backend.hcl.example` — exact var/secret handling.

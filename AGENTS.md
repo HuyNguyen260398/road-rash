@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-`road-rash` is a Next.js App Router project backed by AWS Lambda services and Terraform-managed infrastructure. Frontend routes live in `app/`, reusable React UI in `components/`, and shared TypeScript utilities in `lib/`. Lambda handlers live under `services/<name>/`, with common helpers in `services/shared/` and bundled output in ignored `services/**/dist/`. Terraform is split into `infra/bootstrap`, `infra/envs/{staging,prod}`, and reusable `infra/modules/*`. Planning and architecture references live in `docs/` and `plan/`.
+`road-rash` is a Next.js App Router project backed by AWS Lambda services and Terraform-managed infrastructure. The MVP is largely built (milestones M0–M7 landed; M8 in progress). Frontend routes live in `app/`, reusable React UI in `components/`, and shared TypeScript utilities in `lib/`. Lambda handlers live under `services/<name>/` — `trips`, `favorites`, `presign`, and `suggest-trips` — with common helpers in `services/shared/` and bundled output in ignored `services/**/dist/`. Terraform is split into `infra/bootstrap`, `infra/envs/{staging,prod}`, and reusable `infra/modules/*`. Planning and architecture references live in `docs/` (start with `docs/Project_Architecture_Blueprint.md`; per-task status in `docs/plan/`).
 
 ## Build, Test, and Development Commands
 
@@ -26,7 +26,7 @@ Unit tests use Vitest. Cover validation, search/filtering, service selection log
 
 ## Commit & Pull Request Guidelines
 
-Recent history uses Conventional Commit-style prefixes, for example `ci(deploy): ...`, `fix(infra): ...`, and `docs: ...`. Keep commits focused and imperative. PRs should include a concise summary, verification commands run, linked issues or plan tasks when relevant, and screenshots for visible UI changes. Note any required environment, Terraform, or deployment follow-up.
+Recent history uses Conventional Commit-style prefixes, for example `ci(deploy): ...`, `fix(infra): ...`, and `docs: ...`. Keep commits focused and imperative. PRs should include a concise summary, verification commands run, linked issues or plan tasks when relevant, and screenshots for visible UI changes. Note any required environment, Terraform, or deployment follow-up. PR CI gates (`nextjs-ci.yaml`, `tf-ci.yaml`) run lint, `format:check`, build, test, and Terraform fmt/validate/tflint — run these locally before pushing. Merging to `main` triggers a deploy to the live **staging** environment (`deploy.yaml`).
 
 ## Security & Configuration Tips
 
