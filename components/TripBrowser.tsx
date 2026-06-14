@@ -6,6 +6,7 @@ import SearchPill from "./SearchPill";
 import FilterControls from "./FilterControls";
 import TripCard from "./TripCard";
 import TripGrid from "./TripGrid";
+import LoadMoreIndicator from "./LoadMoreIndicator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -109,6 +110,7 @@ export default function TripBrowser({
   const {
     visible: visibleAi,
     hasMore: hasMoreAi,
+    loading: loadingAi,
     sentinelRef: aiSentinelRef,
   } = useInfiniteScroll(aiResults);
 
@@ -249,7 +251,10 @@ export default function TripBrowser({
           <>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {visibleAi.map(({ trip, reason }) => (
-                <div key={trip.id} className="flex flex-col gap-1">
+                <div
+                  key={trip.id}
+                  className="flex animate-float-up flex-col gap-1"
+                >
                   <TripCard trip={trip} />
                   {reason ? (
                     <p className="px-1 text-xs italic text-muted-foreground">
@@ -260,7 +265,10 @@ export default function TripBrowser({
               ))}
             </div>
             {hasMoreAi ? (
-              <div ref={aiSentinelRef} aria-hidden className="h-px" />
+              <LoadMoreIndicator
+                sentinelRef={aiSentinelRef}
+                loading={loadingAi}
+              />
             ) : null}
           </>
         ) : null

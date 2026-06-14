@@ -16,21 +16,29 @@ import { useEffect, useRef, useState } from "react";
 // The one exception is a page too short to scroll at all, where the rest would be
 // unreachable: there we fill the viewport.
 //
+// Each page is revealed after a short `delayMs` during which `loading` is true, so
+// the transition reads as a deliberate "load more" — without it the swap would be
+// instant and invisible since the data is already in memory.
+//
 // The window resets to `pageSize` whenever `items` changes identity (a new
 // search/filter/group/AI result set); callers pass stable/memoized arrays.
-export function useInfiniteScroll<T>(items: T[], pageSize = 12) {
+export function useInfiniteScroll<T>(items: T[], pageSize = 12, delayMs = 450) {
   const [count, setCount] = useState(pageSize);
   const [prevItems, setPrevItems] = useState(items);
   const [scrolled, setScrolled] = useState(false);
+  const [loading, setLoading] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const loadingRef = useRef(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // New result set → back to the first page, and require a fresh scroll before
-  // auto-loading again. Adjusting state during render (per React's "you might not
-  // need an effect" guidance) re-renders immediately with the reset window.
+  // New result set → back to the first page, drop any in-flight load, and require
+  // a fresh scroll before auto-loading again. Adjusting state during render (per
+  // React's "you might not need an effect" guidance) re-renders immediately.
   if (items !== prevItems) {
     setPrevItems(items);
     setCount(pageSize);
     setScrolled(false);
+    setLoading(false);
   }
 
   const hasMore = count < items.length;
@@ -48,14 +56,12 @@ export function useInfiniteScroll<T>(items: T[], pageSize = 12) {
     const el = sentinelRef.current;
     if (!el) return;
 
-    const loadNext = () =>
-      setCount((c) => Math.min(c + pageSize, items.length));
+    const advance = () => setCount((c) => Math.min(c + pageSize, items.length));
 
     // Page can't scroll yet → the remaining items are unreachable. Fill instead
-    // of waiting for a scroll that can't happen. (Effect re-runs on `count`, so
-    // this keeps filling until the page becomes scrollable or runs out.)
+    // of waiting for a scroll that can't happen, and skip the loading flourish.
     if (document.documentElement.scrollHeight <= window.innerHeight) {
-      loadNext();
+      advance();
       return;
     }
 
@@ -64,14 +70,25 @@ export function useInfiniteScroll<T>(items: T[], pageSize = 12) {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting) loadNext();
+        if (!entries[0]?.isIntersecting || loadingRef.current) return;
+        loadingRef.current = true;
+        setLoading(true);
+        timeoutRef.current = setTimeout(() => {
+          advance();
+          setLoading(false);
+          loadingRef.current = false;
+        }, delayMs);
       },
       // Load the next page slightly before the sentinel is on screen.
       { rootMargin: "200px" },
     );
     observer.observe(el);
-    return () => observer.disconnect();
-  }, [hasMore, items.length, pageSize, count, scrolled]);
+    return () => {
+      observer.disconnect();
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      loadingRef.current = false;
+    };
+  }, [hasMore, items.length, pageSize, count, scrolled, delayMs]);
 
-  return { visible: items.slice(0, count), hasMore, sentinelRef };
+  return { visible: items.slice(0, count), hasMore, loading, sentinelRef };
 }
