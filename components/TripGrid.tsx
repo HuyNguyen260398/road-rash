@@ -5,6 +5,7 @@ import TripCard from "./TripCard";
 import TripDetailModal from "./TripDetailModal";
 import EmptyState from "./EmptyState";
 import { Badge } from "@/components/ui/badge";
+import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
 import type { Trip } from "@/lib/types";
 
 // Responsive, mobile-first card grid (TASK-027 / REQ-001): 1 column on phones,
@@ -29,6 +30,25 @@ function Cards({
         <TripCard key={trip.id} trip={trip} onOpen={onOpen} />
       ))}
     </div>
+  );
+}
+
+// Flat card grid that reveals 12 trips at a time, auto-loading the next batch as
+// the sentinel scrolls into view (used for the ungrouped list; grouped sections
+// render in full).
+function PaginatedCards({
+  trips,
+  onOpen,
+}: {
+  trips: Trip[];
+  onOpen: (trip: Trip) => void;
+}) {
+  const { visible, hasMore, sentinelRef } = useInfiniteScroll(trips);
+  return (
+    <>
+      <Cards trips={visible} onOpen={onOpen} />
+      {hasMore ? <div ref={sentinelRef} aria-hidden className="h-px" /> : null}
+    </>
   );
 }
 
@@ -67,7 +87,7 @@ export default function TripGrid({
       </div>
     );
   } else {
-    body = <Cards trips={trips} onOpen={setSelected} />;
+    body = <PaginatedCards trips={trips} onOpen={setSelected} />;
   }
 
   return (

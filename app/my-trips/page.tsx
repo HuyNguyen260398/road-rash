@@ -4,6 +4,7 @@ import { AlertTriangleIcon, RouteIcon } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import TripGrid from "@/components/TripGrid";
 import EmptyState from "@/components/EmptyState";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { buttonVariants } from "@/components/ui/button";
 import { getServerSession } from "@/lib/server-session";
 import { api } from "@/lib/api-client";
@@ -67,6 +68,7 @@ export default async function MyTripsPage() {
           <TripGrid trips={mine} />
         )}
       </div>
+      <ScrollToTopButton />
     </AppShell>
   );
 }

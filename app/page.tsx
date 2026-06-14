@@ -3,6 +3,7 @@ import AppShell from "@/components/AppShell";
 import DiscoverHero from "@/components/DiscoverHero";
 import TripBrowser from "@/components/TripBrowser";
 import EmptyState from "@/components/EmptyState";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { api } from "@/lib/api-client";
 import type { Trip } from "@/lib/types";
 
@@ -49,6 +50,7 @@ export default async function Home() {
           )}
         </div>
       </section>
+      <ScrollToTopButton />
     </AppShell>
   );
 }
