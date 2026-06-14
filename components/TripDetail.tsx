@@ -20,7 +20,6 @@ import { fetchAuthSession } from "aws-amplify/auth";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { toMyMapsEmbedUrl, validateMyMapsUrl } from "@/lib/validation";
-import { googleMapsLink } from "@/lib/maps";
 import { formatEnum } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Trip, Vehicle } from "@/lib/types";
@@ -202,7 +201,7 @@ export default function TripDetail({ trip }: { trip: Trip }) {
               </Link>
             ) : null}
             <a
-              href={googleMapsLink(trip)}
+              href={trip.myMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
               className={cn(buttonVariants({ size: "sm" }))}

@@ -99,7 +99,6 @@ export default function TripForm({ trip }: Props) {
   const [province, setProvince] = useState(trip?.province ?? "");
   const [country, setCountry] = useState(trip?.country ?? "");
   const [myMapsUrl, setMyMapsUrl] = useState(trip?.myMapsUrl ?? "");
-  const [googleMapsUrl, setGoogleMapsUrl] = useState(trip?.googleMapsUrl ?? "");
 
   const [thumbnailKey, setThumbnailKey] = useState(trip?.thumbnailKey);
   const [file, setFile] = useState<File | null>(null);
@@ -173,7 +172,6 @@ export default function TripForm({ trip }: Props) {
         province: province.trim(),
         country: country.trim(),
         myMapsUrl: myMapsUrl.trim(),
-        googleMapsUrl: googleMapsUrl.trim() || undefined,
         thumbnailKey: key,
       };
 
@@ -321,8 +319,8 @@ export default function TripForm({ trip }: Props) {
 
       <FormSection
         icon={<RouteIcon className="size-5" aria-hidden />}
-        title="Route links"
-        description="Maps are user supplied — paste the links you built in Google My Maps."
+        title="Route map"
+        description="Maps are user supplied — paste the link you built in Google My Maps."
       >
         <div className="space-y-1.5">
           <Label htmlFor="trip-mymaps">Google My Maps link</Label>
@@ -343,20 +341,6 @@ export default function TripForm({ trip }: Props) {
           ) : (
             <p className="text-xs text-muted-foreground">{MY_MAPS_HELP}</p>
           )}
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="trip-googlemaps">
-            Open-in-Google-Maps link{" "}
-            <span className="text-muted-foreground">(optional)</span>
-          </Label>
-          <Input
-            id="trip-googlemaps"
-            value={googleMapsUrl}
-            onChange={(e) => setGoogleMapsUrl(e.target.value)}
-            inputMode="url"
-            maxLength={2048}
-          />
         </div>
       </FormSection>
 

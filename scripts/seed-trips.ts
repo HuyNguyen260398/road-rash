@@ -159,9 +159,6 @@ export function buildSeedTrips(template: TripInput): TripInput[] {
     durationDays: v.durationDays,
     vehicle: v.vehicle,
     myMapsUrl: template.myMapsUrl,
-    ...(template.googleMapsUrl
-      ? { googleMapsUrl: template.googleMapsUrl }
-      : {}),
   }));
 }
 

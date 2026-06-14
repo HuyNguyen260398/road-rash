@@ -31,7 +31,6 @@ export interface Trip {
   vehicle: Vehicle;
   thumbnailKey?: string;
   myMapsUrl: string;
-  googleMapsUrl?: string;
   authorId: string;
   authorName: string;
   createdAt: string;
@@ -86,5 +85,4 @@ export interface TripInput {
   vehicle: Vehicle;
   thumbnailKey?: string;
   myMapsUrl: string;
-  googleMapsUrl?: string;
 }
