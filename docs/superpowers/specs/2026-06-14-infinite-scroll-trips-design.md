@@ -40,6 +40,14 @@ useInfiniteScroll<T>(items: T[], pageSize = 12)
 - An `IntersectionObserver` on `sentinelRef` grows `count` by `pageSize` when the
   sentinel nears the viewport (`rootMargin: "200px"` so the next page loads just
   before the user reaches the bottom — seamless).
+- **Scroll-gated:** the observer is only armed after the user's first scroll.
+  Without this, when the first page doesn't fill the viewport (12 cards = 3 rows on
+  a wide/tall desktop), the sentinel is on screen at mount and the observer fires
+  immediately — cascading to load every page with zero scrolling. Gating keeps the
+  "12 first" guarantee at every viewport size.
+- **Fill fallback:** if the page is too short to scroll at all
+  (`scrollHeight <= innerHeight`), load the next page regardless, so the remaining
+  items never become unreachable.
 - Resets `count` to `pageSize` whenever the `items` reference changes (new
   search/filter/group/AI results). Callers already pass stable/memoized arrays.
 - SSR-safe: observer is created in `useEffect`; if `IntersectionObserver` is
