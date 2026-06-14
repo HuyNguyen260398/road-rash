@@ -5,7 +5,7 @@ import type { Trip, TripInput, TripType, Vehicle } from "../lib/types";
 // embed a valid, real My Maps URL. Run with a bearer token copied from a
 // signed-in browser session — see scripts/README-seed.md.
 
-type Variation = {
+export type Variation = {
   name: string;
   location: string;
   city: string;
@@ -17,7 +17,7 @@ type Variation = {
   description: string;
 };
 
-const VARIATIONS: Variation[] = [
+export const VARIATIONS: Variation[] = [
   {
     name: "Ha Giang Loop Adventure",
     location: "Ha Giang Loop",
@@ -147,8 +147,11 @@ const VARIATIONS: Variation[] = [
 // renders a real map. The template's thumbnailKey is deliberately NOT reused —
 // it points at the template author's private S3 object, so seeds render the
 // placeholder thumbnail instead.
-export function buildSeedTrips(template: TripInput): TripInput[] {
-  return VARIATIONS.map((v) => ({
+export function buildSeedTrips(
+  template: TripInput,
+  variations: Variation[] = VARIATIONS,
+): TripInput[] {
+  return variations.map((v) => ({
     name: v.name,
     description: v.description,
     location: v.location,
@@ -162,9 +165,11 @@ export function buildSeedTrips(template: TripInput): TripInput[] {
   }));
 }
 
-// --- Script entrypoint ----------------------------------------------------
-// Only runs when invoked directly (not when imported by the test).
-async function main(): Promise<void> {
+// --- Reusable seeding routine ---------------------------------------------
+// Reads API_BASE_URL + ID_TOKEN from the env, pulls an existing trip as the
+// My Maps template, then POSTs one trip per variation. Exported so additional
+// batch scripts (e.g. seed-more-trips.ts) can reuse the exact same flow.
+export async function seedVariations(variations: Variation[]): Promise<void> {
   const apiBase = process.env.API_BASE_URL;
   const token = process.env.ID_TOKEN;
   if (!apiBase || !token) {
@@ -186,7 +191,7 @@ async function main(): Promise<void> {
     );
   }
 
-  const seeds = buildSeedTrips(template);
+  const seeds = buildSeedTrips(template, variations);
   for (const seed of seeds) {
     const res = await fetch(`${base}/trips`, {
       method: "POST",
@@ -204,12 +209,12 @@ async function main(): Promise<void> {
     }
     console.log(`created: ${seed.name}`);
   }
-  console.log(`Done — seeded ${seeds.length} trips (total should now be 12).`);
+  console.log(`Done — seeded ${seeds.length} trips.`);
 }
 
 // `import.meta.url` matches the invoked file only when run directly via tsx.
 if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
-  main().catch((err) => {
+  seedVariations(VARIATIONS).catch((err) => {
     console.error(err);
     process.exit(1);
   });
