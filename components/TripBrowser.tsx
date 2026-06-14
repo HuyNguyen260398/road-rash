@@ -6,6 +6,7 @@ import SearchPill from "./SearchPill";
 import FilterControls from "./FilterControls";
 import TripCard from "./TripCard";
 import TripGrid from "./TripGrid";
+import LoadMoreIndicator from "./LoadMoreIndicator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -17,6 +18,7 @@ import {
   type TripFilters,
 } from "@/lib/search";
 import { formatEnum } from "@/lib/format";
+import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
 import type { SuggestCandidate, Trip } from "@/lib/types";
 
 // Client-side discovery shell. Typing filters the loaded set instantly
@@ -102,6 +104,15 @@ export default function TripBrowser({
       trips: g.trips,
     }));
   }, [visible, groupBy]);
+
+  // AI results render in a bespoke grid (each card carries a reason caption), so
+  // they get their own paginated window — TripGrid's load-more covers plain search.
+  const {
+    visible: visibleAi,
+    hasMore: hasMoreAi,
+    loading: loadingAi,
+    sentinelRef: aiSentinelRef,
+  } = useInfiniteScroll(aiResults);
 
   async function askAi() {
     const prompt = q.trim();
@@ -237,18 +248,29 @@ export default function TripBrowser({
 
       {aiActive ? (
         aiResults.length > 0 ? (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {aiResults.map(({ trip, reason }) => (
-              <div key={trip.id} className="flex flex-col gap-1">
-                <TripCard trip={trip} />
-                {reason ? (
-                  <p className="px-1 text-xs italic text-muted-foreground">
-                    {reason}
-                  </p>
-                ) : null}
-              </div>
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {visibleAi.map(({ trip, reason }) => (
+                <div
+                  key={trip.id}
+                  className="flex animate-float-up flex-col gap-1"
+                >
+                  <TripCard trip={trip} />
+                  {reason ? (
+                    <p className="px-1 text-xs italic text-muted-foreground">
+                      {reason}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+            {hasMoreAi ? (
+              <LoadMoreIndicator
+                sentinelRef={aiSentinelRef}
+                loading={loadingAi}
+              />
+            ) : null}
+          </>
         ) : null
       ) : (
         <TripGrid

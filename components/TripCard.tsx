@@ -44,11 +44,13 @@ function locationLabel(trip: Trip): string {
 export default function TripCard({
   trip,
   onOpen,
+  className,
 }: {
   trip: Trip;
   /** When set, a plain click opens the detail modal instead of navigating;
       the href to /trip/[id] is kept so share/new-tab/crawlers still work. */
   onOpen?: (trip: Trip) => void;
+  className?: string;
 }) {
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const router = useRouter();
@@ -99,7 +101,10 @@ export default function TripCard({
     <Link
       href={`/trip/${trip.id}`}
       onClick={handleClick}
-      className="group block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      className={cn(
+        "group block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        className,
+      )}
     >
       <Card className="h-full overflow-hidden transition-shadow group-hover:shadow-md">
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">

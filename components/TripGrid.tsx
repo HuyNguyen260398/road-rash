@@ -4,7 +4,9 @@ import { useState } from "react";
 import TripCard from "./TripCard";
 import TripDetailModal from "./TripDetailModal";
 import EmptyState from "./EmptyState";
+import LoadMoreIndicator from "./LoadMoreIndicator";
 import { Badge } from "@/components/ui/badge";
+import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
 import type { Trip } from "@/lib/types";
 
 // Responsive, mobile-first card grid (TASK-027 / REQ-001): 1 column on phones,
@@ -19,16 +21,45 @@ export type TripGridGroup = { label: string; trips: Trip[] };
 function Cards({
   trips,
   onOpen,
+  animate,
 }: {
   trips: Trip[];
   onOpen: (trip: Trip) => void;
+  /** Fade/float each card in on mount (only newly added cards re-animate). */
+  animate?: boolean;
 }) {
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {trips.map((trip) => (
-        <TripCard key={trip.id} trip={trip} onOpen={onOpen} />
+        <TripCard
+          key={trip.id}
+          trip={trip}
+          onOpen={onOpen}
+          className={animate ? "animate-float-up" : undefined}
+        />
       ))}
     </div>
+  );
+}
+
+// Flat card grid that reveals 12 trips at a time, auto-loading the next batch as
+// the sentinel scrolls into view (used for the ungrouped list; grouped sections
+// render in full).
+function PaginatedCards({
+  trips,
+  onOpen,
+}: {
+  trips: Trip[];
+  onOpen: (trip: Trip) => void;
+}) {
+  const { visible, hasMore, loading, sentinelRef } = useInfiniteScroll(trips);
+  return (
+    <>
+      <Cards trips={visible} onOpen={onOpen} animate />
+      {hasMore ? (
+        <LoadMoreIndicator sentinelRef={sentinelRef} loading={loading} />
+      ) : null}
+    </>
   );
 }
 
@@ -67,7 +98,7 @@ export default function TripGrid({
       </div>
     );
   } else {
-    body = <Cards trips={trips} onOpen={setSelected} />;
+    body = <PaginatedCards trips={trips} onOpen={setSelected} />;
   }
 
   return (
