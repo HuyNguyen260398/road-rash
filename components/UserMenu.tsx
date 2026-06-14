@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { fetchAuthSession, signOut } from "aws-amplify/auth";
+import { fetchAuthSession, getCurrentUser, signOut } from "aws-amplify/auth";
+import { Hub } from "aws-amplify/utils";
 import { HeartIcon, LogOutIcon, PlusIcon, RouteIcon } from "lucide-react";
 import { avatarInitial } from "@/lib/avatar";
 
@@ -11,6 +12,12 @@ import { avatarInitial } from "@/lib/avatar";
 // render an initial avatar, and opens a dropdown with the saved/authored views
 // and sign-out. Renders nothing until a session is confirmed, so signed-out
 // visitors keep the plain "Sign in" link in AppHeader.
+//
+// Because the Google OAuth redirect lands on "/" (not /login), this component
+// mounts *while* Amplify is still completing the code->token exchange, so the
+// first fetch can resolve before the session exists. We therefore subscribe to
+// the auth Hub and re-read the session on sign-in/redirect completion, mirroring
+// the login page — otherwise the avatar never appears until a manual reload.
 
 const MENU_LINKS = [
   { href: "/trips/new", label: "Create trip", icon: PlusIcon },
@@ -20,25 +27,54 @@ const MENU_LINKS = [
 
 export default function UserMenu() {
   const router = useRouter();
-  const [email, setEmail] = useState<string | null>(null);
+  // The account label: the email claim when present, otherwise the username, so
+  // the avatar still renders when an ID token lacks `email` (the login page has
+  // the same fallback). Null means "no confirmed session" → render nothing.
+  const [label, setLabel] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  const refreshSession = useCallback(async () => {
+    try {
+      const current = await getCurrentUser();
+      const session = await fetchAuthSession();
+      const email = session.tokens?.idToken?.payload.email;
+      return typeof email === "string" ? email : current.username;
+    } catch {
+      // No authenticated user (signed out, or token exchange not done yet).
+      return null;
+    }
+  }, []);
+
   useEffect(() => {
     let active = true;
-    fetchAuthSession()
-      .then((session) => {
-        const value = session.tokens?.idToken?.payload.email;
-        if (active && typeof value === "string") setEmail(value);
-      })
-      .catch(() => {
-        // Signed out — leave email null so the component renders nothing.
+    const apply = () =>
+      void refreshSession().then((value) => {
+        if (active) setLabel(value);
       });
+
+    // Initial read on mount.
+    apply();
+
+    // Re-read once the OAuth redirect / sign-in completes, and clear on sign-out.
+    const unsubscribe = Hub.listen("auth", ({ payload }) => {
+      switch (payload.event) {
+        case "signedIn":
+        case "signInWithRedirect":
+          apply();
+          break;
+        case "signedOut":
+          if (active) setLabel(null);
+          break;
+      }
+    });
+
     return () => {
       active = false;
+      unsubscribe();
     };
-  }, []);
+  }, [refreshSession]);
 
   // Roving focus across the menu items so the `role="menu"` keyboard contract
   // (arrows / Home / End, plus first-item focus on open) is actually honored.
@@ -110,7 +146,7 @@ export default function UserMenu() {
   }
 
   // Not signed in (yet): render nothing; AppHeader shows the Sign in link.
-  if (!email) return null;
+  if (!label) return null;
 
   return (
     <div ref={containerRef} className="relative">
@@ -122,7 +158,7 @@ export default function UserMenu() {
         aria-label="Account menu"
         className="flex size-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >
-        {avatarInitial(email)}
+        {avatarInitial(label)}
       </button>
 
       {open ? (
@@ -133,7 +169,7 @@ export default function UserMenu() {
           className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-lg"
         >
           <div role="none" className="border-b border-border px-3 py-2">
-            <p className="truncate text-xs text-muted-foreground">{email}</p>
+            <p className="truncate text-xs text-muted-foreground">{label}</p>
           </div>
           {MENU_LINKS.map(({ href, label, icon: Icon }) => (
             <Link
