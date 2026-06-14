@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { Hub } from "aws-amplify/utils";
 import { api } from "@/lib/api-client";
 
 // Client-side favorites state (M4 / TASK-030). Loaded once on mount so every
@@ -52,21 +53,48 @@ export default function FavoritesProvider({
 
   useEffect(() => {
     let active = true;
-    api
-      .getFavorites()
-      .then(({ favorites }) => {
-        if (!active) return;
-        setFavorited(new Set(favorites.map((f) => f.tripId)));
-        setSignedIn(true);
-      })
-      .catch(() => {
-        // 401 (signed out) or API not reachable yet — render hearts as empty.
-      })
-      .finally(() => {
-        if (active) setReady(true);
-      });
+
+    function load() {
+      api
+        .getFavorites()
+        .then(({ favorites }) => {
+          if (!active) return;
+          setFavorited(new Set(favorites.map((f) => f.tripId)));
+          setSignedIn(true);
+        })
+        .catch(() => {
+          // 401 (signed out) or API not reachable yet — render hearts as empty.
+        })
+        .finally(() => {
+          if (active) setReady(true);
+        });
+    }
+
+    // Initial load on mount.
+    load();
+
+    // The Google OAuth redirect lands on "/" while Amplify is still completing
+    // the token exchange, so this first load can 401. Re-run once sign-in
+    // completes (and reset on sign-out) so the header's auth controls flip
+    // without a manual reload — same pattern as UserMenu / the login page.
+    const unsubscribe = Hub.listen("auth", ({ payload }) => {
+      switch (payload.event) {
+        case "signedIn":
+        case "signInWithRedirect":
+          load();
+          break;
+        case "signedOut":
+          if (!active) return;
+          setFavorited(new Set());
+          setDeltas({});
+          setSignedIn(false);
+          break;
+      }
+    });
+
     return () => {
       active = false;
+      unsubscribe();
     };
   }, []);
 
