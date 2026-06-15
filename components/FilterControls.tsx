@@ -1,6 +1,10 @@
 "use client";
 
+import { useRef } from "react";
 import { SlidersHorizontalIcon, XIcon } from "lucide-react";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "@/lib/gsap";
+import { DURATION, EASE, REDUCED_MOTION_QUERY } from "@/lib/motion";
 import { TRIP_TYPES, VEHICLES } from "@/lib/types";
 import type { Trip } from "@/lib/types";
 import type { TripFilters } from "@/lib/search";
@@ -36,6 +40,24 @@ export default function FilterControls({
     onChange({ ...filters, [key]: value || undefined });
 
   const hasFilters = Object.values(filters).some(Boolean);
+  const activeKey = Object.values(filters).filter(Boolean).join("|");
+
+  // Slide/fade the "Clear filters" affordance in whenever the active filter set
+  // changes (it only renders while filters are active). Reduced-motion: instant.
+  const clearRef = useRef<HTMLButtonElement>(null);
+  useGSAP(
+    () => {
+      if (!clearRef.current) return;
+      if (!window.matchMedia(REDUCED_MOTION_QUERY).matches) return;
+      gsap.from(clearRef.current, {
+        autoAlpha: 0,
+        x: 8,
+        duration: DURATION.fast,
+        ease: EASE.out,
+      });
+    },
+    { dependencies: [activeKey] },
+  );
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-3 shadow-sm">
@@ -46,6 +68,7 @@ export default function FilterControls({
         </div>
         {hasFilters ? (
           <Button
+            ref={clearRef}
             type="button"
             variant="ghost"
             size="sm"
