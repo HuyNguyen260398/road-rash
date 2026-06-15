@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ConfigureAmplifyClientSide from "@/components/ConfigureAmplifyClientSide";
+import GsapProvider from "@/components/GsapProvider";
 import FavoritesProvider from "@/components/FavoritesProvider";
 import ThemeProvider from "@/components/theme-provider";
 
@@ -34,6 +35,7 @@ export default function RootLayout({
     >
       <body className="flex min-h-dvh flex-col bg-background text-foreground">
         <ConfigureAmplifyClientSide />
+        <GsapProvider />
         <ThemeProvider>
           <FavoritesProvider>{children}</FavoritesProvider>
         </ThemeProvider>
