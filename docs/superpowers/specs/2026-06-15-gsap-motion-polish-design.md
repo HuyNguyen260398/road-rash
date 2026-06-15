@@ -128,6 +128,14 @@ motion.
   pointer-fine.
 - Gate: `pnpm build` (tsc) + `pnpm lint` + `pnpm test`.
 
+## Implementation workflow
+
+- **One commit per completed task/step.** Each atomic task in the implementation
+  plan gets its own focused commit once it's complete and its checks pass — no
+  batching multiple tasks into a single commit. Commit messages reference the task
+  (e.g. `feat(motion): add lib/motion.ts tokens + helpers`).
+- Each commit should leave the build green (`pnpm build` + `pnpm lint` + `pnpm test`).
+
 ## Risks
 
 - **`Flip` modal complexity** — highest effort, only piece touching component plumbing.
