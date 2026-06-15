@@ -13,4 +13,10 @@ export function registerGsap(): void {
   registered = true;
 }
 
+// Register eagerly at module load on the client. `useGSAP` runs as a layout
+// effect, which fires before GsapProvider's passive effect — so registering in
+// an effect is too late for components that use ScrollTrigger on mount. Any
+// client island that touches gsap imports this module, so this always runs first.
+registerGsap();
+
 export { gsap, ScrollTrigger };
