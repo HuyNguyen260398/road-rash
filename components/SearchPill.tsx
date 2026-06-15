@@ -1,7 +1,10 @@
 "use client";
 
-import { type FormEvent } from "react";
+import { useRef, type FormEvent } from "react";
 import { SearchIcon, SparklesIcon, XIcon } from "lucide-react";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "@/lib/gsap";
+import { DURATION, EASE, REDUCED_MOTION_QUERY } from "@/lib/motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -29,14 +32,62 @@ export default function SearchPill({
   // from firing a pointless request against an empty set.
   aiDisabled?: boolean;
 }) {
+  const formRef = useRef<HTMLFormElement>(null);
+  const aiBtnRef = useRef<HTMLButtonElement>(null);
+
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (loading || aiDisabled || !value.trim()) return;
     onAskAi();
   }
 
+  // Subtle scale emphasis while the search field is focused.
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add(REDUCED_MOTION_QUERY, () => {
+        const el = formRef.current;
+        if (!el) return;
+        const input = el.querySelector("#trip-search");
+        const to = gsap.quickTo(el, "scale", {
+          duration: DURATION.fast,
+          ease: EASE.out,
+        });
+        const onFocus = () => to(1.01);
+        const onBlur = () => to(1);
+        input?.addEventListener("focus", onFocus);
+        input?.addEventListener("blur", onBlur);
+        return () => {
+          input?.removeEventListener("focus", onFocus);
+          input?.removeEventListener("blur", onBlur);
+        };
+      });
+    },
+    { scope: formRef },
+  );
+
+  // Pulse the Ask-AI button while a suggestion request is in flight.
+  useGSAP(
+    () => {
+      if (!loading || !aiBtnRef.current) return;
+      if (!window.matchMedia(REDUCED_MOTION_QUERY).matches) return;
+      const tween = gsap.to(aiBtnRef.current, {
+        opacity: 0.6,
+        duration: DURATION.slow,
+        ease: EASE.inOut,
+        repeat: -1,
+        yoyo: true,
+      });
+      return () => {
+        tween.kill();
+        gsap.set(aiBtnRef.current, { opacity: 1 });
+      };
+    },
+    { dependencies: [loading], scope: formRef },
+  );
+
   return (
-    <form onSubmit={handleSubmit} className="relative">
+    <form ref={formRef} onSubmit={handleSubmit} className="relative">
       <label htmlFor="trip-search" className="sr-only">
         Search trips or describe your ride
       </label>
@@ -69,6 +120,7 @@ export default function SearchPill({
           </Button>
         )}
         <Button
+          ref={aiBtnRef}
           type="submit"
           size="sm"
           disabled={loading || aiDisabled || !value.trim()}
