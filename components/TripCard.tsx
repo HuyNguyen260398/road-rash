@@ -54,6 +54,7 @@ export default function TripCard({
   onOpen,
   className,
   style,
+  ...rest
 }: {
   trip: Trip;
   /** When set, a plain click opens the detail modal instead of navigating;
@@ -62,7 +63,7 @@ export default function TripCard({
   className?: string;
   /** Inline style on the card root — used to stagger the float-up reveal. */
   style?: React.CSSProperties;
-}) {
+} & React.HTMLAttributes<HTMLAnchorElement>) {
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const router = useRouter();
   const { isFavorited, countDelta, toggle, signedIn } = useFavorites();
@@ -164,6 +165,7 @@ export default function TripCard({
         "group block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
         className,
       )}
+      {...rest}
     >
       <Card className="h-full overflow-hidden transition-shadow group-hover:shadow-md">
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">

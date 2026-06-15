@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useGSAP } from "@gsap/react";
+import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { revealFrom, revealTo, REDUCED_MOTION_QUERY } from "@/lib/motion";
 import TripCard from "./TripCard";
 import TripCardSkeleton from "./TripCardSkeleton";
 import TripDetailModal from "./TripDetailModal";
@@ -34,12 +37,16 @@ function Cards({
   trips,
   onOpen,
   animate,
+  reveal,
 }: {
   trips: Trip[];
   onOpen: (trip: Trip) => void;
   /** Fade/float each card in on mount (only newly added cards re-animate),
       cascading via a per-card animation-delay. */
   animate?: boolean;
+  /** Stamp `data-reveal` so ScrollTrigger can reveal the card on scroll
+      (used by grouped sections instead of the on-mount CSS float-up). */
+  reveal?: boolean;
 }) {
   return (
     <div className={GRID_CLASS}>
@@ -48,6 +55,7 @@ function Cards({
           key={trip.id}
           trip={trip}
           onOpen={onOpen}
+          data-reveal={reveal ? "" : undefined}
           className={animate ? "animate-float-up" : undefined}
           style={
             animate
@@ -95,6 +103,53 @@ function PaginatedCards({
   );
 }
 
+// Grouped sections render all cards at once, so we reveal each card as it enters
+// the viewport (ScrollTrigger.batch) rather than letting the CSS float-up fire on
+// mount for cards far below the fold. Reduced-motion users see them immediately.
+function RevealGroups({
+  groups,
+  onOpen,
+}: {
+  groups: TripGridGroup[];
+  onOpen: (trip: Trip) => void;
+}) {
+  const root = useRef<HTMLDivElement>(null);
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add(REDUCED_MOTION_QUERY, () => {
+        const cards = gsap.utils.toArray<HTMLElement>(
+          root.current!.querySelectorAll("[data-reveal]"),
+        );
+        gsap.set(cards, revealFrom());
+        ScrollTrigger.batch(cards, {
+          start: "top 90%",
+          onEnter: (batch) =>
+            gsap.to(batch, { ...revealTo(), stagger: 0.06, overwrite: true }),
+        });
+      });
+    },
+    { scope: root },
+  );
+
+  return (
+    <div ref={root} className="flex flex-col gap-10">
+      {groups.map((group) => (
+        <section key={group.label}>
+          <div className="mb-4 flex items-center gap-3">
+            <h2 className="text-xl font-semibold">{group.label}</h2>
+            <Badge variant="outline" className="bg-background">
+              {group.trips.length}
+            </Badge>
+          </div>
+          <Cards trips={group.trips} onOpen={onOpen} reveal />
+        </section>
+      ))}
+    </div>
+  );
+}
+
 export default function TripGrid({
   trips,
   groups,
@@ -121,21 +176,7 @@ export default function TripGrid({
   } else if (phase === "loading") {
     body = <SkeletonCards count={Math.min(total, 8)} />;
   } else if (groups) {
-    body = (
-      <div className="flex flex-col gap-10">
-        {groups.map((group) => (
-          <section key={group.label}>
-            <div className="mb-4 flex items-center gap-3">
-              <h2 className="text-xl font-semibold">{group.label}</h2>
-              <Badge variant="outline" className="bg-background">
-                {group.trips.length}
-              </Badge>
-            </div>
-            <Cards trips={group.trips} onOpen={setSelected} animate />
-          </section>
-        ))}
-      </div>
-    );
+    body = <RevealGroups groups={groups} onOpen={setSelected} />;
   } else {
     body = <PaginatedCards trips={trips} onOpen={setSelected} />;
   }
