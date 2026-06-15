@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import TripCard from "./TripCard";
+import TripCardSkeleton from "./TripCardSkeleton";
 import TripDetailModal from "./TripDetailModal";
 import EmptyState from "./EmptyState";
 import LoadMoreIndicator from "./LoadMoreIndicator";
 import { Badge } from "@/components/ui/badge";
 import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
+import { useCardReveal } from "@/lib/use-card-reveal";
 import type { Trip } from "@/lib/types";
 
 // Responsive, mobile-first card grid (TASK-027 / REQ-001): 1 column on phones,
@@ -18,6 +20,16 @@ import type { Trip } from "@/lib/types";
 
 export type TripGridGroup = { label: string; trips: Trip[] };
 
+// Responsive grid wrapper shared by the real cards and the skeleton placeholders
+// so the swap between them is seamless.
+const GRID_CLASS =
+  "grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+
+// Cap the per-card stagger so large grids don't drag: cards past this index all
+// share the final delay and animate in together.
+const STAGGER_CAP = 11;
+const STAGGER_STEP_MS = 55;
+
 function Cards({
   trips,
   onOpen,
@@ -25,18 +37,38 @@ function Cards({
 }: {
   trips: Trip[];
   onOpen: (trip: Trip) => void;
-  /** Fade/float each card in on mount (only newly added cards re-animate). */
+  /** Fade/float each card in on mount (only newly added cards re-animate),
+      cascading via a per-card animation-delay. */
   animate?: boolean;
 }) {
   return (
-    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {trips.map((trip) => (
+    <div className={GRID_CLASS}>
+      {trips.map((trip, i) => (
         <TripCard
           key={trip.id}
           trip={trip}
           onOpen={onOpen}
           className={animate ? "animate-float-up" : undefined}
+          style={
+            animate
+              ? {
+                  animationDelay: `${Math.min(i, STAGGER_CAP) * STAGGER_STEP_MS}ms`,
+                }
+              : undefined
+          }
         />
+      ))}
+    </div>
+  );
+}
+
+// Shimmer placeholders shown during the brief loading phase (TASK: AWS-style card
+// loading effect) on initial render and whenever search/filter/group changes.
+function SkeletonCards({ count }: { count: number }) {
+  return (
+    <div className={GRID_CLASS} aria-hidden>
+      {Array.from({ length: count }, (_, i) => (
+        <TripCardSkeleton key={i} />
       ))}
     </div>
   );
@@ -78,9 +110,16 @@ export default function TripGrid({
     ? groups.reduce((n, g) => n + g.trips.length, 0)
     : trips.length;
 
+  // Loading→reveal phase keyed on the current result set: changes to the trips
+  // array or the groups array (search, filter, group) flash skeletons, then the
+  // real cards float in.
+  const phase = useCardReveal(groups ?? trips);
+
   let body;
   if (total === 0) {
     body = <EmptyState title={emptyMessage} />;
+  } else if (phase === "loading") {
+    body = <SkeletonCards count={Math.min(total, 8)} />;
   } else if (groups) {
     body = (
       <div className="flex flex-col gap-10">
@@ -92,7 +131,7 @@ export default function TripGrid({
                 {group.trips.length}
               </Badge>
             </div>
-            <Cards trips={group.trips} onOpen={setSelected} />
+            <Cards trips={group.trips} onOpen={setSelected} animate />
           </section>
         ))}
       </div>

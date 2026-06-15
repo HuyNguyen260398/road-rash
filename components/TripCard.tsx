@@ -45,12 +45,15 @@ export default function TripCard({
   trip,
   onOpen,
   className,
+  style,
 }: {
   trip: Trip;
   /** When set, a plain click opens the detail modal instead of navigating;
       the href to /trip/[id] is kept so share/new-tab/crawlers still work. */
   onOpen?: (trip: Trip) => void;
   className?: string;
+  /** Inline style on the card root — used to stagger the float-up reveal. */
+  style?: React.CSSProperties;
 }) {
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const router = useRouter();
@@ -101,6 +104,7 @@ export default function TripCard({
     <Link
       href={`/trip/${trip.id}`}
       onClick={handleClick}
+      style={style}
       className={cn(
         "group block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
         className,
