@@ -1,5 +1,18 @@
+"use client";
+
+import { useRef } from "react";
 import Link from "next/link";
 import { MapIcon, SparklesIcon, UsersIcon } from "lucide-react";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "@/lib/gsap";
+import {
+  DURATION,
+  EASE,
+  STAGGER,
+  REDUCED_MOTION_QUERY,
+  revealFrom,
+  parallaxTo,
+} from "@/lib/motion";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -26,13 +39,43 @@ export default function DiscoverHero({ tripCount }: DiscoverHeroProps) {
     },
   ];
 
+  const root = useRef<HTMLElement>(null);
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add(REDUCED_MOTION_QUERY, () => {
+        gsap.from(".hero-stagger", {
+          ...revealFrom(),
+          duration: DURATION.base,
+          ease: EASE.out,
+          stagger: STAGGER.base,
+        });
+        gsap.to(".hero-bg", {
+          ...parallaxTo(12),
+          scrollTrigger: {
+            trigger: root.current,
+            start: "top top",
+            end: "bottom top",
+            scrub: true,
+          },
+        });
+      });
+    },
+    { scope: root },
+  );
+
   return (
-    <section className="relative isolate overflow-hidden bg-muted">
+    <section ref={root} className="relative isolate overflow-hidden bg-muted">
       <div
         aria-hidden
-        className="hero-kenburns absolute inset-0 -z-10 bg-cover bg-center"
-        style={{ backgroundImage: "url('/hero-road.jpg')" }}
-      />
+        className="hero-bg absolute -inset-y-[12%] inset-x-0 -z-10"
+      >
+        <div
+          className="hero-kenburns absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('/hero-road.jpg')" }}
+        />
+      </div>
       <div
         aria-hidden
         className="absolute inset-0 -z-10 bg-gradient-to-r from-black/80 via-black/65 to-black/45 lg:via-black/55 lg:to-black/20"
@@ -41,11 +84,11 @@ export default function DiscoverHero({ tripCount }: DiscoverHeroProps) {
         <div className="flex max-w-3xl flex-col justify-center gap-6">
           <Badge
             variant="outline"
-            className="w-fit border-white/40 bg-white/10 text-white"
+            className="hero-stagger w-fit border-white/40 bg-white/10 text-white"
           >
             Community road trips
           </Badge>
-          <div className="space-y-4">
+          <div className="hero-stagger space-y-4">
             <h1 className="text-4xl leading-tight font-semibold text-balance text-white sm:text-5xl">
               Find ride-ready routes with maps, favorites, and AI suggestions.
             </h1>
@@ -54,7 +97,7 @@ export default function DiscoverHero({ tripCount }: DiscoverHeroProps) {
               narrow the community map down to the trip you want to take next.
             </p>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="hero-stagger flex flex-col gap-3 sm:flex-row">
             <Link href="/trips/new" className={buttonVariants({ size: "lg" })}>
               Create trip
             </Link>

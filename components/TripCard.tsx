@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useGSAP } from "@gsap/react";
 import {
   BikeIcon,
   CarIcon,
@@ -14,6 +15,13 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { api } from "@/lib/api-client";
+import { gsap } from "@/lib/gsap";
+import {
+  DURATION,
+  EASE,
+  POINTER_FINE_QUERY,
+  REDUCED_MOTION_QUERY,
+} from "@/lib/motion";
 import { useFavorites } from "@/components/FavoritesProvider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -46,15 +54,17 @@ export default function TripCard({
   onOpen,
   className,
   style,
+  ...rest
 }: {
   trip: Trip;
   /** When set, a plain click opens the detail modal instead of navigating;
-      the href to /trip/[id] is kept so share/new-tab/crawlers still work. */
-  onOpen?: (trip: Trip) => void;
+      the href to /trip/[id] is kept so share/new-tab/crawlers still work. The
+      card's screen rect is passed so the modal can grow from it. */
+  onOpen?: (trip: Trip, rect: DOMRect) => void;
   className?: string;
   /** Inline style on the card root — used to stagger the float-up reveal. */
   style?: React.CSSProperties;
-}) {
+} & React.HTMLAttributes<HTMLAnchorElement>) {
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const router = useRouter();
   const { isFavorited, countDelta, toggle, signedIn } = useFavorites();
@@ -62,6 +72,52 @@ export default function TripCard({
   const favorited = isFavorited(trip.id);
   const favoriteCount = Math.max(0, trip.favoriteCount + countDelta(trip.id));
   const VehicleIcon = VEHICLE_ICON[trip.vehicle];
+
+  const cardRef = useRef<HTMLAnchorElement>(null);
+  const heartRef = useRef<SVGSVGElement>(null);
+  const heartReady = useRef(false);
+
+  // Pointer-fine hover lift — settles back on leave. No effect on touch.
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add(POINTER_FINE_QUERY, () => {
+        const el = cardRef.current;
+        if (!el) return;
+        const lift = gsap.quickTo(el, "y", {
+          duration: DURATION.fast,
+          ease: EASE.out,
+        });
+        const onEnter = () => lift(-6);
+        const onLeave = () => lift(0);
+        el.addEventListener("pointerenter", onEnter);
+        el.addEventListener("pointerleave", onLeave);
+        return () => {
+          el.removeEventListener("pointerenter", onEnter);
+          el.removeEventListener("pointerleave", onLeave);
+        };
+      });
+    },
+    { scope: cardRef },
+  );
+
+  // Pop the heart when it toggles on (skip first render + reduced motion).
+  useGSAP(
+    () => {
+      if (!heartReady.current) {
+        heartReady.current = true;
+        return;
+      }
+      if (!favorited || !heartRef.current) return;
+      if (!window.matchMedia(REDUCED_MOTION_QUERY).matches) return;
+      gsap.fromTo(
+        heartRef.current,
+        { scale: 0.5 },
+        { scale: 1, duration: DURATION.base, ease: EASE.pop },
+      );
+    },
+    { dependencies: [favorited], scope: cardRef },
+  );
 
   function handleFavorite(e: React.MouseEvent) {
     // The card is a Link — keep the heart from navigating/opening the modal.
@@ -74,14 +130,14 @@ export default function TripCard({
     void toggle(trip.id);
   }
 
-  function handleClick(e: React.MouseEvent) {
+  function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
     if (!onOpen) return;
     // Let the browser handle modified clicks (new tab/window) and the link's
     // real navigation; only intercept a plain left-click to open the modal.
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0)
       return;
     e.preventDefault();
-    onOpen(trip);
+    onOpen(trip, e.currentTarget.getBoundingClientRect());
   }
 
   useEffect(() => {
@@ -102,6 +158,7 @@ export default function TripCard({
 
   return (
     <Link
+      ref={cardRef}
       href={`/trip/${trip.id}`}
       onClick={handleClick}
       style={style}
@@ -109,6 +166,7 @@ export default function TripCard({
         "group block rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
         className,
       )}
+      {...rest}
     >
       <Card className="h-full overflow-hidden transition-shadow group-hover:shadow-md">
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
@@ -169,6 +227,7 @@ export default function TripCard({
               className="h-8 shrink-0 px-2"
             >
               <HeartIcon
+                ref={heartRef}
                 aria-hidden
                 className={cn(favorited ? "fill-current text-destructive" : "")}
               />

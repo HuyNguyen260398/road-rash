@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "aws-amplify/auth";
 import { LogOutIcon, MenuIcon, XIcon } from "lucide-react";
+import { useGSAP } from "@gsap/react";
+import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { DURATION, EASE, REDUCED_MOTION_QUERY } from "@/lib/motion";
 import AppLogo from "@/components/AppLogo";
 import UserMenu from "@/components/UserMenu";
 import ModeToggle from "@/components/ModeToggle";
@@ -37,6 +40,42 @@ export default function AppHeader() {
   // signed-in user never flashes the "Sign in" link before the session loads.
   const { ready, signedIn } = useFavorites();
 
+  const headerRef = useRef<HTMLElement>(null);
+  // Read the latest menu state inside the ScrollTrigger callback without
+  // re-creating the trigger on every toggle.
+  const menuOpenRef = useRef(menuOpen);
+  useEffect(() => {
+    menuOpenRef.current = menuOpen;
+  }, [menuOpen]);
+
+  // Hide the sticky header on scroll-down, reveal on scroll-up. Stays put at the
+  // top, while the mobile menu is open, and for reduced-motion users.
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add(REDUCED_MOTION_QUERY, () => {
+        const el = headerRef.current!;
+        const show = () =>
+          gsap.to(el, { yPercent: 0, duration: DURATION.fast, ease: EASE.out });
+        const hide = () =>
+          gsap.to(el, {
+            yPercent: -100,
+            duration: DURATION.fast,
+            ease: EASE.inOut,
+          });
+        ScrollTrigger.create({
+          start: "top top-=80",
+          end: "max",
+          onUpdate: (self) => {
+            if (self.direction === 1 && !menuOpenRef.current) hide();
+            else show();
+          },
+        });
+      });
+    },
+    { scope: headerRef },
+  );
+
   function isActive(href: string) {
     if (href === "/") return pathname === "/";
     return pathname === href || pathname.startsWith(`${href}/`);
@@ -58,7 +97,10 @@ export default function AppHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+    <header
+      ref={headerRef}
+      className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80"
+    >
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <AppLogo />
 
