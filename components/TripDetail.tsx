@@ -11,6 +11,7 @@ import {
   CompassIcon,
   HeartIcon,
   MapIcon,
+  MotorbikeIcon,
   NavigationIcon,
   PencilIcon,
   UserIcon,
@@ -34,7 +35,7 @@ import type { Trip, Vehicle } from "@/lib/types";
 // unvalidated URL is never injected into the iframe src).
 
 const VEHICLE_ICON: Record<Vehicle, LucideIcon> = {
-  MOTORBIKE: NavigationIcon,
+  MOTORBIKE: MotorbikeIcon,
   CAR: CarIcon,
   BICYCLE: BikeIcon,
   OTHER: CompassIcon,

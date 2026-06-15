@@ -10,7 +10,7 @@ import {
   CompassIcon,
   HeartIcon,
   MapPinIcon,
-  NavigationIcon,
+  MotorbikeIcon,
   type LucideIcon,
 } from "lucide-react";
 import { api } from "@/lib/api-client";
@@ -28,7 +28,7 @@ import type { Trip, Vehicle } from "@/lib/types";
 // route to /login.
 
 const VEHICLE_ICON: Record<Vehicle, LucideIcon> = {
-  MOTORBIKE: NavigationIcon,
+  MOTORBIKE: MotorbikeIcon,
   CAR: CarIcon,
   BICYCLE: BikeIcon,
   OTHER: CompassIcon,
