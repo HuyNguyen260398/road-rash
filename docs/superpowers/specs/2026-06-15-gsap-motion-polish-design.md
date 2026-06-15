@@ -41,9 +41,17 @@ Rejected alternatives:
 ### Packages
 - `gsap` (core)
 - `@gsap/react` — provides `useGSAP()`; handles React 19 cleanup, SSR-safe.
-- Plugins: `ScrollTrigger` (scroll reveal + parallax), `Flip` (card→modal).
+- Plugins: `ScrollTrigger` (scroll reveal + parallax).
 
-Estimated client bundle: ~40 kb gzip, code-split into the islands that use it.
+> **Refinement (discovered during planning):** the trip detail modal renders
+> badges → title → map iframe — it has **no image that matches the card
+> thumbnail**, so a shared-element `Flip` would have nothing to morph. The modal
+> open/close is therefore done as a **rect-anchored scale + fade** (the clicked
+> card's `getBoundingClientRect()` sets the transform origin/offset so the modal
+> visually grows from the card) using GSAP core. The `Flip` plugin is **not**
+> used.
+
+Estimated client bundle: ~30 kb gzip, code-split into the islands that use it.
 
 ### Central motion config — `lib/motion.ts`
 The heart of the system. Exports:
@@ -85,13 +93,15 @@ own guards since we're layering, not migrating.)
   optimistic toggle — no change to `FavoritesProvider` logic.
 
 ### Trip detail modal (`components/TripDetailModal.tsx`)
-- Open: `Flip` transition from the tapped card's thumbnail into the modal + backdrop
-  blur/opacity fade + content stagger.
-- Close: reverse — content fades, card returns to grid position.
-- Fallback: simple scale+fade when no source element is available (deep-link /
-  `/trip/[id]` share page).
-- **Plumbing change:** pass the tapped card's element ref (or `id`) through `onOpen`
-  so `Flip` can read the start state. This is the only component-contract change.
+- Open: rect-anchored **scale + fade** — the modal Card grows from the clicked
+  card's screen position (transform origin/offset derived from the card's
+  `getBoundingClientRect()`) + backdrop blur/opacity fade + content stagger.
+- Close: reverse — content fades and the modal shrinks back toward the card, then
+  unmounts (exit animation requires a short delayed unmount).
+- Fallback: a plain centered scale+fade (origin center) when no source rect is
+  available (deep-link / `/trip/[id]` share page).
+- **Plumbing change:** pass the tapped card's `DOMRect` through `onOpen` so the
+  modal can anchor its open animation. This is the only component-contract change.
 
 ### Header, search & filters (`components/AppHeader.tsx`, `SearchPill.tsx`, `FilterControls.tsx`, `TripBrowser.tsx`)
 - Search pill: focus animation — subtle scale + ring ease on focus, settle on blur.
@@ -138,7 +148,8 @@ motion.
 
 ## Risks
 
-- **`Flip` modal complexity** — highest effort, only piece touching component plumbing.
-  Mitigation: ship the scale+fade fallback first, then enhance to `Flip`.
+- **Modal exit animation** — needs a short delayed unmount (play reverse, then
+  remove from the tree). Mitigation: ship the centered scale+fade first, then add
+  rect anchoring; keep Esc/overlay close working throughout.
 - **ScrollTrigger leaks across route changes** — mitigated by `useGSAP` ref scoping.
 - **Bundle growth** — mitigated by client-only code-splitting; revisit if it regresses.
