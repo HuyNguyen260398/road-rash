@@ -108,7 +108,7 @@ export default function TripDetail({ trip }: { trip: Trip }) {
 
   return (
     <article className="flex flex-col gap-6 p-5 sm:p-6">
-      <header className="flex flex-col gap-3">
+      <header data-stagger className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-2">
             <Badge variant="secondary" className="w-fit">
@@ -144,7 +144,10 @@ export default function TripDetail({ trip }: { trip: Trip }) {
         <p className="text-sm text-muted-foreground">{locationLabel(trip)}</p>
       </header>
 
-      <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
+      <dl
+        data-stagger
+        className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4"
+      >
         <div className="rounded-lg border border-border bg-muted/40 p-3">
           <dt className="flex items-center gap-1.5 text-muted-foreground">
             <MapIcon className="size-4" aria-hidden />
@@ -178,12 +181,15 @@ export default function TripDetail({ trip }: { trip: Trip }) {
       </dl>
 
       {trip.description ? (
-        <p className="whitespace-pre-line text-sm leading-7 text-foreground/90">
+        <p
+          data-stagger
+          className="whitespace-pre-line text-sm leading-7 text-foreground/90"
+        >
           {trip.description}
         </p>
       ) : null}
 
-      <section className="flex flex-col gap-3">
+      <section data-stagger className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
             <MapIcon className="size-4" aria-hidden />

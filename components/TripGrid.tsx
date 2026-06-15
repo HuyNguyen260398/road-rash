@@ -40,7 +40,7 @@ function Cards({
   reveal,
 }: {
   trips: Trip[];
-  onOpen: (trip: Trip) => void;
+  onOpen: (trip: Trip, rect: DOMRect) => void;
   /** Fade/float each card in on mount (only newly added cards re-animate),
       cascading via a per-card animation-delay. */
   animate?: boolean;
@@ -90,7 +90,7 @@ function PaginatedCards({
   onOpen,
 }: {
   trips: Trip[];
-  onOpen: (trip: Trip) => void;
+  onOpen: (trip: Trip, rect: DOMRect) => void;
 }) {
   const { visible, hasMore, loading, sentinelRef } = useInfiniteScroll(trips);
   return (
@@ -111,7 +111,7 @@ function RevealGroups({
   onOpen,
 }: {
   groups: TripGridGroup[];
-  onOpen: (trip: Trip) => void;
+  onOpen: (trip: Trip, rect: DOMRect) => void;
 }) {
   const root = useRef<HTMLDivElement>(null);
 
@@ -159,7 +159,11 @@ export default function TripGrid({
   groups?: TripGridGroup[];
   emptyMessage?: string;
 }) {
-  const [selected, setSelected] = useState<Trip | null>(null);
+  const [selected, setSelected] = useState<{
+    trip: Trip;
+    rect: DOMRect;
+  } | null>(null);
+  const openTrip = (trip: Trip, rect: DOMRect) => setSelected({ trip, rect });
 
   const total = groups
     ? groups.reduce((n, g) => n + g.trips.length, 0)
@@ -176,16 +180,20 @@ export default function TripGrid({
   } else if (phase === "loading") {
     body = <SkeletonCards count={Math.min(total, 8)} />;
   } else if (groups) {
-    body = <RevealGroups groups={groups} onOpen={setSelected} />;
+    body = <RevealGroups groups={groups} onOpen={openTrip} />;
   } else {
-    body = <PaginatedCards trips={trips} onOpen={setSelected} />;
+    body = <PaginatedCards trips={trips} onOpen={openTrip} />;
   }
 
   return (
     <>
       {body}
       {selected ? (
-        <TripDetailModal trip={selected} onClose={() => setSelected(null)} />
+        <TripDetailModal
+          trip={selected.trip}
+          sourceRect={selected.rect}
+          onClose={() => setSelected(null)}
+        />
       ) : null}
     </>
   );

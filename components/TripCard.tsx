@@ -58,8 +58,9 @@ export default function TripCard({
 }: {
   trip: Trip;
   /** When set, a plain click opens the detail modal instead of navigating;
-      the href to /trip/[id] is kept so share/new-tab/crawlers still work. */
-  onOpen?: (trip: Trip) => void;
+      the href to /trip/[id] is kept so share/new-tab/crawlers still work. The
+      card's screen rect is passed so the modal can grow from it. */
+  onOpen?: (trip: Trip, rect: DOMRect) => void;
   className?: string;
   /** Inline style on the card root — used to stagger the float-up reveal. */
   style?: React.CSSProperties;
@@ -129,14 +130,14 @@ export default function TripCard({
     void toggle(trip.id);
   }
 
-  function handleClick(e: React.MouseEvent) {
+  function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
     if (!onOpen) return;
     // Let the browser handle modified clicks (new tab/window) and the link's
     // real navigation; only intercept a plain left-click to open the modal.
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0)
       return;
     e.preventDefault();
-    onOpen(trip);
+    onOpen(trip, e.currentTarget.getBoundingClientRect());
   }
 
   useEffect(() => {
