@@ -85,16 +85,26 @@ resource "aws_amplify_branch" "this" {
 # var.custom_domain; null leaves it all uncreated so envs without a custom
 # domain are unaffected. The zone must already exist in this AWS account.
 
+locals {
+  # Amplify's sub_domain.prefix must be a SINGLE DNS label (no dots), so split the
+  # desired hostname into its leftmost label (the prefix) and the remainder (the
+  # Amplify domain_name). e.g. "roadrash.stg.nghuy.link" -> prefix "roadrash",
+  # domain "stg.nghuy.link". The Route53 zone is separate (var.zone_name).
+  custom_domain_labels = var.custom_domain != null ? split(".", var.custom_domain.hostname) : []
+  custom_domain_prefix = var.custom_domain != null ? local.custom_domain_labels[0] : null
+  custom_domain_name   = var.custom_domain != null ? join(".", slice(local.custom_domain_labels, 1, length(local.custom_domain_labels))) : null
+}
+
 data "aws_route53_zone" "this" {
   count        = var.custom_domain != null ? 1 : 0
-  name         = var.custom_domain.domain_name
+  name         = var.custom_domain.zone_name
   private_zone = false
 }
 
 resource "aws_amplify_domain_association" "this" {
   count       = var.custom_domain != null ? 1 : 0
   app_id      = aws_amplify_app.this.id
-  domain_name = var.custom_domain.domain_name
+  domain_name = local.custom_domain_name
 
   # We create the DNS records below ourselves, so don't block apply on Amplify's
   # ACM verification + CloudFront propagation (can take 15-45 min).
@@ -102,7 +112,7 @@ resource "aws_amplify_domain_association" "this" {
 
   sub_domain {
     branch_name = aws_amplify_branch.this.branch_name
-    prefix      = var.custom_domain.subdomain_prefix
+    prefix      = local.custom_domain_prefix
   }
 }
 

@@ -31,9 +31,10 @@ app_logout_urls   = ["http://localhost:3000/"]
 #     --type SecureString --value "$GEMINI_API_KEY" --overwrite
 
 # Custom domain — attaches the Amplify branch to a Route53-hosted subdomain.
-# Defaulted in variables.tf to nghuy.link / roadrash.stg; override or set to
-# null here to change/disable. The zone must already exist in this AWS account.
+# Defaulted in variables.tf to zone nghuy.link / host roadrash.stg.nghuy.link;
+# override or set to null here to change/disable. zone_name must be an existing
+# Route53 public hosted zone in this AWS account.
 # custom_domain = {
-#   domain_name      = "nghuy.link"
-#   subdomain_prefix = "roadrash.stg"
+#   zone_name = "nghuy.link"
+#   hostname  = "roadrash.stg.nghuy.link"
 # }

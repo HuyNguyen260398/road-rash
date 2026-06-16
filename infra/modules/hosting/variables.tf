@@ -58,14 +58,17 @@ variable "iam_service_role_arn" {
 variable "custom_domain" {
   description = <<-DESC
     Optional custom domain for the Amplify branch. Null = no custom domain.
-    domain_name is an existing Route53 public zone (e.g. "nghuy.link");
-    subdomain_prefix is the label(s) in front of it (e.g. "roadrash.stg" ->
-    roadrash.stg.nghuy.link). The zone must already exist in this AWS account;
-    the module writes the ACM validation + CNAME records into it.
+    zone_name is an existing Route53 public hosted zone in this AWS account
+    (e.g. "nghuy.link"); hostname is the full host to serve (e.g.
+    "roadrash.stg.nghuy.link"). The module splits the hostname into its leftmost
+    label (Amplify's sub_domain prefix, which must be a SINGLE DNS label) and the
+    remainder (Amplify's domain_name) — so "roadrash.stg.nghuy.link" becomes
+    prefix "roadrash" + domain "stg.nghuy.link" — and writes the ACM validation +
+    CNAME records into the zone.
   DESC
   type = object({
-    domain_name      = string
-    subdomain_prefix = string
+    zone_name = string
+    hostname  = string
   })
   default = null
 }
