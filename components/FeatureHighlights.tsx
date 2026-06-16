@@ -1,4 +1,9 @@
-import { MapIcon, HeartIcon, SparklesIcon, type LucideIcon } from "lucide-react";
+import {
+  MapIcon,
+  HeartIcon,
+  SparklesIcon,
+  type LucideIcon,
+} from "lucide-react";
 
 const FEATURES: { icon: LucideIcon; title: string; body: string }[] = [
   {

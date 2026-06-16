@@ -38,8 +38,16 @@ describe("selectTrending", () => {
 
   it("breaks favoriteCount ties by newest createdAt", () => {
     const trips = [
-      makeTrip({ id: "old", favoriteCount: 5, createdAt: "2026-01-01T00:00:00.000Z" }),
-      makeTrip({ id: "new", favoriteCount: 5, createdAt: "2026-06-01T00:00:00.000Z" }),
+      makeTrip({
+        id: "old",
+        favoriteCount: 5,
+        createdAt: "2026-01-01T00:00:00.000Z",
+      }),
+      makeTrip({
+        id: "new",
+        favoriteCount: 5,
+        createdAt: "2026-06-01T00:00:00.000Z",
+      }),
     ];
     expect(selectTrending(trips, 2).map((t) => t.id)).toEqual(["new", "old"]);
   });

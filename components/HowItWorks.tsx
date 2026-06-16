@@ -28,8 +28,8 @@ export default function HowItWorks() {
         <header className="mb-10 max-w-2xl">
           <h2 className="text-2xl font-semibold sm:text-3xl">How it works</h2>
           <p className="mt-2 text-muted-foreground">
-            Road Rash is built around the Google My Maps you already make — three
-            steps from idea to a shared trip.
+            Road Rash is built around the Google My Maps you already make —
+            three steps from idea to a shared trip.
           </p>
         </header>
         <ol className="grid gap-6 sm:grid-cols-3">
