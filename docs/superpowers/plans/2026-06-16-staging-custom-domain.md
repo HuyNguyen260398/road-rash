@@ -387,10 +387,10 @@ Expected additions in the plan:
 - `module.hosting.aws_amplify_domain_association.this[0]`
 - `module.hosting.aws_route53_record.cert_verification[0]`
 - `module.hosting.data.aws_route53_zone.this[0]` (read)
-- `module.hosting.aws_route53_record.subdomain["roadrash.stg"]`
+- `module.hosting.aws_route53_record.subdomain[0]`
 - Cognito user-pool client + API Gateway/S3 CORS changes reflecting the new origin.
 
-If `aws_route53_record.subdomain` shows `for_each` over an unknown value and errors, the `dns_record` is not yet known pre-apply; proceed with apply (Step 3) and re-run plan/apply once (the known first-create quirk noted in the design doc).
+Both Route53 records use `count` (not `for_each`), so their addresses are static and they plan cleanly even though the record values (`dns_record`) are unknown until apply — no for_each/unknown-key error. If the Amplify API returns an empty `dns_record` immediately on first association create (a rare provider quirk), the records' `records` value would be empty; if so, re-run plan/apply once after the association settles.
 
 - [ ] **Step 3: Apply**
 
@@ -407,7 +407,7 @@ aws amplify get-domain-association --app-id d1kr94dtjbjs6h --domain-name nghuy.l
   --query "domainAssociation.{status:domainStatus,sub:subDomains[].{prefix:subDomainSetting.prefix,verified:verified}}"
 dig +short roadrash.stg.nghuy.link
 ```
-Expected: `domainStatus` progresses to `AVAILABLE`; `dig` returns the CloudFront CNAME target. If the domain association is stuck `PENDING_VERIFICATION` and the Route53 records were not created (empty `dns_record` on first apply), re-run Steps 2-3 once.
+Expected: `domainStatus` progresses to `AVAILABLE`; `dig` returns the CloudFront CNAME target. If the domain association is stuck `PENDING_VERIFICATION` and the Route53 records hold empty values (the rare empty-`dns_record`-on-first-create quirk), re-run Steps 2-3 once after the association settles.
 
 - [ ] **Step 5: End-to-end smoke**
 
