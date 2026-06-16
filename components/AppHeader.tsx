@@ -105,6 +105,12 @@ export default function AppHeader() {
         <AppLogo />
 
         <div className="hidden items-center gap-3 lg:flex">
+          <Link
+            href="/discover"
+            className={navLinkClass(isActive("/discover"))}
+          >
+            Discover
+          </Link>
           <ModeToggle />
           {ready && !signedIn ? (
             <Link
@@ -142,6 +148,13 @@ export default function AppHeader() {
             className="mx-auto flex max-w-7xl flex-col gap-2"
             aria-label="Mobile"
           >
+            <Link
+              href="/discover"
+              className={navLinkClass(isActive("/discover"))}
+              onClick={closeMenu}
+            >
+              Discover
+            </Link>
             {ACCOUNT_LINKS.map((item) => (
               <Link
                 key={item.href}
