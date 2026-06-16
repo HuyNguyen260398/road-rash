@@ -25,5 +25,5 @@ output "branch_url" {
 
 output "custom_domain_url" {
   description = "HTTPS URL of the custom domain, or null if none configured."
-  value       = var.custom_domain != null ? "https://${var.custom_domain.subdomain_prefix}.${var.custom_domain.domain_name}" : null
+  value       = var.custom_domain != null ? "https://${var.custom_domain.hostname}" : null
 }
