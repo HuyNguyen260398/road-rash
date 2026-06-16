@@ -29,3 +29,11 @@ app_logout_urls   = ["http://localhost:3000/"]
 # the real value out-of-band (it won't be reverted by later applies):
 #   aws ssm put-parameter --name /staging/road-rash/gemini_api_key \
 #     --type SecureString --value "$GEMINI_API_KEY" --overwrite
+
+# Custom domain — attaches the Amplify branch to a Route53-hosted subdomain.
+# Defaulted in variables.tf to nghuy.link / roadrash.stg; override or set to
+# null here to change/disable. The zone must already exist in this AWS account.
+# custom_domain = {
+#   domain_name      = "nghuy.link"
+#   subdomain_prefix = "roadrash.stg"
+# }

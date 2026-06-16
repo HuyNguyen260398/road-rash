@@ -200,6 +200,7 @@ module "hosting" {
   branch_name           = var.branch_name
   enable_auto_build     = var.enable_auto_build
   environment_variables = local.amplify_environment_variables
+  custom_domain         = var.custom_domain
 }
 
 # GitHub Actions OIDC deploy role — CI assumes this (no static keys) to trigger

@@ -132,3 +132,19 @@ variable "gemini_api_key" {
   default     = "REPLACE_ME"
   sensitive   = true
 }
+
+# --- Custom domain (hosting module) ---------------------------------------
+# Attaches the staging Amplify branch to a Route53-hosted subdomain. The zone
+# (domain_name) must already exist in this AWS account; Terraform writes the ACM
+# validation + CNAME records. Set to null to disable.
+variable "custom_domain" {
+  description = "Custom domain for the Amplify branch (domain_name = Route53 zone, subdomain_prefix = labels in front). Null disables."
+  type = object({
+    domain_name      = string
+    subdomain_prefix = string
+  })
+  default = {
+    domain_name      = "nghuy.link"
+    subdomain_prefix = "roadrash.stg"
+  }
+}

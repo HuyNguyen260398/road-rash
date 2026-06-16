@@ -22,3 +22,8 @@ output "branch_url" {
   description = "Public URL of the deployed branch."
   value       = "https://${aws_amplify_branch.this.branch_name}.${aws_amplify_app.this.default_domain}"
 }
+
+output "custom_domain_url" {
+  description = "HTTPS URL of the custom domain, or null if none configured."
+  value       = var.custom_domain != null ? "https://${var.custom_domain.subdomain_prefix}.${var.custom_domain.domain_name}" : null
+}

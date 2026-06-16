@@ -79,3 +79,58 @@ resource "aws_amplify_branch" "this" {
   # Per-branch overrides on top of the app-level env vars.
   environment_variables = var.branch_environment_variables
 }
+
+# --- Custom domain (optional) ---------------------------------------------
+# Attach the branch to a Route53-hosted subdomain. Everything here is gated on
+# var.custom_domain; null leaves it all uncreated so envs without a custom
+# domain are unaffected. The zone must already exist in this AWS account.
+
+data "aws_route53_zone" "this" {
+  count        = var.custom_domain != null ? 1 : 0
+  name         = var.custom_domain.domain_name
+  private_zone = false
+}
+
+resource "aws_amplify_domain_association" "this" {
+  count       = var.custom_domain != null ? 1 : 0
+  app_id      = aws_amplify_app.this.id
+  domain_name = var.custom_domain.domain_name
+
+  # We create the DNS records below ourselves, so don't block apply on Amplify's
+  # ACM verification + CloudFront propagation (can take 15-45 min).
+  wait_for_verification = false
+
+  sub_domain {
+    branch_name = aws_amplify_branch.this.branch_name
+    prefix      = var.custom_domain.subdomain_prefix
+  }
+}
+
+# ACM DNS-validation record for the Amplify-managed cert. The association exposes
+# it as a single space-delimited "<name> <type> <value>" string.
+resource "aws_route53_record" "cert_verification" {
+  count           = var.custom_domain != null ? 1 : 0
+  zone_id         = data.aws_route53_zone.this[0].zone_id
+  name            = trimsuffix(element(split(" ", aws_amplify_domain_association.this[0].certificate_verification_dns_record), 0), ".")
+  type            = element(split(" ", aws_amplify_domain_association.this[0].certificate_verification_dns_record), 1)
+  ttl             = 300
+  records         = [trimsuffix(element(split(" ", aws_amplify_domain_association.this[0].certificate_verification_dns_record), 2), ".")]
+  allow_overwrite = true
+}
+
+# CNAME for the subdomain, pointing at the Amplify CloudFront endpoint. The
+# association exposes exactly one sub_domain whose dns_record is a
+# "<name> CNAME <target>" string. Use count + one() (mirroring cert_verification)
+# rather than for_each over the computed sub_domain set, which would be unknown
+# at plan time on the first apply.
+resource "aws_route53_record" "subdomain" {
+  count   = var.custom_domain != null ? 1 : 0
+  zone_id = data.aws_route53_zone.this[0].zone_id
+  name    = trimsuffix(element(split(" ", one(aws_amplify_domain_association.this[0].sub_domain).dns_record), 0), ".")
+  type    = element(split(" ", one(aws_amplify_domain_association.this[0].sub_domain).dns_record), 1)
+  # 300s (5 min) TTL — short, since this rarely changes and we want quick
+  # propagation if the CloudFront target ever updates.
+  ttl             = 300
+  records         = [trimsuffix(element(split(" ", one(aws_amplify_domain_association.this[0].sub_domain).dns_record), 2), ".")]
+  allow_overwrite = true
+}
