@@ -1,5 +1,6 @@
-import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
+import { Link, redirect } from "@/i18n/navigation";
+import { notFound } from "next/navigation";
 import { ArrowLeftIcon } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import TripForm from "@/components/TripForm";
@@ -17,9 +18,10 @@ export default async function EditTripPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const locale = await getLocale();
 
   const session = await getServerSession();
-  if (!session) redirect("/login");
+  if (!session) return redirect({ href: "/login", locale });
 
   let trip;
   try {
@@ -30,7 +32,8 @@ export default async function EditTripPage({
   }
 
   // Non-owners can't edit — bounce them to the (public) detail view (M4).
-  if (trip.authorId !== session.sub) redirect(`/trip/${id}`);
+  if (trip.authorId !== session.sub)
+    redirect({ href: `/trip/${id}`, locale });
 
   return (
     <AppShell>

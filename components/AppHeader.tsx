@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { signOut } from "aws-amplify/auth";
 import { LogOutIcon, MenuIcon, XIcon } from "lucide-react";
 import { useGSAP } from "@gsap/react";

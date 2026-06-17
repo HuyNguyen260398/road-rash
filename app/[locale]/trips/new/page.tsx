@@ -1,4 +1,5 @@
-import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
+import { redirect } from "@/i18n/navigation";
 import AppShell from "@/components/AppShell";
 import TripForm from "@/components/TripForm";
 import { getServerSession } from "@/lib/server-session";
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function NewTripPage() {
   const session = await getServerSession();
-  if (!session) redirect("/login");
+  if (!session) redirect({ href: "/login", locale: await getLocale() });
 
   return (
     <AppShell>

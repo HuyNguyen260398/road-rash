@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "@/lib/gsap";
 import {

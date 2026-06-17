@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
+import { Link, redirect } from "@/i18n/navigation";
 import { AlertTriangleIcon, RouteIcon } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import TripGrid from "@/components/TripGrid";
@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 
 export default async function MyTripsPage() {
   const session = await getServerSession();
-  if (!session) redirect("/login");
+  if (!session) return redirect({ href: "/login", locale: await getLocale() });
 
   let mine: Trip[] = [];
   let loadError: string | null = null;

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useFavorites } from "@/components/FavoritesProvider";
 import { buttonVariants } from "@/components/ui/button";
 
