@@ -236,6 +236,10 @@
     "en": "EN",
     "vi": "VI"
   },
+  "metadata": {
+    "title": "Road Rash",
+    "description": "Discover, save, and share road trip routes with maps and AI suggestions."
+  },
   "tripType": {
     "ROAD_TRIP": "Road trip",
     "CITY": "City",

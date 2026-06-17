@@ -81,6 +81,7 @@ const PAGE_KEYS = [
 ] as const;
 
 const LANGUAGE_SWITCHER_KEYS = ["label", "en", "vi"] as const;
+const METADATA_KEYS = ["title", "description"] as const;
 
 function collectKeyPaths(value: unknown, prefix = ""): string[] {
   if (value === null || typeof value !== "object") return [prefix];
@@ -122,6 +123,13 @@ describe("i18n messages", () => {
     for (const key of LANGUAGE_SWITCHER_KEYS) {
       expect(en).toHaveProperty(`languageSwitcher.${key}`);
       expect(vi).toHaveProperty(`languageSwitcher.${key}`);
+    }
+  });
+
+  it("defines every message key used by locale metadata", () => {
+    for (const key of METADATA_KEYS) {
+      expect(en).toHaveProperty(`metadata.${key}`);
+      expect(vi).toHaveProperty(`metadata.${key}`);
     }
   });
 });

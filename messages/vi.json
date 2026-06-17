@@ -236,6 +236,10 @@
     "en": "EN",
     "vi": "VI"
   },
+  "metadata": {
+    "title": "Road Rash",
+    "description": "Khám phá, lưu và chia sẻ các tuyến đường du lịch với bản đồ và gợi ý từ AI."
+  },
   "tripType": {
     "ROAD_TRIP": "Chuyến đi đường dài",
     "CITY": "Thành phố",

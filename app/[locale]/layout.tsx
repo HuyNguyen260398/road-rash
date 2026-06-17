@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import "../globals.css";
 import { routing } from "@/i18n/routing";
 import ConfigureAmplifyClientSide from "@/components/ConfigureAmplifyClientSide";
@@ -22,14 +22,29 @@ const geistMono = Geist_Mono({
   subsets: ["latin", "latin-ext"],
 });
 
-export const metadata: Metadata = {
-  title: "Road Rash",
-  description:
-    "Discover, save, and share road trip routes with maps and AI suggestions.",
-};
-
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "metadata" });
+
+  return {
+    title: t("title"),
+    description: t("description"),
+    alternates: {
+      languages: {
+        en: "/en",
+        vi: "/vi",
+        "x-default": "/en",
+      },
+    },
+  };
 }
 
 export default async function LocaleLayout({
