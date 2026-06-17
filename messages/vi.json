@@ -128,6 +128,24 @@
     "noTripsYet": "Chưa có hành trình nào.",
     "noMatches": "Không có hành trình nào khớp với tìm kiếm và bộ lọc của bạn."
   },
+  "trip": {
+    "addToFavorites": "Thêm vào yêu thích",
+    "removeFromFavorites": "Xóa khỏi yêu thích",
+    "favorites": "{count, plural, =0 {Chưa có lượt thích} other {# lượt thích}}",
+    "typeLabel": "Loại",
+    "vehicleLabel": "Phương tiện",
+    "durationLabel": "Thời lượng",
+    "durationDays": "{count, plural, other {# ngày}}",
+    "authorLabel": "Tác giả",
+    "mapHeading": "Bản đồ",
+    "edit": "Chỉnh sửa",
+    "openInGoogleMaps": "Mở trong Google Maps",
+    "mapTitle": "Bản đồ cho {name}",
+    "mapEmbedFailed": "Không thể nhúng bản đồ này.",
+    "openMap": "Mở bản đồ",
+    "mapUnavailable": "Không có bản xem trước bản đồ.",
+    "close": "Đóng chi tiết hành trình"
+  },
   "tripType": {
     "ROAD_TRIP": "Chuyến đi đường dài",
     "CITY": "Thành phố",

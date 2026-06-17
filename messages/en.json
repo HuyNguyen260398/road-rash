@@ -128,6 +128,24 @@
     "noTripsYet": "No trips yet.",
     "noMatches": "No trips match your search and filters."
   },
+  "trip": {
+    "addToFavorites": "Add to favorites",
+    "removeFromFavorites": "Remove from favorites",
+    "favorites": "{count, plural, =0 {No favorites} one {# favorite} other {# favorites}}",
+    "typeLabel": "Type",
+    "vehicleLabel": "Vehicle",
+    "durationLabel": "Duration",
+    "durationDays": "{count, plural, one {# day} other {# days}}",
+    "authorLabel": "Author",
+    "mapHeading": "Map",
+    "edit": "Edit",
+    "openInGoogleMaps": "Open in Google Maps",
+    "mapTitle": "Map for {name}",
+    "mapEmbedFailed": "This map couldn’t be embedded.",
+    "openMap": "Open map",
+    "mapUnavailable": "Map preview unavailable.",
+    "close": "Close trip details"
+  },
   "tripType": {
     "ROAD_TRIP": "Road trip",
     "CITY": "City",
