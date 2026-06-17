@@ -77,7 +77,7 @@ export default async function TripPage({
           className="flex items-center gap-1.5 text-sm text-muted-foreground"
         >
           <Link
-            href="/"
+            href="/discover"
             className="inline-flex items-center gap-1.5 font-medium transition-colors hover:text-foreground"
           >
             <MapIcon className="size-4" aria-hidden />

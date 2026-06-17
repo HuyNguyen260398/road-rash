@@ -1,55 +1,40 @@
-import { AlertTriangleIcon } from "lucide-react";
 import AppShell from "@/components/AppShell";
-import DiscoverHero from "@/components/DiscoverHero";
-import TripBrowser from "@/components/TripBrowser";
-import EmptyState from "@/components/EmptyState";
+import LandingHero from "@/components/LandingHero";
+import FeaturedRoutes from "@/components/FeaturedRoutes";
+import HowItWorks from "@/components/HowItWorks";
+import FeatureHighlights from "@/components/FeatureHighlights";
+import LandingCta from "@/components/LandingCta";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { api } from "@/lib/api-client";
+import { selectTrending } from "@/lib/trending";
 import type { Trip } from "@/lib/types";
 
-// Home / Discover (TASK-028). Public, server-rendered: fetch all trips and hand
-// them to the client TripBrowser, which runs instant search/filter/group (M5).
+// Marketing landing page (home). Public, server-rendered: fetch trips for the
+// live count + the "Featured routes" marquee, then compose the static sections.
+// The browse experience lives at /discover. Fetch failures degrade gracefully —
+// the hero shows a static label and FeaturedRoutes renders nothing for an empty set.
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
   let trips: Trip[] = [];
-  let loadError: string | null = null;
 
   try {
     const result = await api.getTrips();
     trips = result.trips;
   } catch {
     // API not reachable/configured yet (e.g. before terraform apply) — render
-    // the page shell with an empty grid rather than crashing.
-    loadError = "Please try again in a moment.";
+    // the static landing shell rather than crashing.
   }
+
+  const featured = selectTrending(trips, 10);
 
   return (
     <AppShell>
-      <DiscoverHero tripCount={trips.length} />
-      <section id="trip-browser" className="bg-background">
-        <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-          <header className="mb-6">
-            <h2 className="text-2xl font-semibold">Discover trips</h2>
-            <p className="text-sm text-muted-foreground">
-              Browse travel plans shared by the community.
-            </p>
-          </header>
-
-          {loadError ? (
-            <EmptyState
-              icon={<AlertTriangleIcon className="size-6" aria-hidden />}
-              title="Trips are unavailable right now"
-              description={loadError}
-            />
-          ) : (
-            <TripBrowser
-              trips={trips}
-              emptyMessage="No trips yet — be the first to share one."
-            />
-          )}
-        </div>
-      </section>
+      <LandingHero tripCount={trips.length} />
+      <FeaturedRoutes trips={featured} />
+      <HowItWorks />
+      <FeatureHighlights />
+      <LandingCta />
       <ScrollToTopButton />
     </AppShell>
   );

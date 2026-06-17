@@ -49,7 +49,10 @@ export default async function SavedPage() {
               </p>
             </div>
           </div>
-          <Link href="/" className={buttonVariants({ variant: "outline" })}>
+          <Link
+            href="/discover"
+            className={buttonVariants({ variant: "outline" })}
+          >
             Discover more
           </Link>
         </header>
@@ -66,7 +69,7 @@ export default async function SavedPage() {
             title="No saved trips yet"
             description="Tap the heart on any trip to save it here for later."
             action={
-              <Link href="/" className={buttonVariants()}>
+              <Link href="/discover" className={buttonVariants()}>
                 Browse trips
               </Link>
             }
