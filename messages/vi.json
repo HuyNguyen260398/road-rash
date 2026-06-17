@@ -231,6 +231,11 @@
       "metadataFallbackDescription": "Kế hoạch hành trình bởi {author}."
     }
   },
+  "languageSwitcher": {
+    "label": "Ngôn ngữ",
+    "en": "EN",
+    "vi": "VI"
+  },
   "tripType": {
     "ROAD_TRIP": "Chuyến đi đường dài",
     "CITY": "Thành phố",

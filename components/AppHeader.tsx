@@ -11,6 +11,7 @@ import { DURATION, EASE, REDUCED_MOTION_QUERY } from "@/lib/motion";
 import AppLogo from "@/components/AppLogo";
 import UserMenu from "@/components/UserMenu";
 import ModeToggle from "@/components/ModeToggle";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useFavorites } from "@/components/FavoritesProvider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -106,6 +107,7 @@ export default function AppHeader() {
         <AppLogo />
 
         <div className="hidden items-center gap-3 lg:flex">
+          <LanguageSwitcher />
           <ModeToggle />
           {ready && !signedIn ? (
             <Link
@@ -154,7 +156,11 @@ export default function AppHeader() {
               </Link>
             ))}
             <div className="mt-2 flex flex-col gap-2 border-t border-border pt-4 sm:hidden">
+              <LanguageSwitcher />
               <ModeToggle />
+            </div>
+            <div className="mt-2 hidden border-t border-border pt-4 sm:block">
+              <LanguageSwitcher />
             </div>
             <div className="mt-2 grid gap-2 border-t border-border pt-4 sm:grid-cols-2">
               {ready && !signedIn ? (

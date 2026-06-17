@@ -80,6 +80,8 @@ const PAGE_KEYS = [
   "trip.metadataFallbackDescription",
 ] as const;
 
+const LANGUAGE_SWITCHER_KEYS = ["label", "en", "vi"] as const;
+
 function collectKeyPaths(value: unknown, prefix = ""): string[] {
   if (value === null || typeof value !== "object") return [prefix];
   if (Array.isArray(value)) return [prefix];
@@ -113,6 +115,13 @@ describe("i18n messages", () => {
     for (const key of PAGE_KEYS) {
       expect(en).toHaveProperty(`pages.${key}`);
       expect(vi).toHaveProperty(`pages.${key}`);
+    }
+  });
+
+  it("defines every message key used by the language switcher", () => {
+    for (const key of LANGUAGE_SWITCHER_KEYS) {
+      expect(en).toHaveProperty(`languageSwitcher.${key}`);
+      expect(vi).toHaveProperty(`languageSwitcher.${key}`);
     }
   });
 });

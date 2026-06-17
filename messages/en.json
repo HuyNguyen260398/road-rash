@@ -231,6 +231,11 @@
       "metadataFallbackDescription": "A trip plan by {author}."
     }
   },
+  "languageSwitcher": {
+    "label": "Language",
+    "en": "EN",
+    "vi": "VI"
+  },
   "tripType": {
     "ROAD_TRIP": "Road trip",
     "CITY": "City",
