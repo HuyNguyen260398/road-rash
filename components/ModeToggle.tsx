@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTheme } from "next-themes";
 import { LaptopIcon, MoonIcon, SunIcon } from "lucide-react";
+import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -15,12 +15,12 @@ const MODES = [
 export default function ModeToggle({ className }: { className?: string }) {
   const { setTheme, theme } = useTheme();
 
-  // next-themes can't know the active theme during SSR, so the server and the
-  // first client render must be theme-agnostic to avoid a hydration mismatch on
-  // aria-pressed/variant. We only reflect the active mode after mount.
+  // The provider can't know the stored/browser theme during SSR, so the server
+  // and first client render stay theme-agnostic to avoid a hydration mismatch
+  // on aria-pressed/variant. We only reflect the active mode after mount.
   const [mounted, setMounted] = useState(false);
-  // The one-shot mount flag is the documented next-themes pattern; it's a
-  // mount signal, not the cascading-render case this rule guards against.
+  // The one-shot mount flag is a mount signal, not the cascading-render case
+  // this rule guards against.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
 
