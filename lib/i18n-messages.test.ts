@@ -42,6 +42,44 @@ const FORM_KEYS = [
   "cancel",
 ] as const;
 
+const AUTH_KEYS = [
+  "title",
+  "description",
+  "checkingSession",
+  "signedInAs",
+  "signOut",
+  "continueWithGoogle",
+  "signInFailed",
+  "signInStartFailed",
+  "signOutFailed",
+  "configUnavailable",
+] as const;
+
+const PAGE_KEYS = [
+  "common.loadError",
+  "discover.title",
+  "discover.subtitle",
+  "discover.unavailableTitle",
+  "discover.emptyMessage",
+  "saved.title",
+  "saved.subtitle",
+  "saved.discoverMore",
+  "saved.loadErrorTitle",
+  "saved.emptyTitle",
+  "saved.emptyDescription",
+  "saved.browseTrips",
+  "myTrips.title",
+  "myTrips.subtitle",
+  "myTrips.createTrip",
+  "myTrips.loadErrorTitle",
+  "myTrips.emptyTitle",
+  "myTrips.emptyDescription",
+  "trip.breadcrumbLabel",
+  "trip.discover",
+  "trip.metadataFallbackTitle",
+  "trip.metadataFallbackDescription",
+] as const;
+
 function collectKeyPaths(value: unknown, prefix = ""): string[] {
   if (value === null || typeof value !== "object") return [prefix];
   if (Array.isArray(value)) return [prefix];
@@ -63,6 +101,18 @@ describe("i18n messages", () => {
     for (const key of FORM_KEYS) {
       expect(en).toHaveProperty(`forms.${key}`);
       expect(vi).toHaveProperty(`forms.${key}`);
+    }
+  });
+
+  it("defines every message key used by auth and route pages", () => {
+    for (const key of AUTH_KEYS) {
+      expect(en).toHaveProperty(`auth.${key}`);
+      expect(vi).toHaveProperty(`auth.${key}`);
+    }
+
+    for (const key of PAGE_KEYS) {
+      expect(en).toHaveProperty(`pages.${key}`);
+      expect(vi).toHaveProperty(`pages.${key}`);
     }
   });
 });

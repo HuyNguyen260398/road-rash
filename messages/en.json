@@ -185,6 +185,52 @@
     "createTrip": "Create trip",
     "cancel": "Cancel"
   },
+  "auth": {
+    "title": "Sign in to Road Rash",
+    "description": "Sign in to create routes and save your favorite trips.",
+    "checkingSession": "Checking your session…",
+    "signedInAs": "Signed in as",
+    "signOut": "Sign out",
+    "continueWithGoogle": "Continue with Google",
+    "signInFailed": "Sign-in failed. Please try again.",
+    "signInStartFailed": "Could not start sign-in. Please try again.",
+    "signOutFailed": "Could not sign out. Please try again.",
+    "configUnavailable": "Google sign-in is not available right now."
+  },
+  "pages": {
+    "common": {
+      "loadError": "Please try again in a moment."
+    },
+    "discover": {
+      "title": "Discover trips",
+      "subtitle": "{count, plural, one {Browse # travel plan shared by the community.} other {Browse # travel plans shared by the community.}}",
+      "unavailableTitle": "Trips are unavailable right now",
+      "emptyMessage": "No trips yet — be the first to share one."
+    },
+    "saved": {
+      "title": "Saved trips",
+      "subtitle": "Routes you’ve favorited, ready to revisit anytime.",
+      "discoverMore": "Discover more",
+      "loadErrorTitle": "Couldn’t load your saved trips",
+      "emptyTitle": "No saved trips yet",
+      "emptyDescription": "Tap the heart on any trip to save it here for later.",
+      "browseTrips": "Browse trips"
+    },
+    "myTrips": {
+      "title": "My trips",
+      "subtitle": "Routes you’ve published for the community to discover.",
+      "createTrip": "Create trip",
+      "loadErrorTitle": "Couldn’t load your trips",
+      "emptyTitle": "You haven’t created any trips yet",
+      "emptyDescription": "Share your first travel plan with the community."
+    },
+    "trip": {
+      "breadcrumbLabel": "Breadcrumb",
+      "discover": "Discover",
+      "metadataFallbackTitle": "Trip · Road Rash",
+      "metadataFallbackDescription": "A trip plan by {author}."
+    }
+  },
   "tripType": {
     "ROAD_TRIP": "Road trip",
     "CITY": "City",

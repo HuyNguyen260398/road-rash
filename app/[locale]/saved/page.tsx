@@ -1,4 +1,4 @@
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Link, redirect } from "@/i18n/navigation";
 import { AlertTriangleIcon, HeartIcon } from "lucide-react";
 import AppShell from "@/components/AppShell";
@@ -18,6 +18,8 @@ import type { Trip } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 export default async function SavedPage() {
+  const t = await getTranslations("pages.saved");
+  const tCommon = await getTranslations("pages.common");
   const session = await getServerSession();
   if (!session) return redirect({ href: "/login", locale: await getLocale() });
 
@@ -31,7 +33,7 @@ export default async function SavedPage() {
     const ids = new Set(favorites.map((f) => f.tripId));
     saved = trips.filter((t) => ids.has(t.id));
   } catch {
-    loadError = "Please try again in a moment.";
+    loadError = tCommon("loadError");
   }
 
   return (
@@ -43,9 +45,9 @@ export default async function SavedPage() {
               <HeartIcon className="size-5" aria-hidden />
             </div>
             <div>
-              <h1 className="text-2xl font-semibold">Saved trips</h1>
+              <h1 className="text-2xl font-semibold">{t("title")}</h1>
               <p className="text-sm text-muted-foreground">
-                Routes you’ve favorited, ready to revisit anytime.
+                {t("subtitle")}
               </p>
             </div>
           </div>
@@ -53,24 +55,24 @@ export default async function SavedPage() {
             href="/discover"
             className={buttonVariants({ variant: "outline" })}
           >
-            Discover more
+            {t("discoverMore")}
           </Link>
         </header>
 
         {loadError ? (
           <EmptyState
             icon={<AlertTriangleIcon className="size-6" aria-hidden />}
-            title="Couldn’t load your saved trips"
+            title={t("loadErrorTitle")}
             description={loadError}
           />
         ) : saved.length === 0 ? (
           <EmptyState
             icon={<HeartIcon className="size-6" aria-hidden />}
-            title="No saved trips yet"
-            description="Tap the heart on any trip to save it here for later."
+            title={t("emptyTitle")}
+            description={t("emptyDescription")}
             action={
               <Link href="/discover" className={buttonVariants()}>
-                Browse trips
+                {t("browseTrips")}
               </Link>
             }
           />

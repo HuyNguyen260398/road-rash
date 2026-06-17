@@ -1,4 +1,4 @@
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Link, redirect } from "@/i18n/navigation";
 import { AlertTriangleIcon, RouteIcon } from "lucide-react";
 import AppShell from "@/components/AppShell";
@@ -15,6 +15,8 @@ import type { Trip } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 export default async function MyTripsPage() {
+  const t = await getTranslations("pages.myTrips");
+  const tCommon = await getTranslations("pages.common");
   const session = await getServerSession();
   if (!session) return redirect({ href: "/login", locale: await getLocale() });
 
@@ -24,7 +26,7 @@ export default async function MyTripsPage() {
     const { trips } = await api.getTrips();
     mine = trips.filter((t) => t.authorId === session.sub);
   } catch {
-    loadError = "Please try again in a moment.";
+    loadError = tCommon("loadError");
   }
 
   return (
@@ -36,31 +38,31 @@ export default async function MyTripsPage() {
               <RouteIcon className="size-5" aria-hidden />
             </div>
             <div>
-              <h1 className="text-2xl font-semibold">My trips</h1>
+              <h1 className="text-2xl font-semibold">{t("title")}</h1>
               <p className="text-sm text-muted-foreground">
-                Routes you’ve published for the community to discover.
+                {t("subtitle")}
               </p>
             </div>
           </div>
           <Link href="/trips/new" className={buttonVariants()}>
-            Create trip
+            {t("createTrip")}
           </Link>
         </header>
 
         {loadError ? (
           <EmptyState
             icon={<AlertTriangleIcon className="size-6" aria-hidden />}
-            title="Couldn’t load your trips"
+            title={t("loadErrorTitle")}
             description={loadError}
           />
         ) : mine.length === 0 ? (
           <EmptyState
             icon={<RouteIcon className="size-6" aria-hidden />}
-            title="You haven’t created any trips yet"
-            description="Share your first travel plan with the community."
+            title={t("emptyTitle")}
+            description={t("emptyDescription")}
             action={
               <Link href="/trips/new" className={buttonVariants()}>
-                Create trip
+                {t("createTrip")}
               </Link>
             }
           />

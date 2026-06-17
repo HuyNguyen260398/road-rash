@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { ChevronRightIcon, MapIcon } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import TripDetail from "@/components/TripDetail";
@@ -25,13 +26,15 @@ async function loadTrip(id: string): Promise<Trip> {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; locale: string }>;
 }): Promise<Metadata> {
-  const { id } = await params;
+  const { id, locale } = await params;
+  const t = await getTranslations({ locale, namespace: "pages.trip" });
   try {
     const trip = await api.getTrip(id);
     const description =
-      trip.description ?? `A trip plan by ${trip.authorName}.`;
+      trip.description ??
+      t("metadataFallbackDescription", { author: trip.authorName });
 
     // Best-effort OG image: the thumbnail bucket is private, so we mint a public
     // presigned GET (the same URL the cards use). It's time-limited, which is
@@ -57,7 +60,7 @@ export async function generateMetadata({
       },
     };
   } catch {
-    return { title: "Trip · road-rash" };
+    return { title: t("metadataFallbackTitle") };
   }
 }
 
@@ -67,13 +70,14 @@ export default async function TripPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const t = await getTranslations("pages.trip");
   const trip = await loadTrip(id);
 
   return (
     <AppShell>
       <div className="mx-auto w-full max-w-2xl px-4 py-8">
         <nav
-          aria-label="Breadcrumb"
+          aria-label={t("breadcrumbLabel")}
           className="flex items-center gap-1.5 text-sm text-muted-foreground"
         >
           <Link
@@ -81,7 +85,7 @@ export default async function TripPage({
             className="inline-flex items-center gap-1.5 font-medium transition-colors hover:text-foreground"
           >
             <MapIcon className="size-4" aria-hidden />
-            Discover
+            {t("discover")}
           </Link>
           <ChevronRightIcon className="size-4" aria-hidden />
           <span className="truncate text-foreground">{trip.name}</span>

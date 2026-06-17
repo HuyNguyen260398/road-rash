@@ -185,6 +185,52 @@
     "createTrip": "Tạo hành trình",
     "cancel": "Hủy"
   },
+  "auth": {
+    "title": "Đăng nhập vào Road Rash",
+    "description": "Đăng nhập để tạo tuyến đường và lưu những hành trình bạn yêu thích.",
+    "checkingSession": "Đang kiểm tra phiên đăng nhập…",
+    "signedInAs": "Đã đăng nhập với",
+    "signOut": "Đăng xuất",
+    "continueWithGoogle": "Tiếp tục với Google",
+    "signInFailed": "Đăng nhập thất bại. Vui lòng thử lại.",
+    "signInStartFailed": "Không thể bắt đầu đăng nhập. Vui lòng thử lại.",
+    "signOutFailed": "Không thể đăng xuất. Vui lòng thử lại.",
+    "configUnavailable": "Đăng nhập bằng Google hiện không khả dụng."
+  },
+  "pages": {
+    "common": {
+      "loadError": "Vui lòng thử lại sau giây lát."
+    },
+    "discover": {
+      "title": "Khám phá hành trình",
+      "subtitle": "{count, plural, other {Duyệt # kế hoạch du lịch được cộng đồng chia sẻ.}}",
+      "unavailableTitle": "Hiện chưa thể tải danh sách hành trình",
+      "emptyMessage": "Chưa có hành trình nào — hãy là người đầu tiên chia sẻ."
+    },
+    "saved": {
+      "title": "Hành trình đã lưu",
+      "subtitle": "Những tuyến đường bạn đã yêu thích, luôn sẵn sàng để xem lại.",
+      "discoverMore": "Khám phá thêm",
+      "loadErrorTitle": "Không thể tải hành trình đã lưu của bạn",
+      "emptyTitle": "Bạn chưa lưu hành trình nào",
+      "emptyDescription": "Nhấn biểu tượng trái tim trên bất kỳ hành trình nào để lưu lại cho sau này.",
+      "browseTrips": "Duyệt hành trình"
+    },
+    "myTrips": {
+      "title": "Hành trình của tôi",
+      "subtitle": "Những tuyến đường bạn đã đăng để cộng đồng khám phá.",
+      "createTrip": "Tạo hành trình",
+      "loadErrorTitle": "Không thể tải hành trình của bạn",
+      "emptyTitle": "Bạn chưa tạo hành trình nào",
+      "emptyDescription": "Chia sẻ kế hoạch du lịch đầu tiên của bạn với cộng đồng."
+    },
+    "trip": {
+      "breadcrumbLabel": "Điều hướng phân cấp",
+      "discover": "Khám phá",
+      "metadataFallbackTitle": "Hành trình · Road Rash",
+      "metadataFallbackDescription": "Kế hoạch hành trình bởi {author}."
+    }
+  },
   "tripType": {
     "ROAD_TRIP": "Chuyến đi đường dài",
     "CITY": "Thành phố",
