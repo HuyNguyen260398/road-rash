@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useGSAP } from "@gsap/react";
 import {
@@ -64,6 +65,7 @@ export default function TripCard({
   /** Inline style on the card root — used to stagger the float-up reveal. */
   style?: React.CSSProperties;
 } & React.HTMLAttributes<HTMLAnchorElement>) {
+  const t = useTranslations("search");
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const router = useRouter();
   const { isFavorited, countDelta, toggle, signedIn } = useFavorites();
@@ -203,15 +205,13 @@ export default function TripCard({
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Clock3Icon className="size-4" aria-hidden />
-              <span>
-                {trip.durationDays} day{trip.durationDays === 1 ? "" : "s"}
-              </span>
+              <span>{t("duration", { count: trip.durationDays })}</span>
             </span>
           </div>
 
           <div className="flex items-center justify-between gap-3 border-t border-border pt-3">
             <p className="min-w-0 truncate text-xs text-muted-foreground">
-              by {trip.authorName}
+              {t("byAuthor", { author: trip.authorName })}
             </p>
             <Button
               type="button"
@@ -220,9 +220,9 @@ export default function TripCard({
               onClick={handleFavorite}
               aria-pressed={favorited}
               aria-label={
-                favorited ? "Remove from favorites" : "Add to favorites"
+                favorited ? t("removeFromFavorites") : t("addToFavorites")
               }
-              title={favorited ? "Remove from favorites" : "Add to favorites"}
+              title={favorited ? t("removeFromFavorites") : t("addToFavorites")}
               className="h-8 shrink-0 px-2"
             >
               <HeartIcon

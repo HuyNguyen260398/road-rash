@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { SlidersHorizontalIcon } from "lucide-react";
 import SearchPill from "./SearchPill";
 import FilterControls from "./FilterControls";
@@ -26,12 +27,12 @@ import type { SuggestCandidate, Trip } from "@/lib/types";
 // POST /suggest (submit-only) and the grid switches to the ranked results until
 // cleared. Filters + grouping collapse behind a toggle.
 
-const GROUP_OPTIONS: { value: GroupField; label: string }[] = [
-  { value: "country", label: "Country" },
-  { value: "province", label: "Province" },
-  { value: "city", label: "City" },
-  { value: "tripType", label: "Trip type" },
-  { value: "vehicle", label: "Vehicle" },
+const GROUP_OPTIONS: GroupField[] = [
+  "country",
+  "province",
+  "city",
+  "tripType",
+  "vehicle",
 ];
 
 const ENUM_GROUPS: ReadonlySet<GroupField> = new Set(["tripType", "vehicle"]);
@@ -57,11 +58,13 @@ type AiStatus = "idle" | "loading" | "done";
 
 export default function TripBrowser({
   trips,
-  emptyMessage = "No trips yet.",
+  emptyMessage,
 }: {
   trips: Trip[];
   emptyMessage?: string;
 }) {
+  const t = useTranslations("search");
+  const tEmpty = useTranslations("empty");
   const [q, setQ] = useState("");
   const [filters, setFilters] = useState<TripFilters>({});
   const [groupBy, setGroupBy] = useState<GroupField | "">("");
@@ -136,11 +139,7 @@ export default function TripBrowser({
         })
         .filter((r): r is AiResult => r !== undefined);
       setAiResults(mapped);
-      setAiMessage(
-        mapped.length === 0
-          ? "No trips matched that — try a different description, or browse below."
-          : null,
-      );
+      setAiMessage(mapped.length === 0 ? t("aiNoMatch") : null);
     } catch {
       if (requestId !== requestIdRef.current) return; // superseded — discard
       // Gemini unavailable/timed out — fall back to plain search over the same
@@ -151,8 +150,8 @@ export default function TripBrowser({
       setAiResults(fallback);
       setAiMessage(
         fallback.length === 0
-          ? `AI is unavailable and no trips matched "${prompt}". Try another search.`
-          : "AI is unavailable right now — showing plain search results instead.",
+          ? t("aiUnavailableNoMatch", { prompt })
+          : t("aiUnavailable"),
       );
     } finally {
       if (requestId === requestIdRef.current) setAiStatus("done");
@@ -166,7 +165,7 @@ export default function TripBrowser({
 
   const aiActive = aiStatus === "done";
   const resultCount = aiActive ? aiResults.length : visible.length;
-  const resultLabel = `${resultCount} route${resultCount === 1 ? "" : "s"}`;
+  const resultLabel = t("results", { count: resultCount });
   const hasActiveFilters =
     Object.values(filters).some(Boolean) || Boolean(groupBy);
 
@@ -193,7 +192,7 @@ export default function TripBrowser({
             onClick={() => setFiltersOpen((v) => !v)}
           >
             <SlidersHorizontalIcon className="size-4" aria-hidden />
-            {filtersOpen ? "Hide filters" : "Show filters"}
+            {filtersOpen ? t("hideFilters") : t("showFilters")}
             {hasActiveFilters ? (
               <span
                 className="ml-1 size-2 rounded-full bg-primary"
@@ -222,19 +221,19 @@ export default function TripBrowser({
               htmlFor="trip-group-by"
               className="text-sm font-medium text-muted-foreground"
             >
-              Group
+              {t("group")}
             </label>
             <Select
               id="trip-group-by"
-              aria-label="Group trips by"
+              aria-label={t("groupBy")}
               className="min-w-48"
               value={groupBy}
               onChange={(e) => setGroupBy(e.target.value as GroupField | "")}
             >
-              <option value="">No grouping</option>
+              <option value="">{t("noGrouping")}</option>
               {GROUP_OPTIONS.map((g) => (
-                <option key={g.value} value={g.value}>
-                  By {g.label.toLowerCase()}
+                <option key={g} value={g}>
+                  {t("groupByOption", { field: t(`groupField.${g}`) })}
                 </option>
               ))}
             </Select>
@@ -278,8 +277,8 @@ export default function TripBrowser({
           groups={groups}
           emptyMessage={
             trips.length === 0
-              ? emptyMessage
-              : "No trips match your search and filters."
+              ? (emptyMessage ?? tEmpty("noTripsYet"))
+              : tEmpty("noMatches")
           }
         />
       )}

@@ -82,5 +82,50 @@
       "title": "Hành trình nổi bật",
       "viewAll": "Xem tất cả hành trình"
     }
+  },
+  "search": {
+    "label": "Tìm hành trình hoặc mô tả chuyến đi của bạn",
+    "placeholder": "Tìm hành trình, hoặc mô tả chuyến đi của bạn…",
+    "clear": "Xóa tìm kiếm",
+    "askAi": "Hỏi AI",
+    "asking": "Đang hỏi…",
+    "showFilters": "Hiện bộ lọc",
+    "hideFilters": "Ẩn bộ lọc",
+    "results": "{count, plural, =0 {Không có tuyến} other {# tuyến}}",
+    "group": "Nhóm",
+    "groupBy": "Nhóm hành trình theo",
+    "noGrouping": "Không nhóm",
+    "groupByOption": "Theo {field}",
+    "groupField": {
+      "country": "quốc gia",
+      "province": "tỉnh/thành",
+      "city": "thành phố",
+      "tripType": "loại hành trình",
+      "vehicle": "phương tiện"
+    },
+    "filtersTitle": "Bộ lọc",
+    "clearFilters": "Xóa bộ lọc",
+    "filterByTripType": "Lọc theo loại hành trình",
+    "filterByVehicle": "Lọc theo phương tiện",
+    "filterByCountry": "Lọc theo quốc gia",
+    "filterByProvince": "Lọc theo tỉnh/thành",
+    "filterByCity": "Lọc theo thành phố",
+    "allTypes": "Tất cả loại",
+    "allVehicles": "Tất cả phương tiện",
+    "allCountries": "Tất cả quốc gia",
+    "allProvinces": "Tất cả tỉnh/thành",
+    "allCities": "Tất cả thành phố",
+    "loadMore": "Đang tải…",
+    "aiNoMatch": "Không có hành trình nào phù hợp — hãy thử mô tả khác, hoặc duyệt bên dưới.",
+    "aiUnavailableNoMatch": "AI hiện không khả dụng và không có hành trình nào khớp với \"{prompt}\". Hãy thử tìm kiếm khác.",
+    "aiUnavailable": "AI hiện không khả dụng — đang hiển thị kết quả tìm kiếm thường.",
+    "duration": "{count, plural, other {# ngày}}",
+    "byAuthor": "bởi {author}",
+    "addToFavorites": "Thêm vào yêu thích",
+    "removeFromFavorites": "Xóa khỏi yêu thích"
+  },
+  "empty": {
+    "noTripsYet": "Chưa có hành trình nào.",
+    "noMatches": "Không có hành trình nào khớp với tìm kiếm và bộ lọc của bạn."
   }
 }

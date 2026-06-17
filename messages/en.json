@@ -82,5 +82,50 @@
       "title": "Featured routes",
       "viewAll": "See all trips"
     }
+  },
+  "search": {
+    "label": "Search trips or describe your ride",
+    "placeholder": "Search trips, or describe your ride…",
+    "clear": "Clear search",
+    "askAi": "Ask AI",
+    "asking": "Asking…",
+    "showFilters": "Show filters",
+    "hideFilters": "Hide filters",
+    "results": "{count, plural, =0 {No routes} one {# route} other {# routes}}",
+    "group": "Group",
+    "groupBy": "Group trips by",
+    "noGrouping": "No grouping",
+    "groupByOption": "By {field}",
+    "groupField": {
+      "country": "country",
+      "province": "province",
+      "city": "city",
+      "tripType": "trip type",
+      "vehicle": "vehicle"
+    },
+    "filtersTitle": "Filters",
+    "clearFilters": "Clear filters",
+    "filterByTripType": "Filter by trip type",
+    "filterByVehicle": "Filter by vehicle",
+    "filterByCountry": "Filter by country",
+    "filterByProvince": "Filter by province",
+    "filterByCity": "Filter by city",
+    "allTypes": "All types",
+    "allVehicles": "All vehicles",
+    "allCountries": "All countries",
+    "allProvinces": "All provinces",
+    "allCities": "All cities",
+    "loadMore": "Loading…",
+    "aiNoMatch": "No trips matched that — try a different description, or browse below.",
+    "aiUnavailableNoMatch": "AI is unavailable and no trips matched \"{prompt}\". Try another search.",
+    "aiUnavailable": "AI is unavailable right now — showing plain search results instead.",
+    "duration": "{count, plural, one {# day} other {# days}}",
+    "byAuthor": "by {author}",
+    "addToFavorites": "Add to favorites",
+    "removeFromFavorites": "Remove from favorites"
+  },
+  "empty": {
+    "noTripsYet": "No trips yet.",
+    "noMatches": "No trips match your search and filters."
   }
 }
