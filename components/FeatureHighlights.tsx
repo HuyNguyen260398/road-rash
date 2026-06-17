@@ -65,15 +65,15 @@ export default function FeatureHighlights() {
           {features.map(({ title, body }, i) => {
             const Icon = FEATURE_ICONS[i];
             return (
-            <div key={title} className="feature-card">
-              <div className="group h-full rounded-lg border border-border bg-card p-6 shadow-sm transition-[transform,box-shadow,border-color] duration-300 ease-out hover:border-secondary/40 hover:shadow-lg motion-safe:hover:-translate-y-1.5">
-                <div className="mb-4 flex size-11 items-center justify-center rounded-md bg-secondary/10 text-secondary transition-colors duration-300 group-hover:bg-secondary group-hover:text-secondary-foreground">
-                  <Icon className="size-5" aria-hidden />
+              <div key={title} className="feature-card">
+                <div className="group h-full rounded-lg border border-border bg-card p-6 shadow-sm transition-[transform,box-shadow,border-color] duration-300 ease-out hover:border-secondary/40 hover:shadow-lg motion-safe:hover:-translate-y-1.5">
+                  <div className="mb-4 flex size-11 items-center justify-center rounded-md bg-secondary/10 text-secondary transition-colors duration-300 group-hover:bg-secondary group-hover:text-secondary-foreground">
+                    <Icon className="size-5" aria-hidden />
+                  </div>
+                  <h3 className="font-semibold">{title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{body}</p>
                 </div>
-                <h3 className="font-semibold">{title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{body}</p>
               </div>
-            </div>
             );
           })}
         </div>

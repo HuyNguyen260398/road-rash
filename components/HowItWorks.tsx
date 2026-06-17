@@ -65,18 +65,18 @@ export default function HowItWorks() {
           {steps.map(({ title, body }, i) => {
             const Icon = STEP_ICONS[i];
             return (
-            <li key={title} className="hiw-card list-none">
-              <div className="group h-full rounded-lg border border-border bg-card p-6 shadow-sm transition-[transform,box-shadow,border-color] duration-300 ease-out hover:border-primary/40 hover:shadow-lg motion-safe:hover:-translate-y-1.5">
-                <div className="mb-4 flex size-11 items-center justify-center rounded-md bg-primary/10 text-primary transition-colors duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
-                  <Icon className="size-5" aria-hidden />
+              <li key={title} className="hiw-card list-none">
+                <div className="group h-full rounded-lg border border-border bg-card p-6 shadow-sm transition-[transform,box-shadow,border-color] duration-300 ease-out hover:border-primary/40 hover:shadow-lg motion-safe:hover:-translate-y-1.5">
+                  <div className="mb-4 flex size-11 items-center justify-center rounded-md bg-primary/10 text-primary transition-colors duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
+                    <Icon className="size-5" aria-hidden />
+                  </div>
+                  <p className="mb-1 text-sm font-medium text-muted-foreground">
+                    {t("stepLabel", { number: i + 1 })}
+                  </p>
+                  <h3 className="font-semibold">{title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{body}</p>
                 </div>
-                <p className="mb-1 text-sm font-medium text-muted-foreground">
-                  {t("stepLabel", { number: i + 1 })}
-                </p>
-                <h3 className="font-semibold">{title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{body}</p>
-              </div>
-            </li>
+              </li>
             );
           })}
         </ol>
