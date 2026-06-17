@@ -18,7 +18,6 @@ import {
   type GroupField,
   type TripFilters,
 } from "@/lib/search";
-import { formatEnum } from "@/lib/format";
 import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
 import type { SuggestCandidate, Trip } from "@/lib/types";
 
@@ -34,8 +33,6 @@ const GROUP_OPTIONS: GroupField[] = [
   "tripType",
   "vehicle",
 ];
-
-const ENUM_GROUPS: ReadonlySet<GroupField> = new Set(["tripType", "vehicle"]);
 
 // Compact projection sent as the AI candidate set — never the full record.
 function toCandidates(trips: Trip[]): SuggestCandidate[] {
@@ -65,6 +62,8 @@ export default function TripBrowser({
 }) {
   const t = useTranslations("search");
   const tEmpty = useTranslations("empty");
+  const tTripType = useTranslations("tripType");
+  const tVehicle = useTranslations("vehicle");
   const [q, setQ] = useState("");
   const [filters, setFilters] = useState<TripFilters>({});
   const [groupBy, setGroupBy] = useState<GroupField | "">("");
@@ -103,10 +102,17 @@ export default function TripBrowser({
   const groups = useMemo(() => {
     if (!groupBy) return undefined;
     return groupTrips(visible, groupBy).map((g) => ({
-      label: ENUM_GROUPS.has(groupBy) ? formatEnum(g.key) : g.key,
+      // Enum group keys (tripType / vehicle) get translated display labels;
+      // location group keys (country/province/city) stay as raw user data.
+      label:
+        groupBy === "tripType"
+          ? tTripType(g.key)
+          : groupBy === "vehicle"
+            ? tVehicle(g.key)
+            : g.key,
       trips: g.trips,
     }));
-  }, [visible, groupBy]);
+  }, [visible, groupBy, tTripType, tVehicle]);
 
   // AI results render in a bespoke grid (each card carries a reason caption), so
   // they get their own paginated window — TripGrid's load-more covers plain search.

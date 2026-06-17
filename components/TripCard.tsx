@@ -26,7 +26,6 @@ import { useFavorites } from "@/components/FavoritesProvider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { formatEnum } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Trip, Vehicle } from "@/lib/types";
 
@@ -66,6 +65,8 @@ export default function TripCard({
   style?: React.CSSProperties;
 } & React.HTMLAttributes<HTMLAnchorElement>) {
   const t = useTranslations("search");
+  const tTripType = useTranslations("tripType");
+  const tVehicle = useTranslations("vehicle");
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const router = useRouter();
   const { isFavorited, countDelta, toggle, signedIn } = useFavorites();
@@ -185,7 +186,7 @@ export default function TripCard({
             </div>
           )}
           <div className="absolute left-3 top-3">
-            <Badge variant="secondary">{formatEnum(trip.tripType)}</Badge>
+            <Badge variant="secondary">{tTripType(trip.tripType)}</Badge>
           </div>
         </div>
 
@@ -201,7 +202,7 @@ export default function TripCard({
           <div className="mt-auto flex items-center justify-between gap-3 pt-1 text-sm text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
               <VehicleIcon className="size-4" aria-hidden />
-              <span>{formatEnum(trip.vehicle)}</span>
+              <span>{tVehicle(trip.vehicle)}</span>
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Clock3Icon className="size-4" aria-hidden />

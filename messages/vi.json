@@ -127,5 +127,20 @@
   "empty": {
     "noTripsYet": "Chưa có hành trình nào.",
     "noMatches": "Không có hành trình nào khớp với tìm kiếm và bộ lọc của bạn."
+  },
+  "tripType": {
+    "ROAD_TRIP": "Chuyến đi đường dài",
+    "CITY": "Thành phố",
+    "BEACH": "Biển",
+    "MOUNTAIN": "Núi",
+    "FOOD": "Ẩm thực",
+    "CAMPING": "Cắm trại",
+    "OTHER": "Khác"
+  },
+  "vehicle": {
+    "MOTORBIKE": "Xe máy",
+    "CAR": "Ô tô",
+    "BICYCLE": "Xe đạp",
+    "OTHER": "Khác"
   }
 }

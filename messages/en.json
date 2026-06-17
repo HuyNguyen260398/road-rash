@@ -127,5 +127,20 @@
   "empty": {
     "noTripsYet": "No trips yet.",
     "noMatches": "No trips match your search and filters."
+  },
+  "tripType": {
+    "ROAD_TRIP": "Road trip",
+    "CITY": "City",
+    "BEACH": "Beach",
+    "MOUNTAIN": "Mountain",
+    "FOOD": "Food",
+    "CAMPING": "Camping",
+    "OTHER": "Other"
+  },
+  "vehicle": {
+    "MOTORBIKE": "Motorbike",
+    "CAR": "Car",
+    "BICYCLE": "Bicycle",
+    "OTHER": "Other"
   }
 }
