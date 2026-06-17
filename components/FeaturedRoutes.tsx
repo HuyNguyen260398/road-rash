@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ArrowRightIcon } from "lucide-react";
 import { useGSAP } from "@gsap/react";
@@ -22,6 +23,7 @@ import type { Trip } from "@/lib/types";
 const SECONDS_PER_CARD = 5;
 
 export default function FeaturedRoutes({ trips }: { trips: Trip[] }) {
+  const t = useTranslations("landing.featuredRoutes");
   const root = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const tweenRef = useRef<GSAPTween | null>(null);
@@ -57,14 +59,12 @@ export default function FeaturedRoutes({ trips }: { trips: Trip[] }) {
     <section className="bg-background">
       <div className="mx-auto w-full max-w-6xl px-4 pt-16 pb-6 sm:px-6 lg:px-8">
         <header className="flex items-end justify-between gap-4">
-          <h2 className="text-2xl font-semibold sm:text-3xl">
-            Featured routes
-          </h2>
+          <h2 className="text-2xl font-semibold sm:text-3xl">{t("title")}</h2>
           <Link
             href="/discover"
             className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-primary hover:underline"
           >
-            See all trips
+            {t("viewAll")}
             <ArrowRightIcon className="size-4" aria-hidden />
           </Link>
         </header>

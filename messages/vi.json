@@ -24,5 +24,63 @@
     "myTrips": "Hành trình của tôi",
     "signOut": "Đăng xuất",
     "accountMenu": "Menu tài khoản"
+  },
+  "landing": {
+    "hero": {
+      "countLabel": "{count, number} hành trình được cộng đồng chia sẻ",
+      "countLabelFallback": "Hành trình của cộng đồng",
+      "title": "Những hành trình có thật, được vẽ bởi chính người đã đi qua.",
+      "subtitle": "Khám phá những tuyến đường sẵn sàng lên đường dựa trên Google My Maps thật, lưu lại những tuyến bạn yêu thích, và để AI thu hẹp bản đồ cộng đồng về đúng chuyến đi tiếp theo của bạn.",
+      "ctaPrimary": "Khám phá hành trình",
+      "ctaSecondarySignedIn": "Tạo hành trình",
+      "ctaSecondarySignedOut": "Đăng nhập để chia sẻ hành trình của bạn",
+      "footnote": "Duyệt miễn phí · Không cần tài khoản để khám phá"
+    },
+    "howItWorks": {
+      "title": "Cách hoạt động",
+      "stepLabel": "Bước {number}",
+      "steps": [
+        {
+          "title": "Vẽ tuyến đường của bạn trên Google My Maps",
+          "body": "Đặt ghim, vẽ tuyến đường và thêm điểm dừng trong trình chỉnh sửa My Maps mà bạn đã quen thuộc."
+        },
+        {
+          "title": "Dán liên kết chia sẻ",
+          "body": "Sao chép liên kết chia sẻ My Maps vào biểu mẫu hành trình, rồi bổ sung thông tin: phương tiện, thời lượng và lộ trình."
+        },
+        {
+          "title": "Chia sẻ & khám phá",
+          "body": "Đăng hành trình của bạn cho cộng đồng và khám phá những tuyến đường có bản đồ mà người khác đã chia sẻ."
+        }
+      ]
+    },
+    "featureHighlights": {
+      "title": "Mọi thứ bạn cần để lên kế hoạch cho chuyến đi tiếp theo",
+      "items": [
+        {
+          "title": "Kế hoạch gắn liền bản đồ",
+          "body": "Mỗi hành trình đều nhúng một tuyến Google My Maps thật — không còn lịch trình mơ hồ, chỉ có lộ trình thực tế trên bản đồ."
+        },
+        {
+          "title": "Lưu hành trình yêu thích",
+          "body": "Thả tim bất kỳ tuyến đường nào để tạo danh sách rút gọn của riêng bạn, rồi quay lại xem từ mục hành trình đã lưu."
+        },
+        {
+          "title": "Khám phá hành trình bằng AI",
+          "body": "Mô tả chuyến đi bạn muốn và để AI xếp hạng các tuyến đường của cộng đồng về những lựa chọn phù hợp nhất."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Tuyến đường tiếp theo của bạn đang chờ",
+      "body": "Duyệt các hành trình của cộng đồng hoặc chia sẻ kế hoạch gắn liền bản đồ của riêng bạn — chỉ cần một liên kết My Maps.",
+      "ctaPrimary": "Khám phá hành trình",
+      "ctaSecondarySignedIn": "Tạo hành trình",
+      "ctaSecondarySignedOut": "Đăng nhập để chia sẻ hành trình của bạn"
+    },
+    "featuredRoutes": {
+      "title": "Hành trình nổi bật",
+      "viewAll": "Xem tất cả hành trình"
+    }
   }
 }

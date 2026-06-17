@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "@/lib/gsap";
@@ -23,6 +24,7 @@ import { buttonVariants } from "@/components/ui/button";
 // matching the old DiscoverHero so dark mode / scroll behavior stay consistent.
 export default function LandingHero({ tripCount }: { tripCount: number }) {
   const { signedIn } = useFavorites();
+  const t = useTranslations("landing.hero");
   const root = useRef<HTMLElement>(null);
 
   useGSAP(
@@ -51,8 +53,8 @@ export default function LandingHero({ tripCount }: { tripCount: number }) {
 
   const countLabel =
     tripCount > 0
-      ? `${tripCount.toLocaleString()} trips shared by the community`
-      : "Community road trips";
+      ? t("countLabel", { count: tripCount })
+      : t("countLabelFallback");
 
   return (
     <section ref={root} className="relative isolate overflow-hidden bg-muted">
@@ -77,27 +79,23 @@ export default function LandingHero({ tripCount }: { tripCount: number }) {
           {countLabel}
         </Badge>
         <h1 className="hero-stagger max-w-3xl text-4xl leading-tight font-semibold text-balance text-white sm:text-5xl lg:text-6xl">
-          Real road trips, mapped by the people who rode them.
+          {t("title")}
         </h1>
         <p className="hero-stagger max-w-2xl text-lg leading-8 text-white/85">
-          Discover ride-ready routes backed by real Google My Maps, save the
-          ones you love, and let AI narrow the community map down to your next
-          trip.
+          {t("subtitle")}
         </p>
         <div className="hero-stagger flex flex-col gap-3 sm:flex-row">
           <Link href="/discover" className={buttonVariants({ size: "lg" })}>
-            Explore trips
+            {t("ctaPrimary")}
           </Link>
           <Link
             href={signedIn ? "/trips/new" : "/login"}
             className={buttonVariants({ variant: "outline", size: "lg" })}
           >
-            {signedIn ? "Create a trip" : "Sign in to share yours"}
+            {signedIn ? t("ctaSecondarySignedIn") : t("ctaSecondarySignedOut")}
           </Link>
         </div>
-        <p className="hero-stagger text-sm text-white/70">
-          Free to browse · No account needed to explore
-        </p>
+        <p className="hero-stagger text-sm text-white/70">{t("footnote")}</p>
       </div>
     </section>
   );

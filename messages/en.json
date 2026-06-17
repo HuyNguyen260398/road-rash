@@ -24,5 +24,63 @@
     "myTrips": "My trips",
     "signOut": "Sign out",
     "accountMenu": "Account menu"
+  },
+  "landing": {
+    "hero": {
+      "countLabel": "{count, number} trips shared by the community",
+      "countLabelFallback": "Community road trips",
+      "title": "Real road trips, mapped by the people who rode them.",
+      "subtitle": "Discover ride-ready routes backed by real Google My Maps, save the ones you love, and let AI narrow the community map down to your next trip.",
+      "ctaPrimary": "Explore trips",
+      "ctaSecondarySignedIn": "Create a trip",
+      "ctaSecondarySignedOut": "Sign in to share yours",
+      "footnote": "Free to browse · No account needed to explore"
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "stepLabel": "Step {number}",
+      "steps": [
+        {
+          "title": "Build your route in Google My Maps",
+          "body": "Drop pins, draw your route, and add stops in the My Maps editor you already know."
+        },
+        {
+          "title": "Paste the share link",
+          "body": "Copy your My Maps share link into the trip form, then add the details: vehicle, duration, and where it goes."
+        },
+        {
+          "title": "Share & discover",
+          "body": "Publish your trip for the community and explore map-backed routes other riders have shared."
+        }
+      ]
+    },
+    "featureHighlights": {
+      "title": "Everything you need to plan the next ride",
+      "items": [
+        {
+          "title": "Map-backed plans",
+          "body": "Every trip embeds a real Google My Maps route — no vague itineraries, just the actual path on the map."
+        },
+        {
+          "title": "Save your favorites",
+          "body": "Heart any route to build your own shortlist, then come back to it from your saved trips."
+        },
+        {
+          "title": "AI trip discovery",
+          "body": "Describe the trip you want and let AI rank the community's routes down to the best matches."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Your next route is waiting",
+      "body": "Browse community trips or share your own map-backed plan — it only takes a My Maps link.",
+      "ctaPrimary": "Explore trips",
+      "ctaSecondarySignedIn": "Create a trip",
+      "ctaSecondarySignedOut": "Sign in to share yours"
+    },
+    "featuredRoutes": {
+      "title": "Featured routes",
+      "viewAll": "See all trips"
+    }
   }
 }
