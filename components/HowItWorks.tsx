@@ -70,12 +70,8 @@ export default function HowItWorks() {
   return (
     <section ref={root} className="bg-muted">
       <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-        <header className="mb-10 max-w-2xl">
+        <header className="mb-10">
           <h2 className="text-2xl font-semibold sm:text-3xl">How it works</h2>
-          <p className="mt-2 text-muted-foreground">
-            Road Rash is built around the Google My Maps you already make —
-            three steps from idea to a shared trip.
-          </p>
         </header>
         <ol className="grid gap-6 sm:grid-cols-3">
           {STEPS.map(({ icon: Icon, title, body }, i) => (

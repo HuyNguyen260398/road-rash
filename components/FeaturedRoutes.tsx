@@ -57,12 +57,9 @@ export default function FeaturedRoutes({ trips }: { trips: Trip[] }) {
     <section className="bg-background">
       <div className="mx-auto w-full max-w-6xl px-4 pt-16 pb-6 sm:px-6 lg:px-8">
         <header className="flex items-end justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-semibold">Featured routes</h2>
-            <p className="text-sm text-muted-foreground">
-              A rolling pick of the community&apos;s most-loved trips.
-            </p>
-          </div>
+          <h2 className="text-2xl font-semibold sm:text-3xl">
+            Featured routes
+          </h2>
           <Link
             href="/discover"
             className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-primary hover:underline"

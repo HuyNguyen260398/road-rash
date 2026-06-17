@@ -70,7 +70,7 @@ export default function FeatureHighlights() {
   return (
     <section ref={root} className="bg-background">
       <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-        <header className="mb-10 max-w-2xl">
+        <header className="mb-10">
           <h2 className="text-2xl font-semibold sm:text-3xl">
             Everything you need to plan the next ride
           </h2>
