@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import {
   ImageIcon,
@@ -38,10 +39,6 @@ const ALLOWED_IMAGE_TYPES = [
   "image/webp",
   "image/gif",
 ];
-
-const MY_MAPS_HELP =
-  "Build your map in Google My Maps, then paste its share or embed link " +
-  "(e.g. https://www.google.com/maps/d/view?mid=…).";
 
 type Props = {
   /** Present when editing; prefills the form and switches to update. */
@@ -83,6 +80,9 @@ function FormSection({
 
 export default function TripForm({ trip }: Props) {
   const router = useRouter();
+  const t = useTranslations("forms");
+  const tTripType = useTranslations("tripType");
+  const tVehicle = useTranslations("vehicle");
   const isEdit = Boolean(trip);
 
   const [name, setName] = useState(trip?.name ?? "");
@@ -117,11 +117,11 @@ export default function TripForm({ trip }: Props) {
       return;
     }
     if (!ALLOWED_IMAGE_TYPES.includes(selected.type)) {
-      setFormError("Thumbnail must be a JPEG, PNG, WebP, or GIF image.");
+      setFormError(t("thumbnailType"));
       return;
     }
     if (selected.size > MAX_THUMBNAIL_BYTES) {
-      setFormError("Thumbnail must be 5 MB or smaller.");
+      setFormError(t("thumbnailSize"));
       return;
     }
     setFile(selected);
@@ -139,7 +139,7 @@ export default function TripForm({ trip }: Props) {
       body: selected,
       headers: { "Content-Type": selected.type },
     });
-    if (!put.ok) throw new Error("Thumbnail upload failed");
+    if (!put.ok) throw new Error(t("thumbnailUploadFailed"));
     return key;
   }
 
@@ -149,7 +149,7 @@ export default function TripForm({ trip }: Props) {
 
     if (!validateMyMapsUrl(myMapsUrl)) {
       setMapTouched(true);
-      setFormError("Please enter a valid Google My Maps link.");
+      setFormError(t("mapRequired"));
       return;
     }
 
@@ -189,7 +189,7 @@ export default function TripForm({ trip }: Props) {
           ? err.message
           : err instanceof Error
             ? err.message
-            : "Something went wrong. Please try again.";
+            : t("genericError");
       setFormError(message);
     } finally {
       setSubmitting(false);
@@ -200,11 +200,11 @@ export default function TripForm({ trip }: Props) {
     <form onSubmit={onSubmit} className="space-y-6">
       <FormSection
         icon={<InfoIcon className="size-5" aria-hidden />}
-        title="Trip basics"
-        description="Name your route and tell travelers what to expect."
+        title={t("basicsTitle")}
+        description={t("basicsDescription")}
       >
         <div className="space-y-1.5">
-          <Label htmlFor="trip-name">Trip name</Label>
+          <Label htmlFor="trip-name">{t("nameLabel")}</Label>
           <Input
             id="trip-name"
             value={name}
@@ -215,7 +215,7 @@ export default function TripForm({ trip }: Props) {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="trip-description">Description</Label>
+          <Label htmlFor="trip-description">{t("descriptionLabel")}</Label>
           <Textarea
             id="trip-description"
             value={description}
@@ -227,21 +227,21 @@ export default function TripForm({ trip }: Props) {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="space-y-1.5">
-            <Label htmlFor="trip-type">Trip type</Label>
+            <Label htmlFor="trip-type">{t("tripTypeLabel")}</Label>
             <Select
               id="trip-type"
               value={tripType}
               onChange={(e) => setTripType(e.target.value as TripType)}
             >
-              {TRIP_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t.replace(/_/g, " ")}
+              {TRIP_TYPES.map((value) => (
+                <option key={value} value={value}>
+                  {tTripType(value)}
                 </option>
               ))}
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="trip-vehicle">Vehicle</Label>
+            <Label htmlFor="trip-vehicle">{t("vehicleLabel")}</Label>
             <Select
               id="trip-vehicle"
               value={vehicle}
@@ -249,13 +249,13 @@ export default function TripForm({ trip }: Props) {
             >
               {VEHICLES.map((v) => (
                 <option key={v} value={v}>
-                  {v}
+                  {tVehicle(v)}
                 </option>
               ))}
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="trip-duration">Duration (days)</Label>
+            <Label htmlFor="trip-duration">{t("durationLabel")}</Label>
             <Input
               id="trip-duration"
               type="number"
@@ -271,23 +271,23 @@ export default function TripForm({ trip }: Props) {
 
       <FormSection
         icon={<MapPinIcon className="size-5" aria-hidden />}
-        title="Location"
-        description="Where does this route take riders?"
+        title={t("locationTitle")}
+        description={t("locationDescription")}
       >
         <div className="space-y-1.5">
-          <Label htmlFor="trip-location">Location label</Label>
+          <Label htmlFor="trip-location">{t("locationLabelLabel")}</Label>
           <Input
             id="trip-location"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            placeholder="e.g. Northern Vietnam loop"
+            placeholder={t("locationPlaceholder")}
             maxLength={200}
           />
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="space-y-1.5">
-            <Label htmlFor="trip-city">City</Label>
+            <Label htmlFor="trip-city">{t("cityLabel")}</Label>
             <Input
               id="trip-city"
               value={city}
@@ -296,7 +296,7 @@ export default function TripForm({ trip }: Props) {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="trip-province">Province / state</Label>
+            <Label htmlFor="trip-province">{t("provinceLabel")}</Label>
             <Input
               id="trip-province"
               value={province}
@@ -305,7 +305,7 @@ export default function TripForm({ trip }: Props) {
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="trip-country">Country</Label>
+            <Label htmlFor="trip-country">{t("countryLabel")}</Label>
             <Input
               id="trip-country"
               value={country}
@@ -319,11 +319,11 @@ export default function TripForm({ trip }: Props) {
 
       <FormSection
         icon={<RouteIcon className="size-5" aria-hidden />}
-        title="Route map"
-        description="Maps are user supplied — paste the link you built in Google My Maps."
+        title={t("mapTitle")}
+        description={t("mapDescription")}
       >
         <div className="space-y-1.5">
-          <Label htmlFor="trip-mymaps">Google My Maps link</Label>
+          <Label htmlFor="trip-mymaps">{t("mapUrlLabel")}</Label>
           <Input
             id="trip-mymaps"
             value={myMapsUrl}
@@ -336,21 +336,21 @@ export default function TripForm({ trip }: Props) {
           />
           {showMapError ? (
             <p className="text-xs text-destructive">
-              That doesn’t look like a Google My Maps link. {MY_MAPS_HELP}
+              {t("mapInvalid") + " " + t("mapHelp")}
             </p>
           ) : (
-            <p className="text-xs text-muted-foreground">{MY_MAPS_HELP}</p>
+            <p className="text-xs text-muted-foreground">{t("mapHelp")}</p>
           )}
         </div>
       </FormSection>
 
       <FormSection
         icon={<ImageIcon className="size-5" aria-hidden />}
-        title="Thumbnail"
-        description="Add a cover image so your route stands out (optional, ≤ 5 MB)."
+        title={t("thumbnailTitle")}
+        description={t("thumbnailDescription")}
       >
         <div className="space-y-1.5">
-          <Label htmlFor="trip-thumbnail">Thumbnail image</Label>
+          <Label htmlFor="trip-thumbnail">{t("thumbnailLabel")}</Label>
           <Input
             id="trip-thumbnail"
             type="file"
@@ -359,7 +359,7 @@ export default function TripForm({ trip }: Props) {
           />
           {thumbnailKey && !file ? (
             <p className="text-xs text-muted-foreground">
-              Current thumbnail kept unless you choose a new file.
+              {t("thumbnailKept")}
             </p>
           ) : null}
         </div>
@@ -372,10 +372,14 @@ export default function TripForm({ trip }: Props) {
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={submitting}>
           <MapIcon className="size-4" aria-hidden />
-          {submitting ? "Saving…" : isEdit ? "Save changes" : "Create trip"}
+          {submitting
+            ? t("saving")
+            : isEdit
+              ? t("saveChanges")
+              : t("createTrip")}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.back()}>
-          Cancel
+          {t("cancel")}
         </Button>
       </div>
     </form>

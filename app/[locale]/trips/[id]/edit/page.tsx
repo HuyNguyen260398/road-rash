@@ -1,4 +1,4 @@
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Link, redirect } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
 import { ArrowLeftIcon } from "lucide-react";
@@ -35,6 +35,8 @@ export default async function EditTripPage({
   if (trip.authorId !== session.sub)
     redirect({ href: `/trip/${id}`, locale });
 
+  const t = await getTranslations("forms");
+
   return (
     <AppShell>
       <div className="mx-auto w-full max-w-2xl px-4 py-8">
@@ -44,13 +46,12 @@ export default async function EditTripPage({
             className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeftIcon className="size-4" aria-hidden />
-            Back to trip
+            {t("backToTrip")}
           </Link>
           <div className="space-y-2">
-            <h1 className="text-2xl font-semibold">Edit trip</h1>
+            <h1 className="text-2xl font-semibold">{t("editPageTitle")}</h1>
             <p className="text-sm text-muted-foreground">
-              Update your route details and map links. Changes go live as soon
-              as you save.
+              {t("editPageSubtitle")}
             </p>
           </div>
         </header>
