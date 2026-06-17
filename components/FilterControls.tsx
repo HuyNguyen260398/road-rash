@@ -2,13 +2,13 @@
 
 import { useRef } from "react";
 import { SlidersHorizontalIcon, XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "@/lib/gsap";
 import { DURATION, EASE, REDUCED_MOTION_QUERY } from "@/lib/motion";
 import { TRIP_TYPES, VEHICLES } from "@/lib/types";
 import type { Trip } from "@/lib/types";
 import type { TripFilters } from "@/lib/search";
-import { formatEnum } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 
@@ -36,6 +36,9 @@ export default function FilterControls({
   filters: TripFilters;
   onChange: (next: TripFilters) => void;
 }) {
+  const t = useTranslations("search");
+  const tTripType = useTranslations("tripType");
+  const tVehicle = useTranslations("vehicle");
   const set = (key: keyof TripFilters, value: string) =>
     onChange({ ...filters, [key]: value || undefined });
 
@@ -64,7 +67,7 @@ export default function FilterControls({
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-sm font-medium">
           <SlidersHorizontalIcon className="size-4 text-muted-foreground" />
-          Filters
+          {t("filtersTitle")}
         </div>
         {hasFilters ? (
           <Button
@@ -76,44 +79,44 @@ export default function FilterControls({
             onClick={() => onChange({})}
           >
             <XIcon aria-hidden />
-            Clear filters
+            {t("clearFilters")}
           </Button>
         ) : null}
       </div>
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
         <Select
-          aria-label="Filter by trip type"
+          aria-label={t("filterByTripType")}
           value={filters.tripType ?? ""}
           onChange={(e) => set("tripType", e.target.value)}
         >
-          <option value="">All types</option>
-          {TRIP_TYPES.map((t) => (
-            <option key={t} value={t}>
-              {formatEnum(t)}
+          <option value="">{t("allTypes")}</option>
+          {TRIP_TYPES.map((value) => (
+            <option key={value} value={value}>
+              {tTripType(value)}
             </option>
           ))}
         </Select>
 
         <Select
-          aria-label="Filter by vehicle"
+          aria-label={t("filterByVehicle")}
           value={filters.vehicle ?? ""}
           onChange={(e) => set("vehicle", e.target.value)}
         >
-          <option value="">All vehicles</option>
-          {VEHICLES.map((v) => (
-            <option key={v} value={v}>
-              {formatEnum(v)}
+          <option value="">{t("allVehicles")}</option>
+          {VEHICLES.map((value) => (
+            <option key={value} value={value}>
+              {tVehicle(value)}
             </option>
           ))}
         </Select>
 
         <Select
-          aria-label="Filter by country"
+          aria-label={t("filterByCountry")}
           value={filters.country ?? ""}
           onChange={(e) => set("country", e.target.value)}
         >
-          <option value="">All countries</option>
+          <option value="">{t("allCountries")}</option>
           {distinct(trips, "country").map((c) => (
             <option key={c} value={c}>
               {c}
@@ -122,11 +125,11 @@ export default function FilterControls({
         </Select>
 
         <Select
-          aria-label="Filter by province"
+          aria-label={t("filterByProvince")}
           value={filters.province ?? ""}
           onChange={(e) => set("province", e.target.value)}
         >
-          <option value="">All provinces</option>
+          <option value="">{t("allProvinces")}</option>
           {distinct(trips, "province").map((p) => (
             <option key={p} value={p}>
               {p}
@@ -135,11 +138,11 @@ export default function FilterControls({
         </Select>
 
         <Select
-          aria-label="Filter by city"
+          aria-label={t("filterByCity")}
           value={filters.city ?? ""}
           onChange={(e) => set("city", e.target.value)}
         >
-          <option value="">All cities</option>
+          <option value="">{t("allCities")}</option>
           {distinct(trips, "city").map((c) => (
             <option key={c} value={c}>
               {c}

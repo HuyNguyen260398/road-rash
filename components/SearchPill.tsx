@@ -2,6 +2,7 @@
 
 import { useRef, type FormEvent } from "react";
 import { SearchIcon, SparklesIcon, XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "@/lib/gsap";
 import { DURATION, EASE, REDUCED_MOTION_QUERY } from "@/lib/motion";
@@ -32,6 +33,7 @@ export default function SearchPill({
   // from firing a pointless request against an empty set.
   aiDisabled?: boolean;
 }) {
+  const t = useTranslations("search");
   const formRef = useRef<HTMLFormElement>(null);
   const aiBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -89,7 +91,7 @@ export default function SearchPill({
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="relative">
       <label htmlFor="trip-search" className="sr-only">
-        Search trips or describe your ride
+        {t("label")}
       </label>
       <SearchIcon
         className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
@@ -103,7 +105,7 @@ export default function SearchPill({
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Search trips, or describe your ride…"
+        placeholder={t("placeholder")}
         className="h-12 pl-9 pr-44"
       />
       <div className="absolute right-1.5 top-1/2 flex -translate-y-1/2 items-center gap-1">
@@ -112,7 +114,7 @@ export default function SearchPill({
             type="button"
             variant="ghost"
             size="icon"
-            aria-label="Clear search"
+            aria-label={t("clear")}
             className="size-9"
             onClick={onClear}
           >
@@ -127,7 +129,7 @@ export default function SearchPill({
           className="gap-1.5"
         >
           <SparklesIcon aria-hidden />
-          {loading ? "Asking…" : "Ask AI"}
+          {loading ? t("asking") : t("askAi")}
         </Button>
       </div>
     </form>

@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { useFavorites } from "@/components/FavoritesProvider";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -11,6 +12,7 @@ import { buttonVariants } from "@/components/ui/button";
 // via globals.css.
 export default function LandingCta() {
   const { signedIn } = useFavorites();
+  const t = useTranslations("landing.cta");
 
   return (
     <section className="relative isolate overflow-hidden">
@@ -26,21 +28,18 @@ export default function LandingCta() {
       />
       <div className="mx-auto flex w-full max-w-4xl flex-col items-center gap-6 px-4 py-20 text-center sm:px-6 lg:px-8 lg:py-28">
         <h2 className="text-3xl font-semibold text-balance text-white sm:text-4xl">
-          Your next route is waiting
+          {t("title")}
         </h2>
-        <p className="max-w-2xl text-lg text-white/85">
-          Browse community trips or share your own map-backed plan — it only
-          takes a My Maps link.
-        </p>
+        <p className="max-w-2xl text-lg text-white/85">{t("body")}</p>
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link href="/discover" className={buttonVariants({ size: "lg" })}>
-            Explore trips
+            {t("ctaPrimary")}
           </Link>
           <Link
             href={signedIn ? "/trips/new" : "/login"}
             className={buttonVariants({ variant: "outline", size: "lg" })}
           >
-            {signedIn ? "Create a trip" : "Sign in to share yours"}
+            {signedIn ? t("ctaSecondarySignedIn") : t("ctaSecondarySignedOut")}
           </Link>
         </div>
       </div>

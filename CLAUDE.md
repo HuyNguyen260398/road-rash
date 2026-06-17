@@ -12,6 +12,8 @@ This repo is **well underway**, not pre-code. The Next.js app (`app/`, `componen
 
 **road-rash** is a mobile-first responsive web app for creating, sharing, and discovering travel trip plans, built around Google My Maps. Stack: **Next.js (App Router, SSR)** frontend on **AWS Amplify Hosting**, with a serverless REST backend (**API Gateway → Lambda → DynamoDB**), **Cognito** auth (Google OAuth), **S3** thumbnails, and **Google Gemini** for AI suggestions. **All AWS resources are provisioned with Terraform** (remote state in an S3 backend). There is **no Amplify Gen 2 backend and no AppSync/GraphQL** — Amplify is hosting only.
 
+The app is bilingual (**English** default + **Vietnamese**) via `next-intl` with locale-prefixed routing (`/en/...`, `/vi/...`) and UI strings in `messages/{en,vi}.json`. Trip content remains user-supplied data and is not translated.
+
 ## The central architectural constraint
 
 **Google My Maps has no public API.** The app cannot create, read, or edit a My Maps map programmatically. A trip's map is therefore **user-supplied data**: the user builds the map by hand in the My Maps UI and pastes the share/embed URL into the trip form. The app validates the URL, stores the string, and renders it as a read-only `<iframe>`. Any feature idea that assumes programmatic map access is a dead end — design around this constraint. The separate "Open in Google Maps" action is a best-effort mobile deep link, not a guaranteed native handoff.

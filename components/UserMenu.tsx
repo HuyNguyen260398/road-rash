@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/navigation";
 import { fetchAuthSession, getCurrentUser, signOut } from "aws-amplify/auth";
 import { Hub } from "aws-amplify/utils";
 import { HeartIcon, LogOutIcon, PlusIcon, RouteIcon } from "lucide-react";
@@ -20,12 +20,13 @@ import { avatarInitial } from "@/lib/avatar";
 // the login page — otherwise the avatar never appears until a manual reload.
 
 const MENU_LINKS = [
-  { href: "/trips/new", label: "Create trip", icon: PlusIcon },
-  { href: "/saved", label: "Liked trips", icon: HeartIcon },
-  { href: "/my-trips", label: "My trips", icon: RouteIcon },
+  { href: "/trips/new", key: "createTrip", icon: PlusIcon },
+  { href: "/saved", key: "savedTrips", icon: HeartIcon },
+  { href: "/my-trips", key: "myTrips", icon: RouteIcon },
 ] as const;
 
 export default function UserMenu() {
+  const t = useTranslations("userMenu");
   const router = useRouter();
   // The account label: the email claim when present, otherwise the username, so
   // the avatar still renders when an ID token lacks `email` (the login page has
@@ -155,7 +156,7 @@ export default function UserMenu() {
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label="Account menu"
+        aria-label={t("accountMenu")}
         className="flex size-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >
         {avatarInitial(label)}
@@ -171,7 +172,7 @@ export default function UserMenu() {
           <div role="none" className="border-b border-border px-3 py-2">
             <p className="truncate text-xs text-muted-foreground">{label}</p>
           </div>
-          {MENU_LINKS.map(({ href, label, icon: Icon }) => (
+          {MENU_LINKS.map(({ href, key, icon: Icon }) => (
             <Link
               key={href}
               href={href}
@@ -180,7 +181,7 @@ export default function UserMenu() {
               className="flex items-center gap-2 px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground focus-visible:outline-none"
             >
               <Icon className="size-4" aria-hidden />
-              {label}
+              {t(key)}
             </Link>
           ))}
           <button
@@ -190,7 +191,7 @@ export default function UserMenu() {
             className="flex w-full items-center gap-2 border-t border-border px-3 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground focus-visible:outline-none"
           >
             <LogOutIcon className="size-4" aria-hidden />
-            Sign out
+            {t("signOut")}
           </button>
         </div>
       ) : null}

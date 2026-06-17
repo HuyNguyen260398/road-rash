@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { AlertTriangleIcon } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import TripBrowser from "@/components/TripBrowser";
@@ -13,6 +14,8 @@ import type { Trip } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 export default async function Discover() {
+  const t = await getTranslations("pages.discover");
+  const tCommon = await getTranslations("pages.common");
   let trips: Trip[] = [];
   let loadError: string | null = null;
 
@@ -22,17 +25,16 @@ export default async function Discover() {
   } catch {
     // API not reachable/configured yet — render the shell with an empty grid
     // rather than crashing.
-    loadError = "Please try again in a moment.";
+    loadError = tCommon("loadError");
   }
 
   return (
     <AppShell>
       <section className="border-b border-border bg-muted">
         <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-semibold">Discover trips</h1>
+          <h1 className="text-3xl font-semibold">{t("title")}</h1>
           <p className="mt-2 text-muted-foreground">
-            Browse {trips.length.toLocaleString()} travel plan
-            {trips.length === 1 ? "" : "s"} shared by the community.
+            {t("subtitle", { count: trips.length })}
           </p>
         </div>
       </section>
@@ -41,14 +43,11 @@ export default async function Discover() {
           {loadError ? (
             <EmptyState
               icon={<AlertTriangleIcon className="size-6" aria-hidden />}
-              title="Trips are unavailable right now"
+              title={t("unavailableTitle")}
               description={loadError}
             />
           ) : (
-            <TripBrowser
-              trips={trips}
-              emptyMessage="No trips yet — be the first to share one."
-            />
+            <TripBrowser trips={trips} emptyMessage={t("emptyMessage")} />
           )}
         </div>
       </section>

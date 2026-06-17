@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { signOut } from "aws-amplify/auth";
 import { LogOutIcon, MenuIcon, XIcon } from "lucide-react";
 import { useGSAP } from "@gsap/react";
@@ -11,6 +11,7 @@ import { DURATION, EASE, REDUCED_MOTION_QUERY } from "@/lib/motion";
 import AppLogo from "@/components/AppLogo";
 import UserMenu from "@/components/UserMenu";
 import ModeToggle from "@/components/ModeToggle";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useFavorites } from "@/components/FavoritesProvider";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -20,8 +21,8 @@ import { cn } from "@/lib/utils";
 // on mobile (the logo links to Discover); guests who tap them are redirected to
 // /login by the target pages' own auth guards.
 const ACCOUNT_LINKS = [
-  { href: "/saved", label: "Liked trips" },
-  { href: "/my-trips", label: "My trips" },
+  { href: "/saved", key: "savedTrips" },
+  { href: "/my-trips", key: "myTrips" },
 ] as const;
 
 function navLinkClass(active: boolean) {
@@ -32,6 +33,7 @@ function navLinkClass(active: boolean) {
 }
 
 export default function AppHeader() {
+  const t = useTranslations("header");
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -105,13 +107,14 @@ export default function AppHeader() {
         <AppLogo />
 
         <div className="hidden items-center gap-3 lg:flex">
+          <LanguageSwitcher />
           <ModeToggle />
           {ready && !signedIn ? (
             <Link
               href="/login"
               className={buttonVariants({ variant: "outline" })}
             >
-              Sign in
+              {t("signIn")}
             </Link>
           ) : null}
           <UserMenu />
@@ -123,7 +126,7 @@ export default function AppHeader() {
             type="button"
             variant="outline"
             size="icon"
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-label={menuOpen ? t("closeMenu") : t("openMenu")}
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
             onClick={() => setMenuOpen((open) => !open)}
@@ -149,11 +152,15 @@ export default function AppHeader() {
                 className={navLinkClass(isActive(item.href))}
                 onClick={closeMenu}
               >
-                {item.label}
+                {t(item.key)}
               </Link>
             ))}
             <div className="mt-2 flex flex-col gap-2 border-t border-border pt-4 sm:hidden">
+              <LanguageSwitcher />
               <ModeToggle />
+            </div>
+            <div className="mt-2 hidden border-t border-border pt-4 sm:block">
+              <LanguageSwitcher />
             </div>
             <div className="mt-2 grid gap-2 border-t border-border pt-4 sm:grid-cols-2">
               {ready && !signedIn ? (
@@ -162,7 +169,7 @@ export default function AppHeader() {
                   className={buttonVariants({ variant: "outline" })}
                   onClick={closeMenu}
                 >
-                  Sign in
+                  {t("signIn")}
                 </Link>
               ) : null}
               {signedIn ? (
@@ -171,7 +178,7 @@ export default function AppHeader() {
                   className={buttonVariants()}
                   onClick={closeMenu}
                 >
-                  Create trip
+                  {t("createTrip")}
                 </Link>
               ) : null}
               {signedIn ? (
@@ -182,7 +189,7 @@ export default function AppHeader() {
                   onClick={handleSignOut}
                 >
                   <LogOutIcon aria-hidden className="size-4" />
-                  Sign out
+                  {t("signOut")}
                 </Button>
               ) : null}
             </div>

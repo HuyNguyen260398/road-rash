@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { XIcon } from "lucide-react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "@/lib/gsap";
@@ -24,6 +25,7 @@ export default function TripDetailModal({
   sourceRect?: DOMRect;
   onClose: () => void;
 }) {
+  const t = useTranslations("trip");
   const overlayRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const closingRef = useRef(false);
@@ -127,7 +129,7 @@ export default function TripDetailModal({
             variant="ghost"
             size="icon"
             onClick={close}
-            aria-label="Close trip details"
+            aria-label={t("close")}
             className="size-9"
           >
             <XIcon aria-hidden />

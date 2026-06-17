@@ -1,0 +1,258 @@
+{
+  "common": {
+    "appName": "Road Rash"
+  },
+  "header": {
+    "signIn": "Đăng nhập",
+    "createTrip": "Tạo hành trình",
+    "signOut": "Đăng xuất",
+    "openMenu": "Mở menu",
+    "closeMenu": "Đóng menu",
+    "savedTrips": "Hành trình đã thích",
+    "myTrips": "Hành trình của tôi"
+  },
+  "footer": {
+    "discover": "Khám phá",
+    "saved": "Đã lưu",
+    "myTrips": "Hành trình của tôi",
+    "createTrip": "Tạo hành trình",
+    "disclaimer": "Các tuyến đường Road Rash và liên kết Google My Maps do người dùng cung cấp. Hãy kiểm tra tình trạng đường, quy định ra vào và thông tin an toàn trước khi đi."
+  },
+  "userMenu": {
+    "createTrip": "Tạo hành trình",
+    "savedTrips": "Hành trình đã thích",
+    "myTrips": "Hành trình của tôi",
+    "signOut": "Đăng xuất",
+    "accountMenu": "Menu tài khoản"
+  },
+  "landing": {
+    "hero": {
+      "countLabel": "{count, number} hành trình được cộng đồng chia sẻ",
+      "countLabelFallback": "Hành trình của cộng đồng",
+      "title": "Những hành trình có thật, được vẽ bởi chính người đã đi qua.",
+      "subtitle": "Khám phá những tuyến đường sẵn sàng lên đường dựa trên Google My Maps thật, lưu lại những tuyến bạn yêu thích, và để AI thu hẹp bản đồ cộng đồng về đúng chuyến đi tiếp theo của bạn.",
+      "ctaPrimary": "Khám phá hành trình",
+      "ctaSecondarySignedIn": "Tạo hành trình",
+      "ctaSecondarySignedOut": "Đăng nhập để chia sẻ hành trình của bạn",
+      "footnote": "Duyệt miễn phí · Không cần tài khoản để khám phá"
+    },
+    "howItWorks": {
+      "title": "Cách hoạt động",
+      "stepLabel": "Bước {number}",
+      "steps": [
+        {
+          "title": "Vẽ tuyến đường của bạn trên Google My Maps",
+          "body": "Đặt ghim, vẽ tuyến đường và thêm điểm dừng trong trình chỉnh sửa My Maps mà bạn đã quen thuộc."
+        },
+        {
+          "title": "Dán liên kết chia sẻ",
+          "body": "Sao chép liên kết chia sẻ My Maps vào biểu mẫu hành trình, rồi bổ sung thông tin: phương tiện, thời lượng và lộ trình."
+        },
+        {
+          "title": "Chia sẻ & khám phá",
+          "body": "Đăng hành trình của bạn cho cộng đồng và khám phá những tuyến đường có bản đồ mà người khác đã chia sẻ."
+        }
+      ]
+    },
+    "featureHighlights": {
+      "title": "Mọi thứ bạn cần để lên kế hoạch cho chuyến đi tiếp theo",
+      "items": [
+        {
+          "title": "Kế hoạch gắn liền bản đồ",
+          "body": "Mỗi hành trình đều nhúng một tuyến Google My Maps thật — không còn lịch trình mơ hồ, chỉ có lộ trình thực tế trên bản đồ."
+        },
+        {
+          "title": "Lưu hành trình yêu thích",
+          "body": "Thả tim bất kỳ tuyến đường nào để tạo danh sách rút gọn của riêng bạn, rồi quay lại xem từ mục hành trình đã lưu."
+        },
+        {
+          "title": "Khám phá hành trình bằng AI",
+          "body": "Mô tả chuyến đi bạn muốn và để AI xếp hạng các tuyến đường của cộng đồng về những lựa chọn phù hợp nhất."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Tuyến đường tiếp theo của bạn đang chờ",
+      "body": "Duyệt các hành trình của cộng đồng hoặc chia sẻ kế hoạch gắn liền bản đồ của riêng bạn — chỉ cần một liên kết My Maps.",
+      "ctaPrimary": "Khám phá hành trình",
+      "ctaSecondarySignedIn": "Tạo hành trình",
+      "ctaSecondarySignedOut": "Đăng nhập để chia sẻ hành trình của bạn"
+    },
+    "featuredRoutes": {
+      "title": "Hành trình nổi bật",
+      "viewAll": "Xem tất cả hành trình"
+    }
+  },
+  "search": {
+    "label": "Tìm hành trình hoặc mô tả chuyến đi của bạn",
+    "placeholder": "Tìm hành trình, hoặc mô tả chuyến đi của bạn…",
+    "clear": "Xóa tìm kiếm",
+    "askAi": "Hỏi AI",
+    "asking": "Đang hỏi…",
+    "showFilters": "Hiện bộ lọc",
+    "hideFilters": "Ẩn bộ lọc",
+    "results": "{count, plural, =0 {Không có tuyến} other {# tuyến}}",
+    "group": "Nhóm",
+    "groupBy": "Nhóm hành trình theo",
+    "noGrouping": "Không nhóm",
+    "groupByOption": "Theo {field}",
+    "groupField": {
+      "country": "quốc gia",
+      "province": "tỉnh/thành",
+      "city": "thành phố",
+      "tripType": "loại hành trình",
+      "vehicle": "phương tiện"
+    },
+    "filtersTitle": "Bộ lọc",
+    "clearFilters": "Xóa bộ lọc",
+    "filterByTripType": "Lọc theo loại hành trình",
+    "filterByVehicle": "Lọc theo phương tiện",
+    "filterByCountry": "Lọc theo quốc gia",
+    "filterByProvince": "Lọc theo tỉnh/thành",
+    "filterByCity": "Lọc theo thành phố",
+    "allTypes": "Tất cả loại",
+    "allVehicles": "Tất cả phương tiện",
+    "allCountries": "Tất cả quốc gia",
+    "allProvinces": "Tất cả tỉnh/thành",
+    "allCities": "Tất cả thành phố",
+    "loadMore": "Đang tải…",
+    "aiNoMatch": "Không có hành trình nào phù hợp — hãy thử mô tả khác, hoặc duyệt bên dưới.",
+    "aiUnavailableNoMatch": "AI hiện không khả dụng và không có hành trình nào khớp với \"{prompt}\". Hãy thử tìm kiếm khác.",
+    "aiUnavailable": "AI hiện không khả dụng — đang hiển thị kết quả tìm kiếm thường.",
+    "duration": "{count, plural, other {# ngày}}",
+    "byAuthor": "bởi {author}",
+    "addToFavorites": "Thêm vào yêu thích",
+    "removeFromFavorites": "Xóa khỏi yêu thích"
+  },
+  "empty": {
+    "noTripsYet": "Chưa có hành trình nào.",
+    "noMatches": "Không có hành trình nào khớp với tìm kiếm và bộ lọc của bạn."
+  },
+  "trip": {
+    "addToFavorites": "Thêm vào yêu thích",
+    "removeFromFavorites": "Xóa khỏi yêu thích",
+    "favorites": "{count, plural, =0 {Chưa có lượt thích} other {# lượt thích}}",
+    "typeLabel": "Loại",
+    "vehicleLabel": "Phương tiện",
+    "durationLabel": "Thời lượng",
+    "durationDays": "{count, plural, other {# ngày}}",
+    "authorLabel": "Tác giả",
+    "mapHeading": "Bản đồ",
+    "edit": "Chỉnh sửa",
+    "openInGoogleMaps": "Mở trong Google Maps",
+    "mapTitle": "Bản đồ cho {name}",
+    "mapEmbedFailed": "Không thể nhúng bản đồ này.",
+    "openMap": "Mở bản đồ",
+    "mapUnavailable": "Không có bản xem trước bản đồ.",
+    "close": "Đóng chi tiết hành trình"
+  },
+  "forms": {
+    "newPageTitle": "Tạo hành trình",
+    "newPageSubtitle": "Đăng một tuyến đường cho cộng đồng. Hãy tạo bản đồ trên Google My Maps trước, rồi thêm thông tin và liên kết bên dưới.",
+    "editPageTitle": "Chỉnh sửa hành trình",
+    "editPageSubtitle": "Cập nhật thông tin tuyến đường và liên kết bản đồ. Thay đổi sẽ hiển thị ngay khi bạn lưu.",
+    "backToTrip": "Quay lại hành trình",
+    "thumbnailType": "Ảnh đại diện phải là ảnh JPEG, PNG, WebP hoặc GIF.",
+    "thumbnailSize": "Ảnh đại diện phải có dung lượng tối đa 5 MB.",
+    "thumbnailUploadFailed": "Tải ảnh đại diện lên thất bại",
+    "mapRequired": "Vui lòng nhập liên kết Google My Maps hợp lệ.",
+    "genericError": "Đã xảy ra lỗi. Vui lòng thử lại.",
+    "basicsTitle": "Thông tin cơ bản",
+    "basicsDescription": "Đặt tên tuyến đường và cho người đi biết điều gì đang chờ họ.",
+    "nameLabel": "Tên hành trình",
+    "descriptionLabel": "Mô tả",
+    "tripTypeLabel": "Loại hành trình",
+    "vehicleLabel": "Phương tiện",
+    "durationLabel": "Thời lượng (ngày)",
+    "locationTitle": "Địa điểm",
+    "locationDescription": "Tuyến đường này đưa người đi qua đâu?",
+    "locationLabelLabel": "Nhãn địa điểm",
+    "locationPlaceholder": "VD: Vòng cung miền Bắc Việt Nam",
+    "cityLabel": "Thành phố",
+    "provinceLabel": "Tỉnh / bang",
+    "countryLabel": "Quốc gia",
+    "mapTitle": "Bản đồ tuyến đường",
+    "mapDescription": "Bản đồ do người dùng cung cấp — hãy dán liên kết bạn đã tạo trong Google My Maps.",
+    "mapUrlLabel": "Liên kết Google My Maps",
+    "mapInvalid": "Đây có vẻ không phải là liên kết Google My Maps.",
+    "mapHelp": "Tạo bản đồ trong Google My Maps, rồi dán liên kết chia sẻ hoặc nhúng của bản đồ (ví dụ: https://www.google.com/maps/d/view?mid=…).",
+    "thumbnailTitle": "Ảnh đại diện",
+    "thumbnailDescription": "Thêm ảnh bìa để tuyến đường nổi bật hơn (không bắt buộc, tối đa 5 MB).",
+    "thumbnailLabel": "Ảnh đại diện",
+    "thumbnailKept": "Ảnh đại diện hiện tại sẽ được giữ nếu bạn không chọn tệp mới.",
+    "saving": "Đang lưu…",
+    "saveChanges": "Lưu thay đổi",
+    "createTrip": "Tạo hành trình",
+    "cancel": "Hủy"
+  },
+  "auth": {
+    "title": "Đăng nhập vào Road Rash",
+    "description": "Đăng nhập để tạo tuyến đường và lưu những hành trình bạn yêu thích.",
+    "checkingSession": "Đang kiểm tra phiên đăng nhập…",
+    "signedInAs": "Đã đăng nhập với",
+    "signOut": "Đăng xuất",
+    "continueWithGoogle": "Tiếp tục với Google",
+    "signInFailed": "Đăng nhập thất bại. Vui lòng thử lại.",
+    "signInStartFailed": "Không thể bắt đầu đăng nhập. Vui lòng thử lại.",
+    "signOutFailed": "Không thể đăng xuất. Vui lòng thử lại.",
+    "configUnavailable": "Đăng nhập bằng Google hiện không khả dụng."
+  },
+  "pages": {
+    "common": {
+      "loadError": "Vui lòng thử lại sau giây lát."
+    },
+    "discover": {
+      "title": "Khám phá hành trình",
+      "subtitle": "{count, plural, other {Duyệt # kế hoạch du lịch được cộng đồng chia sẻ.}}",
+      "unavailableTitle": "Hiện chưa thể tải danh sách hành trình",
+      "emptyMessage": "Chưa có hành trình nào — hãy là người đầu tiên chia sẻ."
+    },
+    "saved": {
+      "title": "Hành trình đã lưu",
+      "subtitle": "Những tuyến đường bạn đã yêu thích, luôn sẵn sàng để xem lại.",
+      "discoverMore": "Khám phá thêm",
+      "loadErrorTitle": "Không thể tải hành trình đã lưu của bạn",
+      "emptyTitle": "Bạn chưa lưu hành trình nào",
+      "emptyDescription": "Nhấn biểu tượng trái tim trên bất kỳ hành trình nào để lưu lại cho sau này.",
+      "browseTrips": "Duyệt hành trình"
+    },
+    "myTrips": {
+      "title": "Hành trình của tôi",
+      "subtitle": "Những tuyến đường bạn đã đăng để cộng đồng khám phá.",
+      "createTrip": "Tạo hành trình",
+      "loadErrorTitle": "Không thể tải hành trình của bạn",
+      "emptyTitle": "Bạn chưa tạo hành trình nào",
+      "emptyDescription": "Chia sẻ kế hoạch du lịch đầu tiên của bạn với cộng đồng."
+    },
+    "trip": {
+      "breadcrumbLabel": "Điều hướng phân cấp",
+      "discover": "Khám phá",
+      "metadataFallbackTitle": "Hành trình · Road Rash",
+      "metadataFallbackDescription": "Kế hoạch hành trình bởi {author}."
+    }
+  },
+  "languageSwitcher": {
+    "label": "Ngôn ngữ",
+    "en": "EN",
+    "vi": "VI"
+  },
+  "metadata": {
+    "title": "Road Rash",
+    "description": "Khám phá, lưu và chia sẻ các tuyến đường du lịch với bản đồ và gợi ý từ AI."
+  },
+  "tripType": {
+    "ROAD_TRIP": "Chuyến đi đường dài",
+    "CITY": "Thành phố",
+    "BEACH": "Biển",
+    "MOUNTAIN": "Núi",
+    "FOOD": "Ẩm thực",
+    "CAMPING": "Cắm trại",
+    "OTHER": "Khác"
+  },
+  "vehicle": {
+    "MOTORBIKE": "Xe máy",
+    "CAR": "Ô tô",
+    "BICYCLE": "Xe đạp",
+    "OTHER": "Khác"
+  }
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useGSAP } from "@gsap/react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { revealFrom, revealTo, REDUCED_MOTION_QUERY } from "@/lib/motion";
@@ -153,12 +154,13 @@ function RevealGroups({
 export default function TripGrid({
   trips,
   groups,
-  emptyMessage = "No trips yet.",
+  emptyMessage,
 }: {
   trips: Trip[];
   groups?: TripGridGroup[];
   emptyMessage?: string;
 }) {
+  const t = useTranslations("empty");
   const [selected, setSelected] = useState<{
     trip: Trip;
     rect: DOMRect;
@@ -176,7 +178,7 @@ export default function TripGrid({
 
   let body;
   if (total === 0) {
-    body = <EmptyState title={emptyMessage} />;
+    body = <EmptyState title={emptyMessage ?? t("noTripsYet")} />;
   } else if (phase === "loading") {
     body = <SkeletonCards count={Math.min(total, 8)} />;
   } else if (groups) {

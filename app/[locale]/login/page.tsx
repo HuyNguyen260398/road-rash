@@ -8,6 +8,7 @@ import {
   signOut,
 } from "aws-amplify/auth";
 import { Hub } from "aws-amplify/utils";
+import { useTranslations } from "next-intl";
 import {
   AlertTriangleIcon,
   LogInIcon,
@@ -31,11 +32,12 @@ type AuthState = {
 };
 
 export default function LoginPage() {
+  const t = useTranslations("auth");
   const [user, setUser] = useState<AuthState | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const visibleError =
-    error ?? (!authConfigStatus.configured ? authConfigStatus.message : null);
+    error ?? (!authConfigStatus.configured ? t("configUnavailable") : null);
 
   const refreshUser = useCallback(async () => {
     try {
@@ -72,25 +74,25 @@ export default function LoginPage() {
           setUser(null);
           break;
         case "signInWithRedirect_failure":
-          setError("Sign-in failed. Please try again.");
+          setError(t("signInFailed"));
           break;
       }
     });
 
     return unsubscribe;
-  }, [refreshUser]);
+  }, [refreshUser, t]);
 
   const handleSignIn = async () => {
     setError(null);
     if (!authConfigStatus.configured) {
-      setError(authConfigStatus.message);
+      setError(t("configUnavailable"));
       return;
     }
 
     try {
       await signInWithRedirect({ provider: "Google" });
     } catch {
-      setError("Could not start sign-in. Please try again.");
+      setError(t("signInStartFailed"));
     }
   };
 
@@ -99,7 +101,7 @@ export default function LoginPage() {
     try {
       await signOut();
     } catch {
-      setError("Could not sign out. Please try again.");
+      setError(t("signOutFailed"));
     }
   };
 
@@ -111,20 +113,18 @@ export default function LoginPage() {
             <div className="mb-2 flex size-12 items-center justify-center rounded-md bg-primary/10 text-primary">
               <MapIcon className="size-6" aria-hidden />
             </div>
-            <CardTitle className="text-2xl">Sign in to Road Rash</CardTitle>
-            <CardDescription>
-              Sign in to create routes and save your favorite trips.
-            </CardDescription>
+            <CardTitle className="text-2xl">{t("title")}</CardTitle>
+            <CardDescription>{t("description")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 text-center">
             {loading ? (
               <p className="text-sm text-muted-foreground">
-                Checking your session…
+                {t("checkingSession")}
               </p>
             ) : user ? (
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  Signed in as{" "}
+                  {t("signedInAs")}{" "}
                   <span className="font-medium text-foreground">
                     {user.email ?? user.username}
                   </span>
@@ -136,7 +136,7 @@ export default function LoginPage() {
                   className="w-full"
                 >
                   <LogOutIcon className="size-4" aria-hidden />
-                  Sign out
+                  {t("signOut")}
                 </Button>
               </div>
             ) : (
@@ -147,7 +147,7 @@ export default function LoginPage() {
                 className="w-full"
               >
                 <LogInIcon className="size-4" aria-hidden />
-                Continue with Google
+                {t("continueWithGoogle")}
               </Button>
             )}
 

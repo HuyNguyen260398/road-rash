@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useFavorites } from "@/components/FavoritesProvider";
 import {
   BikeIcon,
@@ -21,7 +21,6 @@ import { fetchAuthSession } from "aws-amplify/auth";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { toMyMapsEmbedUrl, validateMyMapsUrl } from "@/lib/validation";
-import { formatEnum } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Trip, Vehicle } from "@/lib/types";
 
@@ -49,6 +48,10 @@ function locationLabel(trip: Trip): string {
 }
 
 export default function TripDetail({ trip }: { trip: Trip }) {
+  const t = useTranslations("trip");
+  const tTripType = useTranslations("tripType");
+  const tVehicle = useTranslations("vehicle");
+
   // Only a validated My Maps URL is ever turned into an embed src.
   const embedSrc = validateMyMapsUrl(trip.myMapsUrl)
     ? toMyMapsEmbedUrl(trip.myMapsUrl)
@@ -112,7 +115,7 @@ export default function TripDetail({ trip }: { trip: Trip }) {
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-2">
             <Badge variant="secondary" className="w-fit">
-              {formatEnum(trip.tripType)}
+              {tTripType(trip.tripType)}
             </Badge>
             <h1 className="text-2xl font-semibold sm:text-3xl">{trip.name}</h1>
           </div>
@@ -123,9 +126,9 @@ export default function TripDetail({ trip }: { trip: Trip }) {
             onClick={handleFavorite}
             aria-pressed={favorited}
             aria-label={
-              favorited ? "Remove from favorites" : "Add to favorites"
+              favorited ? t("removeFromFavorites") : t("addToFavorites")
             }
-            title={favorited ? "Remove from favorites" : "Add to favorites"}
+            title={favorited ? t("removeFromFavorites") : t("addToFavorites")}
             className="shrink-0 gap-1.5"
           >
             <HeartIcon
@@ -137,7 +140,7 @@ export default function TripDetail({ trip }: { trip: Trip }) {
             />
             <span aria-hidden>{favoriteCount}</span>
             <span className="sr-only">
-              {favoriteCount} favorite{favoriteCount === 1 ? "" : "s"}
+              {t("favorites", { count: favoriteCount })}
             </span>
           </Button>
         </div>
@@ -151,30 +154,30 @@ export default function TripDetail({ trip }: { trip: Trip }) {
         <div className="rounded-lg border border-border bg-muted/40 p-3">
           <dt className="flex items-center gap-1.5 text-muted-foreground">
             <MapIcon className="size-4" aria-hidden />
-            Type
+            {t("typeLabel")}
           </dt>
-          <dd className="mt-1 font-medium">{formatEnum(trip.tripType)}</dd>
+          <dd className="mt-1 font-medium">{tTripType(trip.tripType)}</dd>
         </div>
         <div className="rounded-lg border border-border bg-muted/40 p-3">
           <dt className="flex items-center gap-1.5 text-muted-foreground">
             <VehicleIcon className="size-4" aria-hidden />
-            Vehicle
+            {t("vehicleLabel")}
           </dt>
-          <dd className="mt-1 font-medium">{formatEnum(trip.vehicle)}</dd>
+          <dd className="mt-1 font-medium">{tVehicle(trip.vehicle)}</dd>
         </div>
         <div className="rounded-lg border border-border bg-muted/40 p-3">
           <dt className="flex items-center gap-1.5 text-muted-foreground">
             <Clock3Icon className="size-4" aria-hidden />
-            Duration
+            {t("durationLabel")}
           </dt>
           <dd className="mt-1 font-medium">
-            {trip.durationDays} day{trip.durationDays === 1 ? "" : "s"}
+            {t("durationDays", { count: trip.durationDays })}
           </dd>
         </div>
         <div className="rounded-lg border border-border bg-muted/40 p-3">
           <dt className="flex items-center gap-1.5 text-muted-foreground">
             <UserIcon className="size-4" aria-hidden />
-            Author
+            {t("authorLabel")}
           </dt>
           <dd className="mt-1 truncate font-medium">{trip.authorName}</dd>
         </div>
@@ -193,7 +196,7 @@ export default function TripDetail({ trip }: { trip: Trip }) {
         <div className="flex items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
             <MapIcon className="size-4" aria-hidden />
-            Map
+            {t("mapHeading")}
           </h2>
           <div className="flex shrink-0 items-center gap-2">
             {isOwner ? (
@@ -204,7 +207,7 @@ export default function TripDetail({ trip }: { trip: Trip }) {
                 )}
               >
                 <PencilIcon className="size-4" aria-hidden />
-                Edit
+                {t("edit")}
               </Link>
             ) : null}
             <a
@@ -214,7 +217,7 @@ export default function TripDetail({ trip }: { trip: Trip }) {
               className={cn(buttonVariants({ size: "sm" }))}
             >
               <NavigationIcon aria-hidden />
-              Open in Google Maps
+              {t("openInGoogleMaps")}
             </a>
           </div>
         </div>
@@ -222,7 +225,7 @@ export default function TripDetail({ trip }: { trip: Trip }) {
           {embedSrc && !embedFailed ? (
             <iframe
               src={embedSrc}
-              title={`Map for ${trip.name}`}
+              title={t("mapTitle", { name: trip.name })}
               className="h-full w-full"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
@@ -234,19 +237,19 @@ export default function TripDetail({ trip }: { trip: Trip }) {
           ) : embedSrc ? (
             // Embed failed/blocked — offer the validated My Maps link instead.
             <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center text-sm text-muted-foreground">
-              <span>This map couldn’t be embedded.</span>
+              <span>{t("mapEmbedFailed")}</span>
               <a
                 href={trip.myMapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium underline underline-offset-4"
               >
-                Open map
+                {t("openMap")}
               </a>
             </div>
           ) : (
             <div className="flex h-full w-full items-center justify-center p-4 text-center text-sm text-muted-foreground">
-              Map preview unavailable.
+              {t("mapUnavailable")}
             </div>
           )}
         </div>

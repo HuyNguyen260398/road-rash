@@ -1,0 +1,258 @@
+{
+  "common": {
+    "appName": "Road Rash"
+  },
+  "header": {
+    "signIn": "Sign in",
+    "createTrip": "Create trip",
+    "signOut": "Sign out",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "savedTrips": "Liked trips",
+    "myTrips": "My trips"
+  },
+  "footer": {
+    "discover": "Discover",
+    "saved": "Saved",
+    "myTrips": "My trips",
+    "createTrip": "Create trip",
+    "disclaimer": "Road Rash routes and Google My Maps links are user supplied. Verify road conditions, access rules, and safety details before you travel."
+  },
+  "userMenu": {
+    "createTrip": "Create trip",
+    "savedTrips": "Liked trips",
+    "myTrips": "My trips",
+    "signOut": "Sign out",
+    "accountMenu": "Account menu"
+  },
+  "landing": {
+    "hero": {
+      "countLabel": "{count, number} trips shared by the community",
+      "countLabelFallback": "Community road trips",
+      "title": "Real road trips, mapped by the people who rode them.",
+      "subtitle": "Discover ride-ready routes backed by real Google My Maps, save the ones you love, and let AI narrow the community map down to your next trip.",
+      "ctaPrimary": "Explore trips",
+      "ctaSecondarySignedIn": "Create a trip",
+      "ctaSecondarySignedOut": "Sign in to share yours",
+      "footnote": "Free to browse · No account needed to explore"
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "stepLabel": "Step {number}",
+      "steps": [
+        {
+          "title": "Build your route in Google My Maps",
+          "body": "Drop pins, draw your route, and add stops in the My Maps editor you already know."
+        },
+        {
+          "title": "Paste the share link",
+          "body": "Copy your My Maps share link into the trip form, then add the details: vehicle, duration, and where it goes."
+        },
+        {
+          "title": "Share & discover",
+          "body": "Publish your trip for the community and explore map-backed routes other riders have shared."
+        }
+      ]
+    },
+    "featureHighlights": {
+      "title": "Everything you need to plan the next ride",
+      "items": [
+        {
+          "title": "Map-backed plans",
+          "body": "Every trip embeds a real Google My Maps route — no vague itineraries, just the actual path on the map."
+        },
+        {
+          "title": "Save your favorites",
+          "body": "Heart any route to build your own shortlist, then come back to it from your saved trips."
+        },
+        {
+          "title": "AI trip discovery",
+          "body": "Describe the trip you want and let AI rank the community's routes down to the best matches."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Your next route is waiting",
+      "body": "Browse community trips or share your own map-backed plan — it only takes a My Maps link.",
+      "ctaPrimary": "Explore trips",
+      "ctaSecondarySignedIn": "Create a trip",
+      "ctaSecondarySignedOut": "Sign in to share yours"
+    },
+    "featuredRoutes": {
+      "title": "Featured routes",
+      "viewAll": "See all trips"
+    }
+  },
+  "search": {
+    "label": "Search trips or describe your ride",
+    "placeholder": "Search trips, or describe your ride…",
+    "clear": "Clear search",
+    "askAi": "Ask AI",
+    "asking": "Asking…",
+    "showFilters": "Show filters",
+    "hideFilters": "Hide filters",
+    "results": "{count, plural, =0 {No routes} one {# route} other {# routes}}",
+    "group": "Group",
+    "groupBy": "Group trips by",
+    "noGrouping": "No grouping",
+    "groupByOption": "By {field}",
+    "groupField": {
+      "country": "country",
+      "province": "province",
+      "city": "city",
+      "tripType": "trip type",
+      "vehicle": "vehicle"
+    },
+    "filtersTitle": "Filters",
+    "clearFilters": "Clear filters",
+    "filterByTripType": "Filter by trip type",
+    "filterByVehicle": "Filter by vehicle",
+    "filterByCountry": "Filter by country",
+    "filterByProvince": "Filter by province",
+    "filterByCity": "Filter by city",
+    "allTypes": "All types",
+    "allVehicles": "All vehicles",
+    "allCountries": "All countries",
+    "allProvinces": "All provinces",
+    "allCities": "All cities",
+    "loadMore": "Loading…",
+    "aiNoMatch": "No trips matched that — try a different description, or browse below.",
+    "aiUnavailableNoMatch": "AI is unavailable and no trips matched \"{prompt}\". Try another search.",
+    "aiUnavailable": "AI is unavailable right now — showing plain search results instead.",
+    "duration": "{count, plural, one {# day} other {# days}}",
+    "byAuthor": "by {author}",
+    "addToFavorites": "Add to favorites",
+    "removeFromFavorites": "Remove from favorites"
+  },
+  "empty": {
+    "noTripsYet": "No trips yet.",
+    "noMatches": "No trips match your search and filters."
+  },
+  "trip": {
+    "addToFavorites": "Add to favorites",
+    "removeFromFavorites": "Remove from favorites",
+    "favorites": "{count, plural, =0 {No favorites} one {# favorite} other {# favorites}}",
+    "typeLabel": "Type",
+    "vehicleLabel": "Vehicle",
+    "durationLabel": "Duration",
+    "durationDays": "{count, plural, one {# day} other {# days}}",
+    "authorLabel": "Author",
+    "mapHeading": "Map",
+    "edit": "Edit",
+    "openInGoogleMaps": "Open in Google Maps",
+    "mapTitle": "Map for {name}",
+    "mapEmbedFailed": "This map couldn’t be embedded.",
+    "openMap": "Open map",
+    "mapUnavailable": "Map preview unavailable.",
+    "close": "Close trip details"
+  },
+  "forms": {
+    "newPageTitle": "Create a trip",
+    "newPageSubtitle": "Publish a route for the community. Build the map in Google My Maps first, then add the details and links below.",
+    "editPageTitle": "Edit trip",
+    "editPageSubtitle": "Update your route details and map links. Changes go live as soon as you save.",
+    "backToTrip": "Back to trip",
+    "thumbnailType": "Thumbnail must be a JPEG, PNG, WebP, or GIF image.",
+    "thumbnailSize": "Thumbnail must be 5 MB or smaller.",
+    "thumbnailUploadFailed": "Thumbnail upload failed",
+    "mapRequired": "Please enter a valid Google My Maps link.",
+    "genericError": "Something went wrong. Please try again.",
+    "basicsTitle": "Trip basics",
+    "basicsDescription": "Name your route and tell travelers what to expect.",
+    "nameLabel": "Trip name",
+    "descriptionLabel": "Description",
+    "tripTypeLabel": "Trip type",
+    "vehicleLabel": "Vehicle",
+    "durationLabel": "Duration (days)",
+    "locationTitle": "Location",
+    "locationDescription": "Where does this route take riders?",
+    "locationLabelLabel": "Location label",
+    "locationPlaceholder": "e.g. Northern Vietnam loop",
+    "cityLabel": "City",
+    "provinceLabel": "Province / state",
+    "countryLabel": "Country",
+    "mapTitle": "Route map",
+    "mapDescription": "Maps are user supplied — paste the link you built in Google My Maps.",
+    "mapUrlLabel": "Google My Maps link",
+    "mapInvalid": "That doesn’t look like a Google My Maps link.",
+    "mapHelp": "Build your map in Google My Maps, then paste its share or embed link (e.g. https://www.google.com/maps/d/view?mid=…).",
+    "thumbnailTitle": "Thumbnail",
+    "thumbnailDescription": "Add a cover image so your route stands out (optional, ≤ 5 MB).",
+    "thumbnailLabel": "Thumbnail image",
+    "thumbnailKept": "Current thumbnail kept unless you choose a new file.",
+    "saving": "Saving…",
+    "saveChanges": "Save changes",
+    "createTrip": "Create trip",
+    "cancel": "Cancel"
+  },
+  "auth": {
+    "title": "Sign in to Road Rash",
+    "description": "Sign in to create routes and save your favorite trips.",
+    "checkingSession": "Checking your session…",
+    "signedInAs": "Signed in as",
+    "signOut": "Sign out",
+    "continueWithGoogle": "Continue with Google",
+    "signInFailed": "Sign-in failed. Please try again.",
+    "signInStartFailed": "Could not start sign-in. Please try again.",
+    "signOutFailed": "Could not sign out. Please try again.",
+    "configUnavailable": "Google sign-in is not available right now."
+  },
+  "pages": {
+    "common": {
+      "loadError": "Please try again in a moment."
+    },
+    "discover": {
+      "title": "Discover trips",
+      "subtitle": "{count, plural, one {Browse # travel plan shared by the community.} other {Browse # travel plans shared by the community.}}",
+      "unavailableTitle": "Trips are unavailable right now",
+      "emptyMessage": "No trips yet — be the first to share one."
+    },
+    "saved": {
+      "title": "Saved trips",
+      "subtitle": "Routes you’ve favorited, ready to revisit anytime.",
+      "discoverMore": "Discover more",
+      "loadErrorTitle": "Couldn’t load your saved trips",
+      "emptyTitle": "No saved trips yet",
+      "emptyDescription": "Tap the heart on any trip to save it here for later.",
+      "browseTrips": "Browse trips"
+    },
+    "myTrips": {
+      "title": "My trips",
+      "subtitle": "Routes you’ve published for the community to discover.",
+      "createTrip": "Create trip",
+      "loadErrorTitle": "Couldn’t load your trips",
+      "emptyTitle": "You haven’t created any trips yet",
+      "emptyDescription": "Share your first travel plan with the community."
+    },
+    "trip": {
+      "breadcrumbLabel": "Breadcrumb",
+      "discover": "Discover",
+      "metadataFallbackTitle": "Trip · Road Rash",
+      "metadataFallbackDescription": "A trip plan by {author}."
+    }
+  },
+  "languageSwitcher": {
+    "label": "Language",
+    "en": "EN",
+    "vi": "VI"
+  },
+  "metadata": {
+    "title": "Road Rash",
+    "description": "Discover, save, and share road trip routes with maps and AI suggestions."
+  },
+  "tripType": {
+    "ROAD_TRIP": "Road trip",
+    "CITY": "City",
+    "BEACH": "Beach",
+    "MOUNTAIN": "Mountain",
+    "FOOD": "Food",
+    "CAMPING": "Camping",
+    "OTHER": "Other"
+  },
+  "vehicle": {
+    "MOTORBIKE": "Motorbike",
+    "CAR": "Car",
+    "BICYCLE": "Bicycle",
+    "OTHER": "Other"
+  }
+}

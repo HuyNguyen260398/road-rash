@@ -2,6 +2,7 @@
 
 import type { RefObject } from "react";
 import { Loader2Icon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 // The infinite-scroll trigger: an element the hook's IntersectionObserver watches,
 // which also shows a brief "Loading…" state while the next page is being revealed.
@@ -12,6 +13,7 @@ export default function LoadMoreIndicator({
   sentinelRef: RefObject<HTMLDivElement | null>;
   loading: boolean;
 }) {
+  const t = useTranslations("search");
   return (
     <div
       ref={sentinelRef}
@@ -24,7 +26,7 @@ export default function LoadMoreIndicator({
             className="size-4 animate-spin motion-reduce:animate-none"
             aria-hidden
           />
-          Loading…
+          {t("loadMore")}
         </span>
       ) : null}
     </div>

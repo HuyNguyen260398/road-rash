@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { useTranslations } from "next-intl";
 import { MapIcon, LinkIcon, Share2Icon, type LucideIcon } from "lucide-react";
 import { useGSAP } from "@gsap/react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
@@ -21,25 +22,12 @@ import {
 // for users who allow motion (reduced-motion users see the panels in place); the
 // hover lift is gated to motion-safe so the shadow/border/colour cues still
 // apply without the movement.
-const STEPS: { icon: LucideIcon; title: string; body: string }[] = [
-  {
-    icon: MapIcon,
-    title: "Build your route in Google My Maps",
-    body: "Drop pins, draw your route, and add stops in the My Maps editor you already know.",
-  },
-  {
-    icon: LinkIcon,
-    title: "Paste the share link",
-    body: "Copy your My Maps share link into the trip form, then add the details: vehicle, duration, and where it goes.",
-  },
-  {
-    icon: Share2Icon,
-    title: "Share & discover",
-    body: "Publish your trip for the community and explore map-backed routes other riders have shared.",
-  },
-];
+// Icons stay in code (paired by index with the translated copy in messages).
+const STEP_ICONS: LucideIcon[] = [MapIcon, LinkIcon, Share2Icon];
 
 export default function HowItWorks() {
+  const t = useTranslations("landing.howItWorks");
+  const steps = t.raw("steps") as { title: string; body: string }[];
   const root = useRef<HTMLElement>(null);
 
   // Staggered fade-up reveal as the section scrolls into view (same
@@ -71,23 +59,26 @@ export default function HowItWorks() {
     <section ref={root} className="bg-muted">
       <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
         <header className="mb-10">
-          <h2 className="text-2xl font-semibold sm:text-3xl">How it works</h2>
+          <h2 className="text-2xl font-semibold sm:text-3xl">{t("title")}</h2>
         </header>
         <ol className="grid gap-6 sm:grid-cols-3">
-          {STEPS.map(({ icon: Icon, title, body }, i) => (
-            <li key={title} className="hiw-card list-none">
-              <div className="group h-full rounded-lg border border-border bg-card p-6 shadow-sm transition-[transform,box-shadow,border-color] duration-300 ease-out hover:border-primary/40 hover:shadow-lg motion-safe:hover:-translate-y-1.5">
-                <div className="mb-4 flex size-11 items-center justify-center rounded-md bg-primary/10 text-primary transition-colors duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
-                  <Icon className="size-5" aria-hidden />
+          {steps.map(({ title, body }, i) => {
+            const Icon = STEP_ICONS[i];
+            return (
+              <li key={title} className="hiw-card list-none">
+                <div className="group h-full rounded-lg border border-border bg-card p-6 shadow-sm transition-[transform,box-shadow,border-color] duration-300 ease-out hover:border-primary/40 hover:shadow-lg motion-safe:hover:-translate-y-1.5">
+                  <div className="mb-4 flex size-11 items-center justify-center rounded-md bg-primary/10 text-primary transition-colors duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
+                    <Icon className="size-5" aria-hidden />
+                  </div>
+                  <p className="mb-1 text-sm font-medium text-muted-foreground">
+                    {t("stepLabel", { number: i + 1 })}
+                  </p>
+                  <h3 className="font-semibold">{title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{body}</p>
                 </div>
-                <p className="mb-1 text-sm font-medium text-muted-foreground">
-                  Step {i + 1}
-                </p>
-                <h3 className="font-semibold">{title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{body}</p>
-              </div>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ol>
       </div>
     </section>

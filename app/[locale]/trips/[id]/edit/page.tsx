@@ -1,5 +1,6 @@
-import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
+import { Link, redirect } from "@/i18n/navigation";
+import { notFound } from "next/navigation";
 import { ArrowLeftIcon } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import TripForm from "@/components/TripForm";
@@ -17,9 +18,10 @@ export default async function EditTripPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const locale = await getLocale();
 
   const session = await getServerSession();
-  if (!session) redirect("/login");
+  if (!session) return redirect({ href: "/login", locale });
 
   let trip;
   try {
@@ -30,7 +32,9 @@ export default async function EditTripPage({
   }
 
   // Non-owners can't edit — bounce them to the (public) detail view (M4).
-  if (trip.authorId !== session.sub) redirect(`/trip/${id}`);
+  if (trip.authorId !== session.sub) redirect({ href: `/trip/${id}`, locale });
+
+  const t = await getTranslations("forms");
 
   return (
     <AppShell>
@@ -41,13 +45,12 @@ export default async function EditTripPage({
             className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeftIcon className="size-4" aria-hidden />
-            Back to trip
+            {t("backToTrip")}
           </Link>
           <div className="space-y-2">
-            <h1 className="text-2xl font-semibold">Edit trip</h1>
+            <h1 className="text-2xl font-semibold">{t("editPageTitle")}</h1>
             <p className="text-sm text-muted-foreground">
-              Update your route details and map links. Changes go live as soon
-              as you save.
+              {t("editPageSubtitle")}
             </p>
           </div>
         </header>
