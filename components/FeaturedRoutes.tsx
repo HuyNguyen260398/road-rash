@@ -77,7 +77,7 @@ export default function FeaturedRoutes({ trips }: { trips: Trip[] }) {
           focus; reduced-motion users get a static, scrollable row instead. */}
       <div
         ref={root}
-        className="relative overflow-hidden pb-16 motion-reduce:overflow-x-auto"
+        className="relative mx-auto w-4/5 overflow-hidden pb-16 motion-reduce:overflow-x-auto"
         onPointerEnter={pause}
         onPointerLeave={resume}
         onFocusCapture={pause}
