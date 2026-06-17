@@ -1,5 +1,28 @@
 {
   "common": {
     "appName": "Road Rash"
+  },
+  "header": {
+    "signIn": "Sign in",
+    "createTrip": "Create trip",
+    "signOut": "Sign out",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "savedTrips": "Liked trips",
+    "myTrips": "My trips"
+  },
+  "footer": {
+    "discover": "Discover",
+    "saved": "Saved",
+    "myTrips": "My trips",
+    "createTrip": "Create trip",
+    "disclaimer": "Road Rash routes and Google My Maps links are user supplied. Verify road conditions, access rules, and safety details before you travel."
+  },
+  "userMenu": {
+    "createTrip": "Create trip",
+    "savedTrips": "Liked trips",
+    "myTrips": "My trips",
+    "signOut": "Sign out",
+    "accountMenu": "Account menu"
   }
 }

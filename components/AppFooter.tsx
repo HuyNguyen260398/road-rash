@@ -1,15 +1,17 @@
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import AppLogo from "@/components/AppLogo";
 import { Separator } from "@/components/ui/separator";
 
 const FOOTER_LINKS = [
-  { href: "/", label: "Discover" },
-  { href: "/saved", label: "Saved" },
-  { href: "/my-trips", label: "My trips" },
-  { href: "/trips/new", label: "Create trip" },
+  { href: "/", key: "discover" },
+  { href: "/saved", key: "saved" },
+  { href: "/my-trips", key: "myTrips" },
+  { href: "/trips/new", key: "createTrip" },
 ] as const;
 
 export default function AppFooter() {
+  const t = useTranslations("footer");
   return (
     <footer className="bg-background">
       <Separator />
@@ -26,14 +28,13 @@ export default function AppFooter() {
                 href={item.href}
                 className="rounded-md transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               >
-                {item.label}
+                {t(item.key)}
               </Link>
             ))}
           </nav>
         </div>
         <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-          Road Rash routes and Google My Maps links are user supplied. Verify
-          road conditions, access rules, and safety details before you travel.
+          {t("disclaimer")}
         </p>
       </div>
     </footer>

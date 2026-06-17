@@ -1,5 +1,28 @@
 {
   "common": {
     "appName": "Road Rash"
+  },
+  "header": {
+    "signIn": "Đăng nhập",
+    "createTrip": "Tạo hành trình",
+    "signOut": "Đăng xuất",
+    "openMenu": "Mở menu",
+    "closeMenu": "Đóng menu",
+    "savedTrips": "Hành trình đã thích",
+    "myTrips": "Hành trình của tôi"
+  },
+  "footer": {
+    "discover": "Khám phá",
+    "saved": "Đã lưu",
+    "myTrips": "Hành trình của tôi",
+    "createTrip": "Tạo hành trình",
+    "disclaimer": "Các tuyến đường Road Rash và liên kết Google My Maps do người dùng cung cấp. Hãy kiểm tra tình trạng đường, quy định ra vào và thông tin an toàn trước khi đi."
+  },
+  "userMenu": {
+    "createTrip": "Tạo hành trình",
+    "savedTrips": "Hành trình đã thích",
+    "myTrips": "Hành trình của tôi",
+    "signOut": "Đăng xuất",
+    "accountMenu": "Menu tài khoản"
   }
 }
