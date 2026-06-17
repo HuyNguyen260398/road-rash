@@ -46,9 +46,7 @@ export default async function SavedPage() {
             </div>
             <div>
               <h1 className="text-2xl font-semibold">{t("title")}</h1>
-              <p className="text-sm text-muted-foreground">
-                {t("subtitle")}
-              </p>
+              <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
             </div>
           </div>
           <Link

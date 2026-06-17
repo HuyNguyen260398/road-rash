@@ -47,10 +47,7 @@ export default async function Discover() {
               description={loadError}
             />
           ) : (
-            <TripBrowser
-              trips={trips}
-              emptyMessage={t("emptyMessage")}
-            />
+            <TripBrowser trips={trips} emptyMessage={t("emptyMessage")} />
           )}
         </div>
       </section>

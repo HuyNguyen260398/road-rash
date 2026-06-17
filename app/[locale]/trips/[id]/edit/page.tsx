@@ -32,8 +32,7 @@ export default async function EditTripPage({
   }
 
   // Non-owners can't edit — bounce them to the (public) detail view (M4).
-  if (trip.authorId !== session.sub)
-    redirect({ href: `/trip/${id}`, locale });
+  if (trip.authorId !== session.sub) redirect({ href: `/trip/${id}`, locale });
 
   const t = await getTranslations("forms");
 

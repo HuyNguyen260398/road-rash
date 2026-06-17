@@ -39,9 +39,7 @@ export default async function MyTripsPage() {
             </div>
             <div>
               <h1 className="text-2xl font-semibold">{t("title")}</h1>
-              <p className="text-sm text-muted-foreground">
-                {t("subtitle")}
-              </p>
+              <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
             </div>
           </div>
           <Link href="/trips/new" className={buttonVariants()}>
