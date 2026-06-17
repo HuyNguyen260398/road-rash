@@ -1,6 +1,6 @@
 import AppShell from "@/components/AppShell";
 import LandingHero from "@/components/LandingHero";
-import TrendingTrips from "@/components/TrendingTrips";
+import FeaturedRoutes from "@/components/FeaturedRoutes";
 import HowItWorks from "@/components/HowItWorks";
 import FeatureHighlights from "@/components/FeatureHighlights";
 import LandingCta from "@/components/LandingCta";
@@ -10,9 +10,9 @@ import { selectTrending } from "@/lib/trending";
 import type { Trip } from "@/lib/types";
 
 // Marketing landing page (home). Public, server-rendered: fetch trips for the
-// live count + a "trending" strip, then compose the static sections. The browse
-// experience lives at /discover. Fetch failures degrade gracefully — the hero
-// shows a static label and TrendingTrips renders nothing for an empty set.
+// live count + the "Featured routes" marquee, then compose the static sections.
+// The browse experience lives at /discover. Fetch failures degrade gracefully —
+// the hero shows a static label and FeaturedRoutes renders nothing for an empty set.
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
@@ -26,12 +26,12 @@ export default async function Home() {
     // the static landing shell rather than crashing.
   }
 
-  const trending = selectTrending(trips, 6);
+  const featured = selectTrending(trips, 10);
 
   return (
     <AppShell>
       <LandingHero tripCount={trips.length} />
-      <TrendingTrips trips={trending} />
+      <FeaturedRoutes trips={featured} />
       <HowItWorks />
       <FeatureHighlights />
       <LandingCta />
