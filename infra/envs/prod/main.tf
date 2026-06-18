@@ -131,6 +131,9 @@ module "lambda_suggest_trips" {
   environment_variables = {
     TRIP_TABLE        = module.dynamodb.trip_table_name
     GEMINI_PARAM_NAME = module.ssm.gemini_api_key_param_name
+    # gemini-2.0-flash has zero free-tier quota (429 RESOURCE_EXHAUSTED); pin to
+    # a model the project's free tier still serves.
+    GEMINI_MODEL = "gemini-2.5-flash"
   }
 }
 

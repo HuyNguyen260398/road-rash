@@ -24,7 +24,10 @@ import type { SuggestRequest, SuggestionResult, Trip } from "../../lib/types";
 
 const TABLE = process.env.TRIP_TABLE ?? "";
 const GEMINI_PARAM_NAME = process.env.GEMINI_PARAM_NAME ?? "";
-const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-2.0-flash";
+// gemini-2.5-flash is the default: gemini-2.0-flash now has zero free-tier quota
+// (the API returns 429 RESOURCE_EXHAUSTED with limit:0), which the handler turns
+// into the 502 → client plain-search fallback. Overridable via GEMINI_MODEL.
+const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 // Bounded so we always answer within the API Gateway HTTP API 30s integration
 // ceiling (the Lambda timeout sits just under it); on overrun we fall back. A
 // bad/non-numeric override falls back rather than becoming NaN (= a 0ms abort).
