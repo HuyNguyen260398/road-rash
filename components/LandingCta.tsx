@@ -17,10 +17,7 @@ export default function LandingCta() {
   return (
     <section className="relative isolate overflow-hidden">
       <div aria-hidden className="absolute inset-0 -z-10">
-        <div
-          className="hero-kenburns absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/cta-sunset-road.jpg')" }}
-        />
+        <div className="hero-kenburns cta-bg-image absolute inset-0 bg-cover bg-center" />
       </div>
       <div
         aria-hidden
