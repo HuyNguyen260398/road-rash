@@ -131,6 +131,7 @@ describe("parseSuggestRequest", () => {
     expect(parseSuggestRequest(raw)).toEqual({
       prompt: "coast",
       candidates: [candidate],
+      locale: "en",
     });
   });
 
@@ -195,5 +196,24 @@ describe("parseSuggestRequest", () => {
     }));
     const raw = JSON.stringify({ prompt: "x", candidates: many });
     expect(parseSuggestRequest(raw)?.candidates.length).toBe(MAX_CANDIDATES);
+  });
+});
+
+describe("parseSuggestRequest locale", () => {
+  const candidates = [{ id: "1", name: "A" }];
+
+  it("parses a valid vi locale", () => {
+    const raw = JSON.stringify({ prompt: "coast", candidates, locale: "vi" });
+    expect(parseSuggestRequest(raw)?.locale).toBe("vi");
+  });
+
+  it("defaults to en when locale is missing", () => {
+    const raw = JSON.stringify({ prompt: "coast", candidates });
+    expect(parseSuggestRequest(raw)?.locale).toBe("en");
+  });
+
+  it("defaults to en for an unknown locale", () => {
+    const raw = JSON.stringify({ prompt: "coast", candidates, locale: "fr" });
+    expect(parseSuggestRequest(raw)?.locale).toBe("en");
   });
 });

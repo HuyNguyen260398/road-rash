@@ -55,9 +55,12 @@ export interface SuggestCandidate {
   description?: string;
 }
 
+export type SuggestLocale = "en" | "vi";
+
 export interface SuggestRequest {
   prompt: string;
   candidates: SuggestCandidate[];
+  locale?: SuggestLocale;
 }
 
 // A ranked suggestion: a trip id (always from the candidate set, validated
@@ -68,6 +71,9 @@ export interface SuggestionResult {
 }
 
 export interface SuggestResponse {
+  // Short natural-language recommendation written in the request locale. May be
+  // "" when the model returns only ranked results (or on the fallback path).
+  summary: string;
   suggestions: SuggestionResult[];
 }
 

@@ -4,7 +4,11 @@
 // DynamoDB re-validation: parse/bound the request → parse the model's text → drop
 // anything outside the candidate set → (handler) confirm the survivors still
 // exist in the Trip table before returning.
-import type { SuggestCandidate, SuggestRequest } from "../../lib/types";
+import type {
+  SuggestCandidate,
+  SuggestLocale,
+  SuggestRequest,
+} from "../../lib/types";
 
 export type Suggestion = { id: string; reason?: string };
 
@@ -24,6 +28,12 @@ export function parsePositiveInt(
 ): number {
   const n = Number(value);
   return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+// Normalize the optional UI locale; anything we don't ship falls back to en so
+// the prompt always has a defined language to write the summary in.
+function parseLocale(value: unknown): SuggestLocale {
+  return value === "vi" ? "vi" : "en";
 }
 
 // Parse + validate + bound the POST /suggest body. Returns undefined for anything
@@ -78,7 +88,7 @@ export function parseSuggestRequest(
   }
   if (candidates.length === 0) return undefined;
 
-  return { prompt, candidates };
+  return { prompt, candidates, locale: parseLocale(b.locale) };
 }
 
 // Strict-ish JSON parse of the model's response. Gemini may wrap the array in a
