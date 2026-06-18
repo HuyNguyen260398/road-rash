@@ -84,8 +84,8 @@
     }
   },
   "search": {
-    "label": "Tìm hành trình hoặc mô tả chuyến đi của bạn",
-    "placeholder": "Tìm hành trình, hoặc mô tả chuyến đi của bạn…",
+    "label": "Mô tả chuyến đi của bạn, rồi nhấn Hỏi AI",
+    "placeholder": "Mô tả chuyến đi của bạn, rồi nhấn Hỏi AI…",
     "clear": "Xóa tìm kiếm",
     "askAi": "Hỏi AI",
     "asking": "Đang hỏi…",

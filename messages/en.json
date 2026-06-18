@@ -84,8 +84,8 @@
     }
   },
   "search": {
-    "label": "Search trips or describe your ride",
-    "placeholder": "Search trips, or describe your ride…",
+    "label": "Describe your ride, then tap Ask AI",
+    "placeholder": "Describe your trip, then tap Ask AI…",
     "clear": "Clear search",
     "askAi": "Ask AI",
     "asking": "Asking…",

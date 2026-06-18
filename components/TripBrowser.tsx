@@ -5,9 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { SlidersHorizontalIcon } from "lucide-react";
 import SearchPill from "./SearchPill";
 import FilterControls from "./FilterControls";
-import TripCard from "./TripCard";
 import TripGrid from "./TripGrid";
-import LoadMoreIndicator from "./LoadMoreIndicator";
 import AiSummary from "./AiSummary";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,13 +17,14 @@ import {
   type GroupField,
   type TripFilters,
 } from "@/lib/search";
-import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
 import type { SuggestCandidate, SuggestLocale, Trip } from "@/lib/types";
 
-// Client-side discovery shell. Typing filters the loaded set instantly
-// (lib/search.ts); the inline "Ask AI" button submits the same text to
-// POST /suggest (submit-only) and the grid switches to the ranked results until
-// cleared. Filters + grouping collapse behind a toggle.
+// Client-side discovery shell. Typing only composes the AI prompt — it does NOT
+// filter the grid. Clicking "Ask AI" submits the text to POST /suggest; the
+// suggestion renders in the summary card above and the grid narrows to the
+// AI-selected trips. Dropdown filters + grouping stay live and apply to whatever
+// set is shown (all trips before a search, the AI subset after). Filters and
+// grouping collapse behind a toggle.
 
 const GROUP_OPTIONS: GroupField[] = [
   "country",
@@ -51,7 +50,6 @@ function toCandidates(trips: Trip[]): SuggestCandidate[] {
   }));
 }
 
-type AiResult = { trip: Trip; reason?: string };
 type AiStatus = "idle" | "loading" | "done";
 
 export default function TripBrowser({
@@ -72,7 +70,9 @@ export default function TripBrowser({
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [aiStatus, setAiStatus] = useState<AiStatus>("idle");
-  const [aiResults, setAiResults] = useState<AiResult[]>([]);
+  // Ranked trips returned by the last AI search (best-first). Empty until a
+  // search runs; on Gemini failure this holds the plain text-match fallback.
+  const [aiResults, setAiResults] = useState<Trip[]>([]);
   const [aiMessage, setAiMessage] = useState<string | null>(null);
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [summaryDismissed, setSummaryDismissed] = useState(false);
@@ -93,16 +93,21 @@ export default function TripBrowser({
   const handleChange = useCallback(
     (value: string) => {
       setQ(value);
-      // Editing the query drops back to plain search and abandons any in-flight
-      // AI request.
+      // Editing the query abandons any in-flight/prior AI search and returns the
+      // grid to all trips until Ask AI is clicked again. Typing never filters.
       resetAi();
     },
     [resetAi],
   );
 
+  const aiActive = aiStatus === "done";
+
+  // Free text never narrows the grid (empty query) — only the dropdown filters
+  // do. The base set is the AI-selected trips once a search has run, otherwise
+  // every trip.
   const visible = useMemo(
-    () => filterTrips(trips, q, filters),
-    [trips, filters, q],
+    () => filterTrips(aiActive ? aiResults : trips, "", filters),
+    [aiActive, aiResults, trips, filters],
   );
 
   const groups = useMemo(() => {
@@ -119,15 +124,6 @@ export default function TripBrowser({
       trips: g.trips,
     }));
   }, [visible, groupBy, tTripType, tVehicle]);
-
-  // AI results render in a bespoke grid (each card carries a reason caption), so
-  // they get their own paginated window — TripGrid's load-more covers plain search.
-  const {
-    visible: visibleAi,
-    hasMore: hasMoreAi,
-    loading: loadingAi,
-    sentinelRef: aiSentinelRef,
-  } = useInfiniteScroll(aiResults);
 
   async function askAi() {
     const prompt = q.trim();
@@ -147,21 +143,17 @@ export default function TripBrowser({
       );
       if (requestId !== requestIdRef.current) return; // superseded — discard
       setAiSummary(summary || null);
+      // Map ranked ids back to trips, preserving the model's best-first order.
       const mapped = suggestions
-        .map((s): AiResult | undefined => {
-          const trip = byId.get(s.id);
-          return trip ? { trip, reason: s.reason } : undefined;
-        })
-        .filter((r): r is AiResult => r !== undefined);
+        .map((s) => byId.get(s.id))
+        .filter((trip): trip is Trip => trip !== undefined);
       setAiResults(mapped);
       setAiMessage(mapped.length === 0 ? t("aiNoMatch") : null);
     } catch {
       if (requestId !== requestIdRef.current) return; // superseded — discard
-      // Gemini unavailable/timed out — fall back to plain search over the same
-      // candidate set so the user still gets results.
-      const fallback = filterTrips(trips, prompt, {}).map(
-        (trip): AiResult => ({ trip }),
-      );
+      // Gemini unavailable/timed out — fall back to a plain text match over the
+      // query so the user still gets results.
+      const fallback = filterTrips(trips, prompt, {});
       setAiResults(fallback);
       setAiMessage(
         fallback.length === 0
@@ -178,9 +170,7 @@ export default function TripBrowser({
     resetAi();
   }
 
-  const aiActive = aiStatus === "done";
-  const resultCount = aiActive ? aiResults.length : visible.length;
-  const resultLabel = t("results", { count: resultCount });
+  const resultLabel = t("results", { count: visible.length });
   const hasActiveFilters =
     Object.values(filters).some(Boolean) || Boolean(groupBy);
   // Show the AI card while a request is in flight, then keep it for the summary
@@ -270,43 +260,15 @@ export default function TripBrowser({
         />
       ) : null}
 
-      {aiActive ? (
-        aiResults.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {visibleAi.map(({ trip, reason }) => (
-                <div
-                  key={trip.id}
-                  className="flex animate-float-up flex-col gap-1"
-                >
-                  <TripCard trip={trip} />
-                  {reason ? (
-                    <p className="px-1 text-xs italic text-muted-foreground">
-                      {reason}
-                    </p>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-            {hasMoreAi ? (
-              <LoadMoreIndicator
-                sentinelRef={aiSentinelRef}
-                loading={loadingAi}
-              />
-            ) : null}
-          </>
-        ) : null
-      ) : (
-        <TripGrid
-          trips={visible}
-          groups={groups}
-          emptyMessage={
-            trips.length === 0
-              ? (emptyMessage ?? tEmpty("noTripsYet"))
-              : tEmpty("noMatches")
-          }
-        />
-      )}
+      <TripGrid
+        trips={visible}
+        groups={groups}
+        emptyMessage={
+          trips.length === 0
+            ? (emptyMessage ?? tEmpty("noTripsYet"))
+            : tEmpty("noMatches")
+        }
+      />
     </div>
   );
 }
