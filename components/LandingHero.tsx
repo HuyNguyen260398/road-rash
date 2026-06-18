@@ -62,10 +62,7 @@ export default function LandingHero({ tripCount }: { tripCount: number }) {
         aria-hidden
         className="hero-bg absolute inset-x-0 -inset-y-[12%] -z-10"
       >
-        <div
-          className="hero-kenburns absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url('/hero-road.jpg')" }}
-        />
+        <div className="hero-kenburns hero-bg-image absolute inset-0 bg-cover bg-center" />
       </div>
       <div
         aria-hidden
