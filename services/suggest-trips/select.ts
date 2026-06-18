@@ -4,7 +4,11 @@
 // DynamoDB re-validation: parse/bound the request → parse the model's text → drop
 // anything outside the candidate set → (handler) confirm the survivors still
 // exist in the Trip table before returning.
-import type { SuggestCandidate, SuggestRequest } from "../../lib/types";
+import type {
+  SuggestCandidate,
+  SuggestLocale,
+  SuggestRequest,
+} from "../../lib/types";
 
 export type Suggestion = { id: string; reason?: string };
 
@@ -15,6 +19,7 @@ export const MAX_CANDIDATES = 100;
 export const MAX_PROMPT_CHARS = 1000;
 export const MAX_FIELD_CHARS = 200;
 export const MAX_DESC_CHARS = 400;
+export const MAX_SUMMARY_CHARS = 600;
 
 // Safe numeric env parse: a non-numeric/zero/negative value falls back instead of
 // yielding NaN (which would make setTimeout fire at 0ms and abort every call).
@@ -24,6 +29,12 @@ export function parsePositiveInt(
 ): number {
   const n = Number(value);
   return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+// Normalize the optional UI locale; anything we don't ship falls back to en so
+// the prompt always has a defined language to write the summary in.
+function parseLocale(value: unknown): SuggestLocale {
+  return value === "vi" ? "vi" : "en";
 }
 
 // Parse + validate + bound the POST /suggest body. Returns undefined for anything
@@ -78,19 +89,40 @@ export function parseSuggestRequest(
   }
   if (candidates.length === 0) return undefined;
 
-  return { prompt, candidates };
+  return { prompt, candidates, locale: parseLocale(b.locale) };
 }
 
-// Strict-ish JSON parse of the model's response. Gemini may wrap the array in a
-// ```json code fence even when asked for raw JSON, so strip that first. Anything
-// that isn't a JSON array of objects with a string `id` yields [] — the handler
-// then falls back rather than throwing.
-export function parseSuggestions(text: string): Suggestion[] {
-  const stripped = text
+// Gemini may wrap its JSON in a ```json code fence even when asked for raw JSON,
+// so strip that (and surrounding whitespace) before parsing.
+function stripCodeFence(text: string): string {
+  return text
     .trim()
     .replace(/^```(?:json)?\s*/i, "")
     .replace(/\s*```$/, "")
     .trim();
+}
+
+// Build Suggestion[] from an already-parsed value. Anything that isn't an array
+// of objects with a string `id` yields [] — entries failing the id rule are
+// skipped. Centralizes the id/reason rules so both parsers share them.
+function parseEntries(value: unknown): Suggestion[] {
+  if (!Array.isArray(value)) return [];
+
+  const result: Suggestion[] = [];
+  for (const entry of value) {
+    if (typeof entry !== "object" || entry === null) continue;
+    const { id, reason } = entry as Record<string, unknown>;
+    if (typeof id !== "string" || id.length === 0) continue;
+    result.push(typeof reason === "string" ? { id, reason } : { id });
+  }
+  return result;
+}
+
+// Strict-ish JSON parse of the model's response. Strips a ```json code fence,
+// then expects a JSON array of objects with a string `id`; anything else yields
+// [] — the handler then falls back rather than throwing.
+export function parseSuggestions(text: string): Suggestion[] {
+  const stripped = stripCodeFence(text);
 
   let parsed: unknown;
   try {
@@ -99,16 +131,43 @@ export function parseSuggestions(text: string): Suggestion[] {
     return [];
   }
 
-  if (!Array.isArray(parsed)) return [];
+  return parseEntries(parsed);
+}
 
-  const result: Suggestion[] = [];
-  for (const entry of parsed) {
-    if (typeof entry !== "object" || entry === null) continue;
-    const { id, reason } = entry as Record<string, unknown>;
-    if (typeof id !== "string" || id.length === 0) continue;
-    result.push(typeof reason === "string" ? { id, reason } : { id });
+// Envelope parser for the model's response. The prompt asks for an object
+// { summary, results }, but we tolerate a bare array (older shape / model drift)
+// by treating it as results with no summary. Strips a ```json code fence first,
+// then delegates entry parsing to parseEntries so the id/reason rules stay in
+// one place.
+export function parseSuggestResponse(text: string): {
+  summary: string;
+  suggestions: Suggestion[];
+} {
+  const stripped = stripCodeFence(text);
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(stripped);
+  } catch {
+    return { summary: "", suggestions: [] };
   }
-  return result;
+
+  if (Array.isArray(parsed)) {
+    return { summary: "", suggestions: parseEntries(parsed) };
+  }
+
+  if (typeof parsed !== "object" || parsed === null) {
+    return { summary: "", suggestions: [] };
+  }
+
+  const obj = parsed as Record<string, unknown>;
+  const summary =
+    typeof obj.summary === "string"
+      ? obj.summary.trim().slice(0, MAX_SUMMARY_CHARS)
+      : "";
+  const suggestions = parseEntries(obj.results);
+
+  return { summary, suggestions };
 }
 
 // Drop any suggestion whose id is not in the candidate set (REQ-007), keeping the

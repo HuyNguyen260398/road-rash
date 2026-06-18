@@ -55,19 +55,24 @@ export interface SuggestCandidate {
   description?: string;
 }
 
+export type SuggestLocale = "en" | "vi";
+
 export interface SuggestRequest {
   prompt: string;
   candidates: SuggestCandidate[];
+  locale?: SuggestLocale;
 }
 
-// A ranked suggestion: a trip id (always from the candidate set, validated
-// server-side) plus an optional "why it fits" blurb from the model.
+// A ranked suggestion: a trip id, always from the candidate set and validated
+// server-side. The client maps these ids back to loaded trips, best-first.
 export interface SuggestionResult {
   id: string;
-  reason?: string;
 }
 
 export interface SuggestResponse {
+  // Short natural-language recommendation written in the request locale. May be
+  // "" when the model returns only ranked results (or on the fallback path).
+  summary: string;
   suggestions: SuggestionResult[];
 }
 

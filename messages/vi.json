@@ -84,8 +84,8 @@
     }
   },
   "search": {
-    "label": "Tìm hành trình hoặc mô tả chuyến đi của bạn",
-    "placeholder": "Tìm hành trình, hoặc mô tả chuyến đi của bạn…",
+    "label": "Mô tả chuyến đi của bạn, rồi nhấn Hỏi AI",
+    "placeholder": "Mô tả chuyến đi của bạn, rồi nhấn Hỏi AI…",
     "clear": "Xóa tìm kiếm",
     "askAi": "Hỏi AI",
     "asking": "Đang hỏi…",
@@ -119,6 +119,9 @@
     "aiNoMatch": "Không có hành trình nào phù hợp — hãy thử mô tả khác, hoặc duyệt bên dưới.",
     "aiUnavailableNoMatch": "AI hiện không khả dụng và không có hành trình nào khớp với \"{prompt}\". Hãy thử tìm kiếm khác.",
     "aiUnavailable": "AI hiện không khả dụng — đang hiển thị kết quả tìm kiếm thường.",
+    "aiSummaryTitle": "Gợi ý từ AI",
+    "aiSummaryLoading": "Đang suy nghĩ…",
+    "aiSummaryDismiss": "Đóng gợi ý AI",
     "duration": "{count, plural, other {# ngày}}",
     "byAuthor": "bởi {author}",
     "addToFavorites": "Thêm vào yêu thích",

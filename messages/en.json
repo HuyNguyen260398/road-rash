@@ -84,8 +84,8 @@
     }
   },
   "search": {
-    "label": "Search trips or describe your ride",
-    "placeholder": "Search trips, or describe your ride…",
+    "label": "Describe your ride, then tap Ask AI",
+    "placeholder": "Describe your trip, then tap Ask AI…",
     "clear": "Clear search",
     "askAi": "Ask AI",
     "asking": "Asking…",
@@ -119,6 +119,9 @@
     "aiNoMatch": "No trips matched that — try a different description, or browse below.",
     "aiUnavailableNoMatch": "AI is unavailable and no trips matched \"{prompt}\". Try another search.",
     "aiUnavailable": "AI is unavailable right now — showing plain search results instead.",
+    "aiSummaryTitle": "AI suggestion",
+    "aiSummaryLoading": "Thinking…",
+    "aiSummaryDismiss": "Dismiss AI suggestion",
     "duration": "{count, plural, one {# day} other {# days}}",
     "byAuthor": "by {author}",
     "addToFavorites": "Add to favorites",

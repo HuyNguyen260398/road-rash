@@ -1,6 +1,7 @@
 import { fetchAuthSession } from "aws-amplify/auth";
 import type {
   SuggestCandidate,
+  SuggestLocale,
   SuggestResponse,
   Trip,
   TripInput,
@@ -183,9 +184,13 @@ export const api = {
   // loaded candidate set; the server ranks only those ids. On a Gemini
   // failure/timeout this throws an ApiError and the caller falls back to plain
   // search (TASK-042).
-  suggestTrips: (prompt: string, candidates: SuggestCandidate[]) =>
+  suggestTrips: (
+    prompt: string,
+    candidates: SuggestCandidate[],
+    locale?: SuggestLocale,
+  ) =>
     apiFetch<SuggestResponse>("/suggest", {
       method: "POST",
-      body: { prompt, candidates },
+      body: { prompt, candidates, locale },
     }),
 };
