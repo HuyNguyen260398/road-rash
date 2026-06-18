@@ -50,7 +50,7 @@ function toCandidates(trips: Trip[]): SuggestCandidate[] {
   }));
 }
 
-type AiStatus = "idle" | "loading" | "done";
+type AiStatus = "idle" | "loading" | "success" | "error";
 
 export default function TripBrowser({
   trips,
@@ -70,8 +70,8 @@ export default function TripBrowser({
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [aiStatus, setAiStatus] = useState<AiStatus>("idle");
-  // Ranked trips returned by the last AI search (best-first). Empty until a
-  // search runs; on Gemini failure this holds the plain text-match fallback.
+  // Ranked trips (best-first) from the last successful AI search. Empty until a
+  // search succeeds; on failure the grid falls back to all trips, not these.
   const [aiResults, setAiResults] = useState<Trip[]>([]);
   const [aiMessage, setAiMessage] = useState<string | null>(null);
   const [aiSummary, setAiSummary] = useState<string | null>(null);
@@ -100,7 +100,9 @@ export default function TripBrowser({
     [resetAi],
   );
 
-  const aiActive = aiStatus === "done";
+  // Only a successful search switches the grid to the AI subset; idle/loading/
+  // error all show the full trip list.
+  const aiActive = aiStatus === "success";
 
   // Free text never narrows the grid (empty query) — only the dropdown filters
   // do. The base set is the AI-selected trips once a search has run, otherwise
@@ -133,6 +135,7 @@ export default function TripBrowser({
     setAiStatus("loading");
     setSummaryDismissed(false);
     setAiMessage(null);
+    setAiSummary(null);
 
     const byId = new Map(trips.map((t) => [t.id, t]));
     try {
@@ -142,26 +145,21 @@ export default function TripBrowser({
         locale,
       );
       if (requestId !== requestIdRef.current) return; // superseded — discard
-      setAiSummary(summary || null);
       // Map ranked ids back to trips, preserving the model's best-first order.
       const mapped = suggestions
         .map((s) => byId.get(s.id))
         .filter((trip): trip is Trip => trip !== undefined);
+      setAiSummary(summary || null);
       setAiResults(mapped);
       setAiMessage(mapped.length === 0 ? t("aiNoMatch") : null);
+      setAiStatus("success");
     } catch {
       if (requestId !== requestIdRef.current) return; // superseded — discard
-      // Gemini unavailable/timed out — fall back to a plain text match over the
-      // query so the user still gets results.
-      const fallback = filterTrips(trips, prompt, {});
-      setAiResults(fallback);
-      setAiMessage(
-        fallback.length === 0
-          ? t("aiUnavailableNoMatch", { prompt })
-          : t("aiUnavailable"),
-      );
-    } finally {
-      if (requestId === requestIdRef.current) setAiStatus("done");
+      // Gemini unavailable/timed out — keep the full trip list (no text-match
+      // filtering) and surface the outage in the summary card.
+      setAiResults([]);
+      setAiMessage(t("aiUnavailable"));
+      setAiStatus("error");
     }
   }
 
@@ -210,9 +208,13 @@ export default function TripBrowser({
               />
             ) : null}
           </Button>
-          <Badge variant="outline" className="bg-background">
-            {resultLabel}
-          </Badge>
+          {/* Hidden while loading so it can't flash a stale count under the
+              spinner (the grid is hidden then too). */}
+          {aiStatus !== "loading" ? (
+            <Badge variant="outline" className="bg-background">
+              {resultLabel}
+            </Badge>
+          ) : null}
         </div>
 
         {/* Kept mounted (display toggled) so the toggle's aria-controls always
@@ -260,11 +262,12 @@ export default function TripBrowser({
         />
       ) : null}
 
-      {/* When an AI search itself returns nothing, the summary card already says
-          so — skip the grid's generic empty state to avoid double messaging. A
-          non-empty AI set narrowed to nothing by the dropdown filters still
-          shows "no matches" below. */}
-      {aiActive && aiResults.length === 0 ? null : (
+      {/* While loading, the grid is hidden so the spinner + suggestion lead; the
+          trips load in once the search resolves. When an AI search itself returns
+          nothing, the summary card already says so — skip the grid's generic
+          empty state to avoid double messaging. A non-empty AI set narrowed to
+          nothing by the dropdown filters still shows "no matches" below. */}
+      {aiStatus === "loading" || (aiActive && aiResults.length === 0) ? null : (
         <TripGrid
           trips={visible}
           groups={groups}
