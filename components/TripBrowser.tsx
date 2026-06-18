@@ -260,15 +260,21 @@ export default function TripBrowser({
         />
       ) : null}
 
-      <TripGrid
-        trips={visible}
-        groups={groups}
-        emptyMessage={
-          trips.length === 0
-            ? (emptyMessage ?? tEmpty("noTripsYet"))
-            : tEmpty("noMatches")
-        }
-      />
+      {/* When an AI search itself returns nothing, the summary card already says
+          so — skip the grid's generic empty state to avoid double messaging. A
+          non-empty AI set narrowed to nothing by the dropdown filters still
+          shows "no matches" below. */}
+      {aiActive && aiResults.length === 0 ? null : (
+        <TripGrid
+          trips={visible}
+          groups={groups}
+          emptyMessage={
+            trips.length === 0
+              ? (emptyMessage ?? tEmpty("noTripsYet"))
+              : tEmpty("noMatches")
+          }
+        />
+      )}
     </div>
   );
 }
