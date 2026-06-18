@@ -1,13 +1,14 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { SlidersHorizontalIcon } from "lucide-react";
 import SearchPill from "./SearchPill";
 import FilterControls from "./FilterControls";
 import TripCard from "./TripCard";
 import TripGrid from "./TripGrid";
 import LoadMoreIndicator from "./LoadMoreIndicator";
+import AiSummary from "./AiSummary";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -19,7 +20,7 @@ import {
   type TripFilters,
 } from "@/lib/search";
 import { useInfiniteScroll } from "@/lib/use-infinite-scroll";
-import type { SuggestCandidate, Trip } from "@/lib/types";
+import type { SuggestCandidate, SuggestLocale, Trip } from "@/lib/types";
 
 // Client-side discovery shell. Typing filters the loaded set instantly
 // (lib/search.ts); the inline "Ask AI" button submits the same text to
@@ -61,6 +62,7 @@ export default function TripBrowser({
   emptyMessage?: string;
 }) {
   const t = useTranslations("search");
+  const locale = useLocale() as SuggestLocale;
   const tEmpty = useTranslations("empty");
   const tTripType = useTranslations("tripType");
   const tVehicle = useTranslations("vehicle");
@@ -72,6 +74,8 @@ export default function TripBrowser({
   const [aiStatus, setAiStatus] = useState<AiStatus>("idle");
   const [aiResults, setAiResults] = useState<AiResult[]>([]);
   const [aiMessage, setAiMessage] = useState<string | null>(null);
+  const [aiSummary, setAiSummary] = useState<string | null>(null);
+  const [summaryDismissed, setSummaryDismissed] = useState(false);
 
   // Monotonic id so a slow AI response for an abandoned query can't overwrite
   // state after the user has typed again or cleared. Bumped on every reset.
@@ -82,6 +86,8 @@ export default function TripBrowser({
     setAiStatus("idle");
     setAiResults([]);
     setAiMessage(null);
+    setAiSummary(null);
+    setSummaryDismissed(false);
   }, []);
 
   const handleChange = useCallback(
@@ -129,15 +135,18 @@ export default function TripBrowser({
     requestIdRef.current += 1;
     const requestId = requestIdRef.current;
     setAiStatus("loading");
+    setSummaryDismissed(false);
     setAiMessage(null);
 
     const byId = new Map(trips.map((t) => [t.id, t]));
     try {
-      const { suggestions } = await api.suggestTrips(
+      const { summary, suggestions } = await api.suggestTrips(
         prompt,
         toCandidates(trips),
+        locale,
       );
       if (requestId !== requestIdRef.current) return; // superseded — discard
+      setAiSummary(summary || null);
       const mapped = suggestions
         .map((s): AiResult | undefined => {
           const trip = byId.get(s.id);
@@ -247,8 +256,14 @@ export default function TripBrowser({
         </div>
       </div>
 
-      {aiMessage ? (
-        <p className="text-sm text-muted-foreground">{aiMessage}</p>
+      {aiStatus === "loading" ||
+      ((aiSummary || aiMessage) && !summaryDismissed) ? (
+        <AiSummary
+          loading={aiStatus === "loading"}
+          summary={aiSummary}
+          message={aiMessage}
+          onDismiss={() => setSummaryDismissed(true)}
+        />
       ) : null}
 
       {aiActive ? (

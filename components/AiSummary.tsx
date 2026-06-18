@@ -24,7 +24,10 @@ export default function AiSummary({
 
   return (
     <div className="flex animate-float-up items-start gap-3 rounded-lg border border-border bg-card p-4 shadow-sm">
-      <SparklesIcon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+      <SparklesIcon
+        className="mt-0.5 size-4 shrink-0 text-primary"
+        aria-hidden
+      />
       <div className="flex-1">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {t("aiSummaryTitle")}
