@@ -33,6 +33,7 @@ export default function AiSummary({
           {t("aiSummaryTitle")}
         </p>
         <p
+          aria-live="polite"
           className={`mt-1 text-sm ${loading ? "animate-pulse text-muted-foreground" : "text-foreground"}`}
         >
           {body}

@@ -183,6 +183,11 @@ export default function TripBrowser({
   const resultLabel = t("results", { count: resultCount });
   const hasActiveFilters =
     Object.values(filters).some(Boolean) || Boolean(groupBy);
+  // Show the AI card while a request is in flight, then keep it for the summary
+  // or fallback message until the user dismisses it.
+  const showSummary =
+    aiStatus === "loading" ||
+    ((Boolean(aiSummary) || Boolean(aiMessage)) && !summaryDismissed);
 
   return (
     <div className="flex flex-col gap-6">
@@ -256,8 +261,7 @@ export default function TripBrowser({
         </div>
       </div>
 
-      {aiStatus === "loading" ||
-      ((aiSummary || aiMessage) && !summaryDismissed) ? (
+      {showSummary ? (
         <AiSummary
           loading={aiStatus === "loading"}
           summary={aiSummary}
