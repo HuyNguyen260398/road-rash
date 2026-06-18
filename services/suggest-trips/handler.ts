@@ -10,7 +10,7 @@ import {
   filterToCandidates,
   parsePositiveInt,
   parseSuggestRequest,
-  parseSuggestions,
+  parseSuggestResponse,
 } from "./select";
 import type { SuggestRequest, SuggestionResult, Trip } from "../../lib/types";
 
@@ -71,14 +71,19 @@ function buildPrompt(req: SuggestRequest): string {
     return `- id=${c.id} | ${c.name} | ${where} | ${c.tripType} | ${c.vehicle} | ${c.durationDays}d${desc}`;
   });
 
+  const language = req.locale === "vi" ? "Vietnamese" : "English";
+
   return [
     "You are a travel trip recommender. From the candidate trips below, pick the",
     "ones that best match the user's request and rank them best-first.",
     "",
     "Rules:",
-    '- Respond with ONLY a strict JSON array of objects: [{"id": "<id>", "reason": "<short why-it-fits>"}].',
-    "- Use ONLY ids from the candidate list. Never invent ids.",
-    `- Return at most ${MAX_SUGGESTIONS} items. If nothing fits, return [].`,
+    "- Respond with ONLY a strict JSON object of the form:",
+    '  {"summary": "<text>", "results": [{"id": "<id>", "reason": "<short why-it-fits>"}]}.',
+    `- Write "summary" as 1-2 sentences in ${language}, answering the request and`,
+    "  naming the best-matching trips. If nothing fits, say so briefly.",
+    '- In "results", use ONLY ids from the candidate list. Never invent ids.',
+    `- Return at most ${MAX_SUGGESTIONS} results. If nothing fits, use [].`,
     "- Keep each reason to one short sentence.",
     "",
     `User request: ${req.prompt}`,
@@ -178,14 +183,14 @@ async function suggest(
   }
 
   // Parse → keep only candidate-set ids → cap → re-validate against the table.
-  const parsed = parseSuggestions(text);
+  const { summary, suggestions: parsed } = parseSuggestResponse(text);
   const inSet = filterToCandidates(parsed, candidateIds).slice(
     0,
     MAX_SUGGESTIONS,
   );
   const suggestions = await validateAgainstTable(inSet);
 
-  return json(200, { suggestions });
+  return json(200, { summary, suggestions });
 }
 
 export async function handler(
