@@ -92,28 +92,24 @@ export function parseSuggestRequest(
   return { prompt, candidates, locale: parseLocale(b.locale) };
 }
 
-// Strict-ish JSON parse of the model's response. Gemini may wrap the array in a
-// ```json code fence even when asked for raw JSON, so strip that first. Anything
-// that isn't a JSON array of objects with a string `id` yields [] — the handler
-// then falls back rather than throwing.
-export function parseSuggestions(text: string): Suggestion[] {
-  const stripped = text
+// Gemini may wrap its JSON in a ```json code fence even when asked for raw JSON,
+// so strip that (and surrounding whitespace) before parsing.
+function stripCodeFence(text: string): string {
+  return text
     .trim()
     .replace(/^```(?:json)?\s*/i, "")
     .replace(/\s*```$/, "")
     .trim();
+}
 
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(stripped);
-  } catch {
-    return [];
-  }
-
-  if (!Array.isArray(parsed)) return [];
+// Build Suggestion[] from an already-parsed value. Anything that isn't an array
+// of objects with a string `id` yields [] — entries failing the id rule are
+// skipped. Centralizes the id/reason rules so both parsers share them.
+function parseEntries(value: unknown): Suggestion[] {
+  if (!Array.isArray(value)) return [];
 
   const result: Suggestion[] = [];
-  for (const entry of parsed) {
+  for (const entry of value) {
     if (typeof entry !== "object" || entry === null) continue;
     const { id, reason } = entry as Record<string, unknown>;
     if (typeof id !== "string" || id.length === 0) continue;
@@ -122,20 +118,32 @@ export function parseSuggestions(text: string): Suggestion[] {
   return result;
 }
 
+// Strict-ish JSON parse of the model's response. Strips a ```json code fence,
+// then expects a JSON array of objects with a string `id`; anything else yields
+// [] — the handler then falls back rather than throwing.
+export function parseSuggestions(text: string): Suggestion[] {
+  const stripped = stripCodeFence(text);
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(stripped);
+  } catch {
+    return [];
+  }
+
+  return parseEntries(parsed);
+}
+
 // Envelope parser for the model's response. The prompt asks for an object
 // { summary, results }, but we tolerate a bare array (older shape / model drift)
 // by treating it as results with no summary. Strips a ```json code fence first,
-// like parseSuggestions. Entry parsing is delegated to parseSuggestions so the
-// id/reason rules stay in one place.
+// then delegates entry parsing to parseEntries so the id/reason rules stay in
+// one place.
 export function parseSuggestResponse(text: string): {
   summary: string;
   suggestions: Suggestion[];
 } {
-  const stripped = text
-    .trim()
-    .replace(/^```(?:json)?\s*/i, "")
-    .replace(/\s*```$/, "")
-    .trim();
+  const stripped = stripCodeFence(text);
 
   let parsed: unknown;
   try {
@@ -145,10 +153,7 @@ export function parseSuggestResponse(text: string): {
   }
 
   if (Array.isArray(parsed)) {
-    return {
-      summary: "",
-      suggestions: parseSuggestions(JSON.stringify(parsed)),
-    };
+    return { summary: "", suggestions: parseEntries(parsed) };
   }
 
   if (typeof parsed !== "object" || parsed === null) {
@@ -160,9 +165,7 @@ export function parseSuggestResponse(text: string): {
     typeof obj.summary === "string"
       ? obj.summary.trim().slice(0, MAX_SUMMARY_CHARS)
       : "";
-  const suggestions = Array.isArray(obj.results)
-    ? parseSuggestions(JSON.stringify(obj.results))
-    : [];
+  const suggestions = parseEntries(obj.results);
 
   return { summary, suggestions };
 }

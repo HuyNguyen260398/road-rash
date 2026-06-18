@@ -110,7 +110,7 @@ async function callGemini(prompt: string, apiKey: string): Promise<string> {
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
-          // Force a JSON body so parseSuggestions has clean input.
+          // Force a JSON body so parseSuggestResponse has clean input.
           responseMimeType: "application/json",
           temperature: 0.2,
         },
