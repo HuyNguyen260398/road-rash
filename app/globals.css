@@ -194,6 +194,23 @@
   }
 }
 
+/* Section background images swap with the light/dark theme. The .dark class is
+   applied to <html> before first paint by ThemeProvider, so CSS picks the right
+   image with no JS and no hydration flash. */
+.hero-bg-image {
+  background-image: url("/hero-road.jpg");
+}
+.dark .hero-bg-image {
+  background-image: url("/hero-night.jpg");
+}
+
+.cta-bg-image {
+  background-image: url("/cta-sunset-road.jpg");
+}
+.dark .cta-bg-image {
+  background-image: url("/cta-night.jpg");
+}
+
 /* Newly loaded trip cards fade and float up into place (disabled for users who
    prefer reduced motion). */
 @keyframes float-up {
