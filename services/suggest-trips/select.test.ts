@@ -3,9 +3,11 @@ import {
   MAX_CANDIDATES,
   MAX_FIELD_CHARS,
   MAX_PROMPT_CHARS,
+  MAX_SUMMARY_CHARS,
   filterToCandidates,
   parsePositiveInt,
   parseSuggestRequest,
+  parseSuggestResponse,
   parseSuggestions,
 } from "./select";
 
@@ -196,6 +198,48 @@ describe("parseSuggestRequest", () => {
     }));
     const raw = JSON.stringify({ prompt: "x", candidates: many });
     expect(parseSuggestRequest(raw)?.candidates.length).toBe(MAX_CANDIDATES);
+  });
+});
+
+describe("parseSuggestResponse", () => {
+  it("parses an object with summary and results", () => {
+    const text = JSON.stringify({
+      summary: "Try the coastal loop.",
+      results: [{ id: "1", reason: "coastal" }],
+    });
+    expect(parseSuggestResponse(text)).toEqual({
+      summary: "Try the coastal loop.",
+      suggestions: [{ id: "1", reason: "coastal" }],
+    });
+  });
+
+  it("strips a code fence around the object", () => {
+    const text = '```json\n{"summary":"Hi","results":[{"id":"1"}]}\n```';
+    expect(parseSuggestResponse(text)).toEqual({
+      summary: "Hi",
+      suggestions: [{ id: "1" }],
+    });
+  });
+
+  it("tolerates a bare array as results with empty summary", () => {
+    const text = '[{"id":"1","reason":"x"}]';
+    expect(parseSuggestResponse(text)).toEqual({
+      summary: "",
+      suggestions: [{ id: "1", reason: "x" }],
+    });
+  });
+
+  it("caps the summary at MAX_SUMMARY_CHARS", () => {
+    const long = "a".repeat(MAX_SUMMARY_CHARS + 50);
+    const text = JSON.stringify({ summary: long, results: [] });
+    expect(parseSuggestResponse(text).summary).toHaveLength(MAX_SUMMARY_CHARS);
+  });
+
+  it("returns empty summary + suggestions for malformed input", () => {
+    expect(parseSuggestResponse("not json")).toEqual({
+      summary: "",
+      suggestions: [],
+    });
   });
 });
 

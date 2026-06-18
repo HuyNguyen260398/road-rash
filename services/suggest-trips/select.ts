@@ -19,6 +19,7 @@ export const MAX_CANDIDATES = 100;
 export const MAX_PROMPT_CHARS = 1000;
 export const MAX_FIELD_CHARS = 200;
 export const MAX_DESC_CHARS = 400;
+export const MAX_SUMMARY_CHARS = 600;
 
 // Safe numeric env parse: a non-numeric/zero/negative value falls back instead of
 // yielding NaN (which would make setTimeout fire at 0ms and abort every call).
@@ -119,6 +120,51 @@ export function parseSuggestions(text: string): Suggestion[] {
     result.push(typeof reason === "string" ? { id, reason } : { id });
   }
   return result;
+}
+
+// Envelope parser for the model's response. The prompt asks for an object
+// { summary, results }, but we tolerate a bare array (older shape / model drift)
+// by treating it as results with no summary. Strips a ```json code fence first,
+// like parseSuggestions. Entry parsing is delegated to parseSuggestions so the
+// id/reason rules stay in one place.
+export function parseSuggestResponse(text: string): {
+  summary: string;
+  suggestions: Suggestion[];
+} {
+  const stripped = text
+    .trim()
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/, "")
+    .trim();
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(stripped);
+  } catch {
+    return { summary: "", suggestions: [] };
+  }
+
+  if (Array.isArray(parsed)) {
+    return {
+      summary: "",
+      suggestions: parseSuggestions(JSON.stringify(parsed)),
+    };
+  }
+
+  if (typeof parsed !== "object" || parsed === null) {
+    return { summary: "", suggestions: [] };
+  }
+
+  const obj = parsed as Record<string, unknown>;
+  const summary =
+    typeof obj.summary === "string"
+      ? obj.summary.trim().slice(0, MAX_SUMMARY_CHARS)
+      : "";
+  const suggestions = Array.isArray(obj.results)
+    ? parseSuggestions(JSON.stringify(obj.results))
+    : [];
+
+  return { summary, suggestions };
 }
 
 // Drop any suggestion whose id is not in the candidate set (REQ-007), keeping the
