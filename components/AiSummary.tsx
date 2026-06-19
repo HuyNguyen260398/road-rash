@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Loader2Icon, SparklesIcon, XIcon } from "lucide-react";
+import { SparklesIcon, XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Dismissible "AI says" card shown between the search bar and the trip grid.
@@ -24,24 +24,19 @@ export default function AiSummary({
 
   return (
     <div className="flex animate-float-up items-start gap-3 rounded-lg border border-border bg-card p-4 shadow-sm">
-      {loading ? (
-        <Loader2Icon
-          className="mt-0.5 size-4 shrink-0 animate-spin text-primary"
-          aria-hidden
-        />
-      ) : (
-        <SparklesIcon
-          className="mt-0.5 size-4 shrink-0 text-primary"
-          aria-hidden
-        />
-      )}
+      {/* While thinking the sparkle "breathes" (pulse) in place of a spinner,
+          keeping the AI identity in the icon instead of a title. */}
+      <SparklesIcon
+        className={`mt-0.5 size-4 shrink-0 text-primary ${loading ? "animate-pulse" : ""}`}
+        aria-hidden
+      />
       <div className="flex-1">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {t("aiSummaryTitle")}
-        </p>
+        {/* No "AI suggestion" title in any state — the sparkle icon carries the
+            AI identity; the text stands on its own (summary, "Thinking…", or a
+            fallback message). */}
         <p
           aria-live="polite"
-          className={`mt-1 text-sm ${loading ? "animate-pulse text-muted-foreground" : "text-foreground"}`}
+          className={`text-sm ${loading ? "animate-pulse text-muted-foreground" : "text-foreground"}`}
         >
           {body}
         </p>

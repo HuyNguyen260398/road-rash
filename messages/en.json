@@ -118,7 +118,6 @@
     "loadMore": "Loading…",
     "aiNoMatch": "No trips matched that — try a different description, or browse below.",
     "aiUnavailable": "AI is unavailable right now — showing all trips instead.",
-    "aiSummaryTitle": "AI suggestion",
     "aiSummaryLoading": "Thinking…",
     "aiSummaryDismiss": "Dismiss AI suggestion",
     "duration": "{count, plural, one {# day} other {# days}}",

@@ -118,7 +118,6 @@
     "loadMore": "Đang tải…",
     "aiNoMatch": "Không có hành trình nào phù hợp — hãy thử mô tả khác, hoặc duyệt bên dưới.",
     "aiUnavailable": "AI hiện không khả dụng — đang hiển thị tất cả hành trình.",
-    "aiSummaryTitle": "Gợi ý từ AI",
     "aiSummaryLoading": "Đang suy nghĩ…",
     "aiSummaryDismiss": "Đóng gợi ý AI",
     "duration": "{count, plural, other {# ngày}}",
