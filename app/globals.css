@@ -199,16 +199,20 @@
    image with no JS and no hydration flash. */
 .hero-bg-image {
   background-image: url("/hero-road.jpg");
+  background-position: center 70%;
 }
 .dark .hero-bg-image {
   background-image: url("/hero-night.jpg");
+  background-position: center 65%;
 }
 
 .cta-bg-image {
   background-image: url("/cta-sunset-road.jpg");
+  background-position: center 70%;
 }
 .dark .cta-bg-image {
   background-image: url("/cta-night.jpg");
+  background-position: center 90%;
 }
 
 /* Newly loaded trip cards fade and float up into place (disabled for users who
