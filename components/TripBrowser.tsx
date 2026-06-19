@@ -90,15 +90,12 @@ export default function TripBrowser({
     setSummaryDismissed(false);
   }, []);
 
-  const handleChange = useCallback(
-    (value: string) => {
-      setQ(value);
-      // Editing the query abandons any in-flight/prior AI search and returns the
-      // grid to all trips until Ask AI is clicked again. Typing never filters.
-      resetAi();
-    },
-    [resetAi],
-  );
+  const handleChange = useCallback((value: string) => {
+    // Typing only edits the AI prompt; it never touches the grid. A prior AI
+    // result set stays on screen while the user composes a new query and is only
+    // replaced when Ask AI is submitted again (or cleared via the X button).
+    setQ(value);
+  }, []);
 
   // Only a successful search switches the grid to the AI subset; idle/loading/
   // error all show the full trip list.
