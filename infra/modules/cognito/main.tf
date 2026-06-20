@@ -134,8 +134,14 @@ resource "aws_cognito_user_pool_client" "this" {
 
 # --- Identity Pool + auth/unauth roles -------------------------------------
 resource "aws_cognito_identity_pool" "this" {
-  identity_pool_name               = "${local.name_prefix}-identities"
-  allow_unauthenticated_identities = true
+  identity_pool_name = "${local.name_prefix}-identities"
+
+  # The app authenticates API calls with the User Pool JWT and uploads via the
+  # presign Lambda — it never requests Identity Pool guest credentials. Disabling
+  # unauthenticated identities removes that unused anonymous-credential surface.
+  # (The policy-free unauthenticated role below is retained but no longer
+  # assumable.)
+  allow_unauthenticated_identities = false
 
   cognito_identity_providers {
     client_id               = aws_cognito_user_pool_client.this.id
