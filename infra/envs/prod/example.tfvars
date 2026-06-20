@@ -13,11 +13,12 @@ branch_name    = "production"
 #   export TF_VAR_github_access_token=ghp_xxx
 
 # OAuth redirect targets — KEEP the trailing slash (matches Amplify/Cognito).
-app_callback_urls = ["http://localhost:3000/", "https://roadrash.nghuy.link/"]
-app_logout_urls   = ["http://localhost:3000/", "https://roadrash.nghuy.link/"]
+# Prod is the live domain only — no localhost.
+app_callback_urls = ["https://roadrash.nghuy.link/"]
+app_logout_urls   = ["https://roadrash.nghuy.link/"]
 
 # CORS origins for API Gateway + S3 — NO trailing slash (scheme+host only).
-app_origins = ["http://localhost:3000", "https://roadrash.nghuy.link"]
+app_origins = ["https://roadrash.nghuy.link"]
 
 # Google OAuth credentials are SECRETS — do not put them here. Supply via:
 #   export TF_VAR_google_oauth_client_id=...
