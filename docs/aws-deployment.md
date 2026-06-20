@@ -164,7 +164,8 @@ Run the checks the phase files marked "deferred to apply":
 - [ ] Two-pass apply (IdP off → register → IdP on), then set the prod Gemini key:
       `aws ssm put-parameter --name /prod/road-rash/gemini_api_key ...`.
 - [ ] Gate: `terraform -chdir=infra/envs/prod plan` shows **no unexpected diffs** (TEST-009);
-      `apply`; deploy `main` via Amplify.
+      `apply`; deploy `main` to the **`production`** Amplify branch via the manual
+      `deploy-prod.yaml` workflow.
 
 ### Step 10 — End-to-end prod smoke test (TASK-050 / TEST-010)
 
@@ -229,6 +230,46 @@ is deliberately **not** wired into CI: the SSM module keeps the placeholder seed
 and the real key is set out-of-band (Step 6), so CI apply never overwrites it.
 (`AWS_DEPLOY_ROLE_ARN` and `AMPLIFY_APP_ID` for the Amplify-release job stay as
 before.)
+
+---
+
+## Production deploy (manual workflow)
+
+Prod is **never** auto-deployed. `.github/workflows/deploy-prod.yaml` ships it and
+runs **only** on manual `workflow_dispatch` (Actions tab → "Deploy to Production" →
+Run workflow → pick the `ref`). The button only appears once the workflow file is
+on the default branch (`main`).
+
+It runs the same gates as staging (`verify`, `terraform-verify`) then
+`deploy-backend` (`pnpm build:lambdas` → `terraform apply infra/envs/prod`) and
+`deploy` (Amplify RELEASE on the **`production`** branch). Both deploy jobs use the
+**`production`** GitHub Environment.
+
+**Bootstrap ordering (chicken-and-egg):** the CI terraform role
+(`github_terraform_role_arn`) and the prod Cognito Hosted UI domain don't exist
+until the **first** apply. So the first prod stand-up is **manual** (two-pass, see
+Step 9 above); the workflow takes over only after the `production` GitHub
+Environment is populated.
+
+### Required `production` GitHub Environment config
+
+Mirror the staging table with **prod** values:
+
+| Kind | Name | Value |
+| --- | --- | --- |
+| Variable | `AWS_TERRAFORM_ROLE_ARN` | `terraform -chdir=infra/envs/prod output -raw github_terraform_role_arn` |
+| Variable | `TF_STATE_BUCKET` | same bucket as staging — `terraform -chdir=infra/bootstrap output -raw state_bucket_name` |
+| Variable | `APP_ORIGINS` | `["https://roadrash.nghuy.link","http://localhost:3000"]` |
+| Variable | `APP_CALLBACK_URLS` | `["https://roadrash.nghuy.link/"]` |
+| Variable | `APP_LOGOUT_URLS` | `["https://roadrash.nghuy.link/"]` |
+| Variable | `AMPLIFY_APP_ID` | `terraform -chdir=infra/envs/prod output -raw amplify_app_id` |
+| Variable | `AWS_DEPLOY_ROLE_ARN` | `terraform -chdir=infra/envs/prod output -raw github_deploy_role_arn` |
+| Secret | `AMPLIFY_GITHUB_TOKEN` | GitHub token for the Amplify repo connection |
+| Secret | `GOOGLE_OAUTH_CLIENT_ID` | **reused** from staging (add a prod redirect URI in Google) |
+| Secret | `GOOGLE_OAUTH_CLIENT_SECRET` | **reused** from staging |
+
+Optionally add a **required-reviewer** protection rule on the `production`
+environment for defense-in-depth (the manual `workflow_dispatch` is already a gate).
 
 ---
 
