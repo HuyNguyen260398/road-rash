@@ -158,7 +158,7 @@ Run the checks the phase files marked "deferred to apply":
 ### Step 9 — Promote to prod (repeat Steps 2–8 for `infra/envs/prod`)
 
 - [ ] `cp infra/envs/prod/backend.hcl.example infra/envs/prod/backend.hcl`; `init -backend-config=backend.hcl`.
-- [ ] Configure prod tfvars: `branch_name = main`, prod `app_origins` /
+- [ ] Configure prod tfvars: `branch_name = production`, prod `app_origins` /
       `app_callback_urls` / `app_logout_urls` (the prod Amplify domain).
 - [ ] Register the **prod** Cognito domain redirect URI in the Google OAuth client.
 - [ ] Two-pass apply (IdP off → register → IdP on), then set the prod Gemini key:
