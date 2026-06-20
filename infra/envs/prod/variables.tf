@@ -37,7 +37,7 @@ variable "github_access_token" {
 variable "branch_name" {
   description = "Git branch this environment deploys from."
   type        = string
-  default     = "main"
+  default     = "production"
 }
 
 # GitHub Environment whose Actions OIDC subject may assume the Amplify deploy
@@ -131,4 +131,21 @@ variable "gemini_api_key" {
   type        = string
   default     = "REPLACE_ME"
   sensitive   = true
+}
+
+# --- Custom domain (hosting module) ---------------------------------------
+# Attaches the prod Amplify branch to a Route53-hosted subdomain. zone_name must
+# be an existing Route53 public hosted zone in this AWS account; hostname is the
+# full host to serve. Terraform writes the ACM validation + CNAME records.
+# Set to null to disable.
+variable "custom_domain" {
+  description = "Custom domain for the Amplify branch (zone_name = Route53 hosted zone, hostname = full host to serve). Null disables."
+  type = object({
+    zone_name = string
+    hostname  = string
+  })
+  default = {
+    zone_name = "nghuy.link"
+    hostname  = "roadrash.nghuy.link"
+  }
 }

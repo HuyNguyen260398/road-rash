@@ -203,6 +203,7 @@ module "hosting" {
   branch_name           = var.branch_name
   enable_auto_build     = var.enable_auto_build
   environment_variables = local.amplify_environment_variables
+  custom_domain         = var.custom_domain
 }
 
 # GitHub Actions OIDC deploy role — CI assumes this (no static keys) to trigger
@@ -216,4 +217,7 @@ module "github_oidc" {
   repository         = replace(var.repository_url, "https://github.com/", "")
   github_environment = var.github_deploy_environment
   amplify_app_arn    = module.hosting.app_arn
+  # CI assumes this to run `terraform apply` for prod via the manual deploy-prod
+  # workflow (build:lambdas → apply), gated behind the Terraform checks.
+  create_terraform_role = true
 }

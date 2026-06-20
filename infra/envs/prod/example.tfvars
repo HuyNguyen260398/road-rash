@@ -7,15 +7,17 @@ project     = "road-rash"
 environment = "prod"
 
 repository_url = "https://github.com/HuyNguyen260398/road-rash"
-branch_name    = "main"
+branch_name    = "production"
 
 # github_access_token is a SECRET — do not put it here. Supply at apply time via:
 #   export TF_VAR_github_access_token=ghp_xxx
 
-# OAuth redirect targets. Add the Amplify branch/custom-domain URL after the
-# first apply surfaces it (keep the trailing slash to match Amplify's config).
-app_callback_urls = ["http://localhost:3000/"]
-app_logout_urls   = ["http://localhost:3000/"]
+# OAuth redirect targets — KEEP the trailing slash (matches Amplify/Cognito).
+app_callback_urls = ["http://localhost:3000/", "https://roadrash.nghuy.link/"]
+app_logout_urls   = ["http://localhost:3000/", "https://roadrash.nghuy.link/"]
+
+# CORS origins for API Gateway + S3 — NO trailing slash (scheme+host only).
+app_origins = ["http://localhost:3000", "https://roadrash.nghuy.link"]
 
 # Google OAuth credentials are SECRETS — do not put them here. Supply via:
 #   export TF_VAR_google_oauth_client_id=...
@@ -29,3 +31,12 @@ app_logout_urls   = ["http://localhost:3000/"]
 # the real value out-of-band (it won't be reverted by later applies):
 #   aws ssm put-parameter --name /prod/road-rash/gemini_api_key \
 #     --type SecureString --value "$GEMINI_API_KEY" --overwrite
+
+# Custom domain — attaches the Amplify branch to a Route53-hosted subdomain.
+# Defaulted in variables.tf to zone nghuy.link / host roadrash.nghuy.link;
+# override or set to null here to change/disable. zone_name must be an existing
+# Route53 public hosted zone in this AWS account.
+# custom_domain = {
+#   zone_name = "nghuy.link"
+#   hostname  = "roadrash.nghuy.link"
+# }
