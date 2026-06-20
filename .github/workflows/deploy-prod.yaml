@@ -1,0 +1,243 @@
+name: Deploy to Production
+
+# Manual-only production deploy. Unlike staging (deploy.yaml, which auto-deploys
+# on push to main), prod ships ONLY when you run this workflow by hand
+# (workflow_dispatch). Same verify + terraform gates, then build:lambdas →
+# terraform apply the prod stack → Amplify RELEASE on the `production` branch.
+# NOTE: workflow_dispatch only appears in the Actions UI once this file is on the
+# default branch (main) — merge it before expecting the "Run workflow" button.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref (branch, tag, or SHA) to deploy to production"
+        required: true
+        default: main
+
+# Never cancel an in-flight prod deploy; serialize globally.
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: ap-southeast-1
+  # Amplify branch registered on the prod app that we RELEASE. The git branch of
+  # the same name is force-advanced to the deployed ref below.
+  AMPLIFY_BRANCH: production
+  TF_VERSION: "1.10.5"
+  # All three Terraform roots (mirrors tf-ci.yaml). modules/* are checked
+  # transitively. The deploy apply step only ever targets infra/envs/prod.
+  TF_ROOTS: "infra/bootstrap infra/envs/staging infra/envs/prod"
+
+jobs:
+  verify:
+    name: Lint, format, build, test
+    runs-on: ubuntu-latest
+    steps:
+      # Check out the dispatched ref (branch/tag/SHA), not the workflow file's ref.
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref }}
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
+      - name: Format check
+        run: pnpm format:check
+      - name: Build
+        run: pnpm build
+      - name: Test
+        run: pnpm run --if-present test
+
+  terraform-verify:
+    name: Terraform fmt, validate & lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+      - name: Terraform fmt (check)
+        run: terraform -chdir=infra fmt -check -recursive -diff
+      - name: Terraform init & validate (per root)
+        run: |
+          set -euo pipefail
+          for root in $TF_ROOTS; do
+            echo "::group::$root"
+            terraform -chdir="$root" init -backend=false -input=false
+            terraform -chdir="$root" validate -no-color
+            echo "::endgroup::"
+          done
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+      - name: TFLint (per root)
+        run: |
+          set -euo pipefail
+          tflint --init
+          for root in $TF_ROOTS; do
+            echo "::group::$root"
+            tflint --chdir="$root" --no-color -f compact --minimum-failure-severity=error
+            echo "::endgroup::"
+          done
+
+  deploy-backend:
+    name: Build Lambdas & terraform apply (prod)
+    needs: [verify, terraform-verify]
+    runs-on: ubuntu-latest
+    # The `production` GitHub Environment holds the deploy config (vars + secrets)
+    # and any required-reviewer protection rule.
+    environment: production
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref }}
+      # Stricter than staging: also gate AMPLIFY_APP_ID / AWS_DEPLOY_ROLE_ARN here
+      # (used by the release job) so a missing one fails fast, not mid-deploy.
+      - name: Preflight — required prod config present
+        env:
+          TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+          AWS_TERRAFORM_ROLE_ARN: ${{ vars.AWS_TERRAFORM_ROLE_ARN }}
+          AMPLIFY_APP_ID: ${{ vars.AMPLIFY_APP_ID }}
+          AWS_DEPLOY_ROLE_ARN: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          APP_ORIGINS: ${{ vars.APP_ORIGINS }}
+          APP_CALLBACK_URLS: ${{ vars.APP_CALLBACK_URLS }}
+          APP_LOGOUT_URLS: ${{ vars.APP_LOGOUT_URLS }}
+          AMPLIFY_GITHUB_TOKEN: ${{ secrets.AMPLIFY_GITHUB_TOKEN }}
+          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          missing=()
+          for v in TF_STATE_BUCKET AWS_TERRAFORM_ROLE_ARN AMPLIFY_APP_ID AWS_DEPLOY_ROLE_ARN \
+                   APP_ORIGINS APP_CALLBACK_URLS APP_LOGOUT_URLS \
+                   AMPLIFY_GITHUB_TOKEN GOOGLE_OAUTH_CLIENT_ID GOOGLE_OAUTH_CLIENT_SECRET; do
+            if [ -z "${!v:-}" ]; then missing+=("$v"); fi
+          done
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing required prod deploy config: ${missing[*]}"
+            echo "Set these on the 'production' GitHub Environment (variables/secrets) — see docs/aws-deployment.md."
+            exit 1
+          fi
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build Lambda bundles
+        run: pnpm build:lambdas
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ vars.AWS_TERRAFORM_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Terraform init (prod)
+        env:
+          TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+        run: |
+          terraform -chdir=infra/envs/prod init -input=false \
+            -backend-config="bucket=${TF_STATE_BUCKET}" \
+            -backend-config="region=${AWS_REGION}"
+      # Plan first and save it — the gate before apply: a failed plan stops the job,
+      # and apply consumes this exact plan (no drift). gemini_api_key is intentionally
+      # NOT passed — the ssm module seeds a placeholder and the real key is set
+      # out-of-band (passing it would persist it in state).
+      - name: Terraform plan (prod)
+        env:
+          APP_ORIGINS: ${{ vars.APP_ORIGINS }}
+          APP_CALLBACK_URLS: ${{ vars.APP_CALLBACK_URLS }}
+          APP_LOGOUT_URLS: ${{ vars.APP_LOGOUT_URLS }}
+          AMPLIFY_GITHUB_TOKEN: ${{ secrets.AMPLIFY_GITHUB_TOKEN }}
+          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+          terraform -chdir=infra/envs/prod plan -out=prod.tfplan -input=false \
+            -var="app_origins=${APP_ORIGINS}" \
+            -var="app_callback_urls=${APP_CALLBACK_URLS}" \
+            -var="app_logout_urls=${APP_LOGOUT_URLS}" \
+            -var="github_access_token=${AMPLIFY_GITHUB_TOKEN}" \
+            -var="google_oauth_client_id=${GOOGLE_OAUTH_CLIENT_ID}" \
+            -var="google_oauth_client_secret=${GOOGLE_OAUTH_CLIENT_SECRET}"
+      - name: Terraform apply (prod)
+        run: |
+          set -euo pipefail
+          terraform -chdir=infra/envs/prod apply -input=false prod.tfplan
+
+  deploy:
+    name: Trigger Amplify Release
+    needs: deploy-backend
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref }}
+      # Make the production Amplify branch serve the deployed ref's code. Force is
+      # safe here: the production branch is a deploy pointer only ever advanced by
+      # this job (it may point at a tag/SHA via the ref input).
+      - name: Sync production deploy branch to the deployed ref
+        run: git push --force origin "HEAD:refs/heads/${{ env.AMPLIFY_BRANCH }}"
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Start Amplify release and wait
+        env:
+          APP_ID: ${{ vars.AMPLIFY_APP_ID }}
+          BRANCH: ${{ env.AMPLIFY_BRANCH }}
+        run: |
+          set -euo pipefail
+          JOB_ID=$(aws amplify start-job \
+            --app-id "$APP_ID" --branch-name "$BRANCH" \
+            --job-type RELEASE \
+            --query 'jobSummary.jobId' --output text)
+          echo "Started Amplify job $JOB_ID for branch $BRANCH"
+          while true; do
+            STATUS=$(aws amplify get-job \
+              --app-id "$APP_ID" --branch-name "$BRANCH" \
+              --job-id "$JOB_ID" \
+              --query 'job.summary.status' --output text)
+            echo "status=$STATUS"
+            case "$STATUS" in
+              SUCCEED)          echo "✅ deploy succeeded"; exit 0 ;;
+              FAILED|CANCELLED) echo "❌ deploy $STATUS"; exit 1 ;;
+              *)                sleep 15 ;;
+            esac
+          done
