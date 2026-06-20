@@ -60,12 +60,13 @@ variable "enable_auto_build" {
 
 # --- App origins (s3 CORS + API Gateway CORS) -----------------------------
 # Browser origins allowed to call the API and PUT/GET thumbnails. No trailing
-# slash (CORS origins are scheme+host only). Add the Amplify URL after apply.
+# slash (CORS origins are scheme+host only). Prod is the live domain only — no
+# localhost (CI overrides via the production GitHub Environment APP_ORIGINS var).
 
 variable "app_origins" {
   description = "App origins (no trailing slash) allowed by API and S3 CORS."
   type        = list(string)
-  default     = ["http://localhost:3000"]
+  default     = ["https://roadrash.nghuy.link"]
 }
 
 # --- Thumbnails (presign Lambda + iam scope) ------------------------------
@@ -85,20 +86,20 @@ variable "max_thumbnail_bytes" {
 }
 
 # --- Cognito (cognito module) ---------------------------------------------
-# OAuth redirect targets for the app. Defaults cover local dev; add the Amplify
-# branch/custom-domain URL once the first apply surfaces it. Not derived from
-# the hosting module to avoid a hosting<->cognito dependency cycle.
+# OAuth redirect targets for the app. Prod defaults to the live domain only — no
+# localhost (CI overrides via the production GitHub Environment vars). Not derived
+# from the hosting module to avoid a hosting<->cognito dependency cycle.
 
 variable "app_callback_urls" {
   description = "Allowed OAuth sign-in redirect URLs for the app."
   type        = list(string)
-  default     = ["http://localhost:3000/"]
+  default     = ["https://roadrash.nghuy.link/"]
 }
 
 variable "app_logout_urls" {
   description = "Allowed OAuth sign-out redirect URLs for the app."
   type        = list(string)
-  default     = ["http://localhost:3000/"]
+  default     = ["https://roadrash.nghuy.link/"]
 }
 
 # Google OAuth credentials (TASK-008/009). Secret — supply via

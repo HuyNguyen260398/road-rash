@@ -259,7 +259,7 @@ Mirror the staging table with **prod** values:
 | --- | --- | --- |
 | Variable | `AWS_TERRAFORM_ROLE_ARN` | `terraform -chdir=infra/envs/prod output -raw github_terraform_role_arn` |
 | Variable | `TF_STATE_BUCKET` | same bucket as staging — `terraform -chdir=infra/bootstrap output -raw state_bucket_name` |
-| Variable | `APP_ORIGINS` | `["https://roadrash.nghuy.link","http://localhost:3000"]` |
+| Variable | `APP_ORIGINS` | `["https://roadrash.nghuy.link"]` (live domain only — no localhost) |
 | Variable | `APP_CALLBACK_URLS` | `["https://roadrash.nghuy.link/"]` |
 | Variable | `APP_LOGOUT_URLS` | `["https://roadrash.nghuy.link/"]` |
 | Variable | `AMPLIFY_APP_ID` | `terraform -chdir=infra/envs/prod output -raw amplify_app_id` |
