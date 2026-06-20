@@ -18,7 +18,7 @@ rename requires.
 | Data isolation | Separate `road-rash-prod-*` DynamoDB tables + S3 thumbnails bucket, **same AWS account** as staging. Already structural (resource names derive from `project`+`environment`); a prod apply creates them automatically. |
 | Deploy mechanism | Prod is wired into CI as a **separate workflow file**, triggered **manually only** (`workflow_dispatch`). No push automation. |
 | Prod deploy branch | `production` (Amplify branch + git deploy pointer). |
-| Staging deploy branch | Renamed `staging` → `internal-release`. |
+| Staging deploy branch | **Unchanged** (`staging`) for now — rename to `internal-release` deferred to later work. |
 | Secrets | **Reuse** staging's Google OAuth client (add a prod redirect URI) and the **same Gemini key value** (written to prod's own SSM parameter). |
 | Domain | `roadrash.nghuy.link` (Route53 zone `nghuy.link` already exists). |
 | Prod env protection | `workflow_dispatch` is the gate. A required-reviewer rule on the `production` GitHub Environment is **optional/recommended** defense-in-depth. |
@@ -76,18 +76,7 @@ domain.
 - `AMPLIFY_BRANCH: production`; `gemini_api_key` intentionally NOT passed (placeholder
   seed + out-of-band SSM), matching staging.
 
-### C. Staging branch rename `staging` → `internal-release` ⚠️ live change
-
-- `infra/envs/staging/terraform.tfvars`: `branch_name = "internal-release"`; update the
-  `*.amplifyapp.com` entries in `app_callback_urls` / `app_origins` to the new
-  `internal-release.<appid>.amplifyapp.com` host (custom-domain entries unchanged).
-- `.github/workflows/deploy.yaml`: `AMPLIFY_BRANCH: staging` → `internal-release`.
-- **Impact:** `branch_name` is replace-only, so Terraform **destroys the `staging` Amplify
-  branch and creates `internal-release`**. The `roadrash.stg.nghuy.link` custom domain
-  follows automatically (mapped via the branch), but there is a brief redeploy and the
-  Amplify default URL changes. The orphaned git `staging` branch can be deleted afterward.
-
-### D. Manual one-time prerequisites (deployment runbook)
+### C. Manual one-time prerequisites (deployment runbook)
 
 These cannot be (or should not be) automated and happen around the **first** prod apply:
 
@@ -120,12 +109,14 @@ These cannot be (or should not be) automated and happen around the **first** pro
 End-to-end smoke test (TASK-050 / TEST-010) on `https://roadrash.nghuy.link`:
 sign in → create a trip (thumbnail + valid My Maps URL) → appears on Home → search/filter
 finds it → favorite it (count updates, shows in Saved) → AI suggestion returns it → detail
-modal embeds the map → "Open in Google Maps" works on mobile. Confirm staging still serves
-at `roadrash.stg.nghuy.link` after the branch rename.
+modal embeds the map → "Open in Google Maps" works on mobile. Staging is untouched by this
+work and should continue serving at `roadrash.stg.nghuy.link`.
 
 ## Out of scope
 
 - Separate AWS account or separate Terraform state bucket for prod (same account, shared
   state bucket, separate state key).
 - Push-triggered prod automation (prod is manual `workflow_dispatch` only).
+- Renaming the staging deploy branch `staging` → `internal-release` (deferred to later
+  work; staging is left untouched here).
 - Any application/feature code changes — this is infra + CI only.
