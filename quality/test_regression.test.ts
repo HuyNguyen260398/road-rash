@@ -33,17 +33,12 @@ const eventWithClaims = (claims: Record<string, unknown>) =>
 
 describe("BUG-001 (REQ-001 / C1): email must never become a public authorName", () => {
   // Spec basis: REQUIREMENTS.md REQ-001 — authorName on public reads must not be email.
-  test.fails(
-    "getDisplayName must NOT return the email when no name claim is present",
-    () => {
-      const label = getDisplayName(
-        eventWithClaims({ email: "secret@user.com" }),
-      );
-      // Current code returns the email (fails); fix returns cognito:username/sub/"Unknown".
-      expect(label).not.toBe("secret@user.com");
-      expect(label).not.toMatch(/@/);
-    },
-  );
+  // FIXED: getDisplayName no longer falls back to email (services/shared/auth.ts).
+  it("getDisplayName must NOT return the email when no name claim is present", () => {
+    const label = getDisplayName(eventWithClaims({ email: "secret@user.com" }));
+    expect(label).not.toBe("secret@user.com");
+    expect(label).not.toMatch(/@/);
+  });
 
   it("still returns the name when a name claim IS present (no regression)", () => {
     expect(

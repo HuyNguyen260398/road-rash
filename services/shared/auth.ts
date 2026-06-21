@@ -25,12 +25,15 @@ export function getUserSub(
   return typeof sub === "string" ? sub : undefined;
 }
 
-/** Best-effort display name for the author label (name, else email, else sub). */
+/** Best-effort PUBLIC author label (name, else cognito:username, else sub) — never email. */
 export function getDisplayName(
   event: EventWithClaims | APIGatewayProxyEventV2WithJWTAuthorizer,
 ): string {
   const c = claims(event) ?? {};
-  for (const key of ["name", "email", "cognito:username", "sub"]) {
+  // Never fall back to `email`: authorName is rendered on the public share page
+  // (components/TripDetail.tsx), so an email would be exposed to anonymous
+  // visitors (REQ-001 / BUG-001).
+  for (const key of ["name", "cognito:username", "sub"]) {
     const value = c[key];
     if (typeof value === "string" && value.length > 0) return value;
   }
