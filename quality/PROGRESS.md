@@ -54,7 +54,8 @@ with the triage (zero net-new). Full suite: 151 passing, 0 xfail.
 
 ## Fixes applied (2026-06-21)
 All three bugs fixed via FAIL→PASS TDD, one focused commit each. Full suite: 151 passing, 0 xfail.
-Follow-up (non-code): consider scrubbing existing `authorName` rows that hold an email (BUG-001).
+Follow-up (BUG-001 data scrub): CLOSED — staging trips are disposable test data (owner-confirmed),
+no real user email to migrate.
 | C4 | Phase 1 | services/trips/handler.ts:90 | case-sensitive search truncation | Low | documented boundary (no fix) |
 | C5 | Phase 1 | services/trips/handler.ts:150 | unpaginated Scan at scale | Low | documented boundary (no fix) |
 

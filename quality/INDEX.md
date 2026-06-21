@@ -41,6 +41,7 @@ TDD-verified. Spec audit (Council of Three) confirmed the fixes and found zero n
 Gate verdict: **pass**.
 
 ## Carried follow-ups (non-code)
-1. BUG-001 — scrub legacy `authorName` rows that hold an email (DynamoDB data migration).
+1. BUG-001 — data scrub **CLOSED / not needed**: existing staging trips are disposable test data
+   (owner-confirmed 2026-06-21); no real user email to migrate.
 2. BUG-002 — legacy non-URL-safe `mid` caveat (charset tightening; shows fallback link).
 3. C4/C5 — case-sensitive search + unpaginated Scan are accepted launch-scale boundaries.

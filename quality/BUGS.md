@@ -20,8 +20,9 @@ no findings.
 | BUG-003 | Low | REQ-003 | services/trips/validate.ts:50 | **FIXED** (commit ac64572) — regression guard green |
 
 > All three fixes applied via FAIL→PASS TDD; the regression tests in
-> `quality/test_regression.test.ts` now pass against the patched source. Note: BUG-001 may warrant a
-> one-off scrub of existing `authorName` rows that already hold an email (data migration, not code).
+> `quality/test_regression.test.ts` now pass against the patched source. BUG-001 data scrub:
+> **not needed** — the existing trips in staging are disposable test data (confirmed by owner
+> 2026-06-21), so no real user email is present to migrate. The code fix prevents future exposure.
 
 ---
 
