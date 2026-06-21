@@ -15,8 +15,15 @@ Mode: A (skill-direct walkthrough), pragmatic engagement
       tests verified, fix patches generated + validated (apply clean; FAIL→PASS proven), writeups + BUGS.md
 - [x] Phase 4: Spec audit + triage — Council of Three (3/3) against the patched tree; all REQs
       SATISFIED, fixes verified, **zero net-new bugs**; 2 non-code follow-ups carried
-- [ ] Phase 5: Reconciliation + closure
+- [x] Phase 5: Reconciliation + closure — TDD FAIL→PASS logs for all 3 bugs, challenge gate,
+      triage↔BUGS sync, authoritative PASS verdict
 - [ ] Phase 6: Verification
+
+## Terminal Gate Verification
+BUG tracker has 3 entries. 3 have regression tests (all passing guards), 0 exemptions, 0 unresolved.
+Code review confirmed 3 bugs. Spec audit confirmed 0 net-new code bugs. Expected total: 3 + 0 = 3. ✓
+All 3 are TDD verified (FAIL→PASS) and fixed (c36ea99, 78add4b, ac64572). BUGS.md present and synced
+with the triage (zero net-new). Full suite: 151 passing, 0 xfail.
 
 ## Artifact inventory
 | Artifact | Status | Path |

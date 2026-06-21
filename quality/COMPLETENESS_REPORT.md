@@ -32,4 +32,19 @@ untested.
 No `reference_docs/` (citable); rich `docs/` tree used as Tier-4 intent. All requirements Tier 3 —
 this run functions partly as a Spec-Gap analysis, which is a valid output state, not a failure.
 
-_No verdict in the baseline — see Phase 5 for closure._
+## Verdict (Phase 5 — authoritative closure)
+
+**PASS — closed.** All 10 requirements traced; 9 specific requirements verified against code; 3
+intent-gap requirements (REQ-001/002/003) were confirmed as bugs in Phase 3, fixed via FAIL→PASS TDD,
+and re-verified SATISFIED by the Phase 4 Council of Three. Net-new bugs from the spec audit: 0.
+
+- **Confirmed bugs:** 3 (BUG-001/002/003) — all **TDD verified (FAIL→PASS)**, all fixed
+  (commits c36ea99, 78add4b, ac64572), all with passing regression guards.
+- **Open bugs:** 0.
+- **Tests:** 23 functional + 3 regression guards passing; full suite 151 passing, 0 xfail.
+- **Challenge gate:** BUG-001 (security/privacy) CONFIRMED; none downgraded/rejected.
+- **Carried follow-ups (non-code):** BUG-001 data scrub of legacy `authorName` rows; BUG-002 legacy
+  `mid` caveat; C4/C5 launch-scale design boundaries (ASSUMPTION-001).
+
+Spec-Gap note: 0 Tier-1/2 requirements (no citable formal spec). All requirements Tier 3 — this is a
+valid degraded output state, reported as a metric, not a failure.
