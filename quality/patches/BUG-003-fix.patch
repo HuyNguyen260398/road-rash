@@ -1,0 +1,19 @@
+diff --git a/services/trips/validate.ts b/services/trips/validate.ts
+index 848a1b2..f6ca883 100644
+--- a/services/trips/validate.ts
++++ b/services/trips/validate.ts
+@@ -91,6 +91,14 @@ export function validateTripInput(body: unknown): ValidationResult {
+     };
+   }
+ 
++  // A thumbnailKey must reference the server-issued thumbnails namespace — a
++  // bypassed client must not point a trip at an arbitrary bucket key (REQ-003 /
++  // BUG-003). The upload route scopes keys to thumbnails/<sub>/...; the empty
++  // case is allowed because thumbnailKey is optional.
++  if (thumbnailKey && !thumbnailKey.startsWith("thumbnails/")) {
++    return { ok: false, message: "thumbnailKey is invalid" };
++  }
++
+   // Server-side re-validation of the My Maps URL — defense in depth behind the
+   // client-side guard (SEC-003); the string ends up as an iframe src.
+   if (!validateMyMapsUrl(myMapsUrl)) {

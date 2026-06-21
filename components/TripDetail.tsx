@@ -228,6 +228,11 @@ export default function TripDetail({ trip }: { trip: Trip }) {
               title={t("mapTitle", { name: trip.name })}
               className="h-full w-full"
               loading="lazy"
+              // Defense in depth: the src is already host-validated to Google
+              // (SEC-003), but sandbox confines the embed to what the My Maps
+              // viewer needs (scripts, its own origin, pop-out to Maps) and
+              // denies top-level navigation, forms, and downloads.
+              sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
               referrerPolicy="no-referrer-when-downgrade"
               onLoad={() => {
                 loadedRef.current = true;
