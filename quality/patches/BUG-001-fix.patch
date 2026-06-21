@@ -1,0 +1,16 @@
+diff --git a/services/shared/auth.ts b/services/shared/auth.ts
+index 3b2a1fe..037ee71 100644
+--- a/services/shared/auth.ts
++++ b/services/shared/auth.ts
+@@ -30,7 +30,10 @@ export function getDisplayName(
+   event: EventWithClaims | APIGatewayProxyEventV2WithJWTAuthorizer,
+ ): string {
+   const c = claims(event) ?? {};
+-  for (const key of ["name", "email", "cognito:username", "sub"]) {
++  // Never fall back to `email`: authorName is rendered on the public share page
++  // (components/TripDetail.tsx), so an email would be exposed to anonymous
++  // visitors (REQ-001 / BUG-001).
++  for (const key of ["name", "cognito:username", "sub"]) {
+     const value = c[key];
+     if (typeof value === "string" && value.length > 0) return value;
+   }
