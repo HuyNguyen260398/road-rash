@@ -13,7 +13,8 @@ Mode: A (skill-direct walkthrough), pragmatic engagement
       COMPLETENESS_REPORT, test_functional (23 passing), RUN_CODE_REVIEW/INTEGRATION/SPEC_AUDIT/TDD
 - [x] Phase 3: Code review + regression tests — 3 bugs confirmed (BUG-001/002/003), red regression
       tests verified, fix patches generated + validated (apply clean; FAIL→PASS proven), writeups + BUGS.md
-- [ ] Phase 4: Spec audit + triage
+- [x] Phase 4: Spec audit + triage — Council of Three (3/3) against the patched tree; all REQs
+      SATISFIED, fixes verified, **zero net-new bugs**; 2 non-code follow-ups carried
 - [ ] Phase 5: Reconciliation + closure
 - [ ] Phase 6: Verification
 
