@@ -49,22 +49,26 @@ describe("BUG-001 (REQ-001 / C1): email must never become a public authorName", 
 
 describe("BUG-002 (REQ-002 / C2): the embed mid must be structurally safe", () => {
   // Spec basis: REQUIREMENTS.md REQ-002 — embed src canonical with an encoded mid.
-  test.fails(
-    "validateMyMapsUrl must reject a mid with a reserved/space char",
-    () => {
-      // searchParams decodes %20 → "a b"; current code accepts any non-empty mid.
-      const url = "https://www.google.com/maps/d/viewer?mid=a%20b";
-      expect(validateMyMapsUrl(url)).toBe(false);
-    },
-  );
+  // FIXED: validateMyMapsUrl now charset-checks the mid; toMyMapsEmbedUrl encodes it.
+  it("validateMyMapsUrl rejects a mid with a reserved/space char", () => {
+    // searchParams decodes %20 → "a b"; the charset check now rejects it.
+    expect(
+      validateMyMapsUrl("https://www.google.com/maps/d/viewer?mid=a%20b"),
+    ).toBe(false);
+    expect(
+      validateMyMapsUrl("https://www.google.com/maps/d/edit?mid=a%26b"),
+    ).toBe(false);
+  });
 
-  test.fails("toMyMapsEmbedUrl must not emit a raw '&' from the mid", () => {
-    // A mid containing '&' would inject an extra query param into the embed URL.
-    const url = "https://www.google.com/maps/d/edit?mid=a%26b"; // decoded: "a&b"
-    // If the validator is tightened this throws (also acceptable); otherwise the
-    // output must encode the '&' rather than emit it raw.
-    const out = toMyMapsEmbedUrl(url);
-    expect(out).not.toContain("mid=a&b");
+  it("toMyMapsEmbedUrl never emits a structure-altering mid (throws on hostile input)", () => {
+    // The tightened validator makes the builder throw rather than emit a raw '&'.
+    expect(() =>
+      toMyMapsEmbedUrl("https://www.google.com/maps/d/edit?mid=a%26b"),
+    ).toThrow();
+    // A genuine URL-safe mid round-trips unchanged.
+    expect(
+      toMyMapsEmbedUrl("https://www.google.com/maps/d/edit?mid=1AbC_dEf-2"),
+    ).toBe("https://www.google.com/maps/d/embed?mid=1AbC_dEf-2");
   });
 });
 

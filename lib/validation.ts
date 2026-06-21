@@ -31,7 +31,9 @@ export function validateMyMapsUrl(url: string): boolean {
   if (!parsed.pathname.startsWith(MY_MAPS_PATH_PREFIX)) return false;
 
   const mid = parsed.searchParams.get("mid");
-  return mid !== null && mid.length > 0;
+  // Genuine My Maps ids are URL-safe (alphanumerics, `-`, `_`). Constraining the
+  // charset keeps a corrupted/hostile `mid` out of the embed src (REQ-002 / BUG-002).
+  return mid !== null && /^[A-Za-z0-9_-]+$/.test(mid);
 }
 
 /**
@@ -45,6 +47,7 @@ export function toMyMapsEmbedUrl(url: string): string {
   }
   const mid = new URL(url).searchParams.get("mid");
   // Normalize host + path so the rendered iframe is always the canonical embed
-  // endpoint regardless of which share/view variant the user pasted.
-  return `https://www.google.com/maps/d/embed?mid=${mid}`;
+  // endpoint regardless of which share/view variant the user pasted. Encode the
+  // mid so it can never alter the URL structure (REQ-002 / BUG-002).
+  return `https://www.google.com/maps/d/embed?mid=${encodeURIComponent(mid!)}`;
 }
