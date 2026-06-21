@@ -36,9 +36,13 @@ Mode: A (skill-direct walkthrough), pragmatic engagement
 ## Cumulative BUG tracker
 | # | Source | File:Line | Description | Severity | Closure Status |
 |---|--------|-----------|-------------|----------|----------------|
-| BUG-001 | Code review | services/shared/auth.ts:33 | email used as public authorName | Medium | confirmed open (xfail); fix patch ready, FAIL→PASS proven |
-| BUG-002 | Code review | lib/validation.ts:34,49 | mid not URL-encoded / charset-checked | Med-Low | confirmed open (xfail); fix patch ready, FAIL→PASS proven |
-| BUG-003 | Code review | services/trips/validate.ts:50 | thumbnailKey not namespace-validated | Low | confirmed open (xfail); fix patch ready, FAIL→PASS proven |
+| BUG-001 | Code review | services/shared/auth.ts:33 | email used as public authorName | Medium | FIXED (c36ea99) — guard green |
+| BUG-002 | Code review | lib/validation.ts:34,49 | mid not URL-encoded / charset-checked | Med-Low | FIXED (78add4b) — guard green |
+| BUG-003 | Code review | services/trips/validate.ts:50 | thumbnailKey not namespace-validated | Low | FIXED (ac64572) — guard green |
+
+## Fixes applied (2026-06-21)
+All three bugs fixed via FAIL→PASS TDD, one focused commit each. Full suite: 151 passing, 0 xfail.
+Follow-up (non-code): consider scrubbing existing `authorName` rows that hold an email (BUG-001).
 | C4 | Phase 1 | services/trips/handler.ts:90 | case-sensitive search truncation | Low | documented boundary (no fix) |
 | C5 | Phase 1 | services/trips/handler.ts:150 | unpaginated Scan at scale | Low | documented boundary (no fix) |
 

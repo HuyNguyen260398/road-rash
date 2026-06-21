@@ -15,9 +15,13 @@ no findings.
 
 | Bug | Severity | REQ | File:Line | Status |
 |-----|----------|-----|-----------|--------|
-| BUG-001 | Medium (privacy) | REQ-001 | services/shared/auth.ts:33 | confirmed open (regression red); fix patch ready |
-| BUG-002 | Medium-Low | REQ-002 | lib/validation.ts:34,49 | confirmed open (regression red); fix patch ready |
-| BUG-003 | Low | REQ-003 | services/trips/validate.ts:50 | confirmed open (regression red); fix patch ready |
+| BUG-001 | Medium (privacy) | REQ-001 | services/shared/auth.ts:33 | **FIXED** (commit c36ea99) — regression guard green |
+| BUG-002 | Medium-Low | REQ-002 | lib/validation.ts:34,49 | **FIXED** (commit 78add4b) — regression guard green |
+| BUG-003 | Low | REQ-003 | services/trips/validate.ts:50 | **FIXED** (commit ac64572) — regression guard green |
+
+> All three fixes applied via FAIL→PASS TDD; the regression tests in
+> `quality/test_regression.test.ts` now pass against the patched source. Note: BUG-001 may warrant a
+> one-off scrub of existing `authorName` rows that already hold an email (data migration, not code).
 
 ---
 
