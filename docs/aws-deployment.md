@@ -1,9 +1,10 @@
 # road-rash — AWS Deployment Guide & Runbook
 
-> **Status:** All Terraform is written and `validate`-clean for M0–M3, M5 (Cognito/SSM)
-> and M6, M4 favorites is code-complete — but **no `terraform apply` has run yet; there
-> are zero live AWS resources.** This is the single source for standing an environment up
-> **from zero**: rationale + secret-handling up top, then a command-level checklist.
+> **Status:** **Decommissioned on 2026-07-03.** The staging and production stacks and
+> the dedicated Terraform state bucket were destroyed through reviewed Terraform plans;
+> there are zero live road-rash application resources in AWS. This is the single source
+> for standing an environment up **from zero**: rationale + secret-handling up top, then
+> a command-level checklist.
 > Derived from `docs/plan/steps/phase-*.md`, `infra/README.md`, and the env composition in
 > `infra/envs/{staging,prod}/main.tf`.
 
@@ -14,24 +15,15 @@ tfvars that hit state (see the secrets table).
 
 ---
 
-## ⚠️ Read first — two things that aren't "just apply"
+## ⚠️ Read first — environment is intentionally offline
 
-1. **M4 favorites is implemented (code-complete, apply deferred).** As of 2026-06-12:
-   - `services/favorites/handler.ts` + `validate.ts` (unit-tested) handle
-     `GET/POST/DELETE /favorites` — conditional-put dedupe + atomic `favoriteCount`.
-   - `services/build.mjs` bundles `favorites`; `pnpm build:lambdas` emits its `dist/`.
-   - `infra/envs/{staging,prod}/main.tf` wire the `lambda_favorites` module,
-     integration, and the three JWT-gated routes; both roots `terraform validate`-clean.
-   - Frontend: `FavoritesProvider` (optimistic heart), `app/saved/` view, and OG
-     metadata on `app/trip/[id]/`.
-
-   It is **not applied** (same deferred-apply posture as the rest). The live check
-   still owed is **TEST-007** (favorite bumps count; unfavorite reverses; no
-   double-favorite) — run it after `terraform apply` (Step 8).
-
-2. **`terraform apply` has never run.** The "✓ validate / apply deferred" notes across
-   the phase files mean every live check (sign-in, CRUD persistence, presign upload,
-   AI suggestions, JWT 403s) is **still outstanding** and can only be verified after apply.
+- Both environment remote states were emptied before the backend was deleted.
+- `road-rash-tfstate-010382427026` no longer exists. Start at Step 1 to recreate it.
+- The per-environment GitHub Actions IAM roles were deleted, so deployment workflows
+  cannot recreate infrastructure until the manual bootstrap/apply sequence is completed.
+- The shared `nghuy.link` Route53 hosted zone and account-level GitHub Actions OIDC
+  provider were intentionally preserved because this project only reads them as data sources.
+- The teardown execution record is `plan/infrastructure-aws-teardown-1.md`.
 
 ---
 

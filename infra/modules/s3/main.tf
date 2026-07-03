@@ -11,7 +11,8 @@ data "aws_caller_identity" "current" {}
 # Account id suffix keeps the bucket name globally unique without a random_id
 # (deterministic, so re-applies don't churn the bucket).
 resource "aws_s3_bucket" "thumbnails" {
-  bucket = "${local.name_prefix}-thumbnails-${data.aws_caller_identity.current.account_id}"
+  bucket        = "${local.name_prefix}-thumbnails-${data.aws_caller_identity.current.account_id}"
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_public_access_block" "thumbnails" {
