@@ -3,7 +3,7 @@
 A mobile-first web app for creating, sharing, and discovering travel trip plans, built around Google My Maps. Plan a road trip, attach your My Maps route, add a thumbnail, and share it — others can browse, search, favorite, and get AI-powered suggestions for where to ride next.
 
 > [!NOTE]
-> The MVP is **largely built**. Milestones **M0–M7 have landed** (auth, trip CRUD, favorites, search/filter/group, AI suggestions, and the trip detail modal); **M8 (QA + launch)** is in progress. CI deploys `main` to a live **staging** environment; there is no prod deployment yet. See [`docs/Project_Architecture_Blueprint.md`](docs/Project_Architecture_Blueprint.md) for a code-grounded architecture reference and [`docs/plan/feature-road-rash-mvp-1.md`](docs/plan/feature-road-rash-mvp-1.md) for the per-task status.
+> The MVP is **largely built**. Milestones **M0–M7 have landed** (auth, trip CRUD, favorites, search/filter/group, AI suggestions, and the trip detail modal); **M8 (QA + launch)** is in progress. The AWS environments were decommissioned on 2026-07-03, and the GitHub deployment workflows are disabled. See [`docs/Project_Architecture_Blueprint.md`](docs/Project_Architecture_Blueprint.md) for a code-grounded architecture reference and [`docs/plan/feature-road-rash-mvp-1.md`](docs/plan/feature-road-rash-mvp-1.md) for the per-task status.
 
 ## Features
 

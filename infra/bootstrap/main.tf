@@ -10,7 +10,8 @@ locals {
 }
 
 resource "aws_s3_bucket" "state" {
-  bucket = local.state_bucket_name
+  bucket        = local.state_bucket_name
+  force_destroy = true
 }
 
 # Versioning lets us recover a previous state if an apply corrupts it.
