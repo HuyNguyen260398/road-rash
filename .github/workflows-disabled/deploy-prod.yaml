@@ -1,3 +1,5 @@
+# Disabled while the AWS application is decommissioned. Move this file back to
+# .github/workflows/deploy-prod.yaml only after rebuilding production.
 name: Deploy to Production
 
 # Manual-only production deploy. Unlike staging (deploy.yaml, which auto-deploys

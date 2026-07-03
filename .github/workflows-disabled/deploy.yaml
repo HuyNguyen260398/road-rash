@@ -1,3 +1,5 @@
+# Disabled while the AWS application is decommissioned. Move this file back to
+# .github/workflows/deploy.yaml only after rebuilding the staging environment.
 name: Deploy to Amplify
 
 # Gated deploy to *staging* (the only environment today). On push to main (or

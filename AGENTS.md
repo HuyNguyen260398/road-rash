@@ -26,7 +26,7 @@ Unit tests use Vitest. Cover validation, search/filtering, service selection log
 
 ## Commit & Pull Request Guidelines
 
-Recent history uses Conventional Commit-style prefixes, for example `ci(deploy): ...`, `fix(infra): ...`, and `docs: ...`. Keep commits focused and imperative. PRs should include a concise summary, verification commands run, linked issues or plan tasks when relevant, and screenshots for visible UI changes. Note any required environment, Terraform, or deployment follow-up. PR CI gates (`nextjs-ci.yaml`, `tf-ci.yaml`) run lint, `format:check`, build, test, and Terraform fmt/validate/tflint — run these locally before pushing. Merging to `main` triggers a deploy to the live **staging** environment (`deploy.yaml`).
+Recent history uses Conventional Commit-style prefixes, for example `ci(deploy): ...`, `fix(infra): ...`, and `docs: ...`. Keep commits focused and imperative. PRs should include a concise summary, verification commands run, linked issues or plan tasks when relevant, and screenshots for visible UI changes. Note any required environment, Terraform, or deployment follow-up. PR CI gates (`nextjs-ci.yaml`, `tf-ci.yaml`) run lint, `format:check`, build, test, and Terraform fmt/validate/tflint — run these locally before pushing. Deployment workflows are disabled under `.github/workflows-disabled/`; merging to `main` does not deploy to AWS.
 
 ## Security & Configuration Tips
 
